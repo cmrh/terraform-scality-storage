@@ -1,174 +1,37 @@
-# Terraform S3 Cross-Region Replication (CRR) Module
+# S3 Cross-Region Replication (CRR) Module
 
-This Terraform module configures Cross-Region Replication (CRR) for S3-compatible storage systems, specifically designed for Scality RING/Zenko but compatible with AWS S3 as well.
+Configure Cross-Region Replication between Scality RING/Zenko buckets using Terraform.
 
 ## Features
 
-- ✅ Configures bidirectional CRR between source and destination buckets
-- ✅ Creates and manages IAM policies and roles
-- ✅ Enables bucket versioning automatically
-- ✅ Supports custom S3 endpoints (Scality/Zenko)
-- ✅ Optional bucket creation
-- ✅ Customizable replication prefix and status
-- ✅ Complete idempotency and state management
-
-## Architecture
-
-This module creates the following resources:
-
-**On Source Account:**
-- IAM Policy with CRR permissions
-- IAM Role with trust relationship to Backbeat service
-- S3 Bucket (optional)
-- Bucket versioning configuration
-- Replication configuration
-
-**On Destination Account:**
-- IAM Policy with CRR permissions
-- IAM Role with trust relationship to Backbeat service
-- S3 Bucket (optional)
-- Bucket versioning configuration
+- Bidirectional CRR configuration
+- Automatic IAM policy and role creation
+- Bucket versioning management
+- Optional bucket creation
+- Scality Backbeat integration
 
 ## Prerequisites
 
 - Terraform >= 1.0
 - AWS Provider >= 4.0
-- Valid credentials for both source and destination environments
-- S3-compatible endpoints (Scality/Zenko/AWS)
+- Credentials for source and destination Scality endpoints
 
-## Understanding Provider Configuration
+## Quick Start
 
-**Why do both providers use "aws" as the type?**
-
-This module requires managing two separate S3-compatible endpoints (source and destination). Since Scality is S3-compatible, we use the AWS provider for both endpoints. To differentiate between them, Terraform uses **provider aliases**:
-
-```hcl
-provider "aws" {
-  alias = "source"      # First instance - manages source endpoint
-  # source-specific configuration
-}
-
-provider "aws" {
-  alias = "destination" # Second instance - manages destination endpoint
-  # destination-specific configuration
-}
-```
-
-These aliases allow you to:
-- Configure two different endpoints using the same provider type
-- Pass different credentials to each provider
-- Reference them separately: `aws.source` and `aws.destination`
-
-**Visual representation:**
-```
-┌─────────────────────────────────────────────────────────┐
-│  provider "aws" (type)                                  │
-│  ┌──────────────────┐       ┌──────────────────┐       │
-│  │  alias="source"  │       │ alias="destination"│     │
-│  │  ├─ endpoint A   │       │  ├─ endpoint B   │       │
-│  │  ├─ creds A      │       │  ├─ creds B      │       │
-│  │  └─ region A     │       │  └─ region B     │       │
-│  └──────────────────┘       └──────────────────┘       │
-│         ↓                            ↓                  │
-│    aws.source               aws.destination            │
-└─────────────────────────────────────────────────────────┘
-```
-
-## Security
-
-🔒 **Important**: This module supports secure credential management through environment variables.
-
-**Recommended approach**: Use environment variables instead of hard-coding credentials.
-
-See [SECURITY.md](SECURITY.md) for complete security best practices.
-
-### Quick Start: Environment Variables
+**Set credentials via environment variables** (recommended):
 
 ```bash
-# Set credentials via environment variables
-export SCALITY_SOURCE_ACCESS_KEY="your-source-access-key"
-export SCALITY_SOURCE_SECRET_KEY="your-source-secret-key"
-export SCALITY_DESTINATION_ACCESS_KEY="your-dest-access-key"
-export SCALITY_DESTINATION_SECRET_KEY="your-dest-secret-key"
-
-# Run Terraform - credentials are automatically picked up
-terraform apply
+export SCALITY_SOURCE_ACCESS_KEY="source-access-key"
+export SCALITY_SOURCE_SECRET_KEY="source-secret-key"
+export SCALITY_DESTINATION_ACCESS_KEY="dest-access-key"
+export SCALITY_DESTINATION_SECRET_KEY="dest-secret-key"
 ```
 
-## Usage
-
-### Secure Example (Environment Variables) ✅ Recommended
+**Configure providers** (both use `aws` type with aliases for Scality S3 compatibility):
 
 ```hcl
-module "s3_crr" {
-  source = "./terraform-s3-crr-module"
-
-  providers = {
-    aws.source      = aws.source
-    aws.destination = aws.destination
-  }
-
-  # Bucket configuration
-  source_bucket_name      = "my-source-bucket"
-  destination_bucket_name = "my-destination-bucket"
-
-  # Endpoint configuration
-  source_endpoint      = "https://source.scality.local"
-  destination_endpoint = "https://destination.scality.local"
-
-  # Credentials are read from environment variables:
-  # - SCALITY_SOURCE_ACCESS_KEY
-  # - SCALITY_SOURCE_SECRET_KEY
-  # - SCALITY_DESTINATION_ACCESS_KEY
-  # - SCALITY_DESTINATION_SECRET_KEY
-  # No need to specify them here!
-
-  # Optional: Create buckets if they don't exist
-  create_source_bucket      = true
-  create_destination_bucket = true
-
-  # Optional: Custom names
-  policy_name = "my-crr-policy"
-  role_name   = "my-crr-role"
-
-  # Tags
-  tags = {
-    Environment = "production"
-    Project     = "data-replication"
-  }
-}
-```
-
-### Complete Example with Provider Configuration
-
-**Important Note on Provider Aliasing:**
-Both providers use the same `aws` provider type (because Scality is S3-compatible), but they are differentiated by their `alias` attribute:
-- First provider has `alias = "source"` → Referenced as `aws.source`
-- Second provider has `alias = "destination"` → Referenced as `aws.destination`
-
-This allows us to manage two different S3-compatible endpoints using the same provider type.
-
-Create a `main.tf` file in your root module:
-
-```hcl
-terraform {
-  required_version = ">= 1.0"
-
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = ">= 4.0"
-    }
-  }
-}
-
-# ============================================================================
-# SOURCE PROVIDER - Manages resources on the source Scality endpoint
-# ============================================================================
-# NOTE: This provider block uses "aws" as the type (for S3 compatibility)
-# but has alias = "source" to differentiate it from the destination provider
 provider "aws" {
-  alias      = "source"  # This makes it referenceable as "aws.source"
+  alias      = "source"
   region     = "us-east-1"
   access_key = var.source_access_key
   secret_key = var.source_secret_key
@@ -176,22 +39,15 @@ provider "aws" {
   endpoints {
     s3  = "https://source.scality.local"
     iam = "https://source.scality.local"
-    sts = "https://source.scality.local"
   }
 
   skip_credentials_validation = true
   skip_metadata_api_check     = true
-  skip_requesting_account_id  = false
   s3_use_path_style          = true
 }
 
-# ============================================================================
-# DESTINATION PROVIDER - Manages resources on the destination Scality endpoint
-# ============================================================================
-# NOTE: This provider block also uses "aws" as the type (for S3 compatibility)
-# but has alias = "destination" to differentiate it from the source provider
 provider "aws" {
-  alias      = "destination"  # This makes it referenceable as "aws.destination"
+  alias      = "destination"
   region     = "us-west-2"
   access_key = var.destination_access_key
   secret_key = var.destination_secret_key
@@ -199,20 +55,19 @@ provider "aws" {
   endpoints {
     s3  = "https://destination.scality.local"
     iam = "https://destination.scality.local"
-    sts = "https://destination.scality.local"
   }
 
   skip_credentials_validation = true
   skip_metadata_api_check     = true
-  skip_requesting_account_id  = false
   s3_use_path_style          = true
 }
+```
 
-# ============================================================================
-# MODULE INVOCATION - Passes both providers to the module
-# ============================================================================
+**Use the module:**
+
+```hcl
 module "s3_crr" {
-  source = "./terraform-s3-crr-module"
+  source = "git::https://github.com/scality/scality-s3-tf-modules.git//s3-crr"
 
   providers = {
     aws.source      = aws.source
@@ -224,6 +79,7 @@ module "s3_crr" {
   source_endpoint         = "https://source.scality.local"
   destination_endpoint    = "https://destination.scality.local"
 
+  # Credentials from environment variables
   source_access_key      = var.source_access_key
   source_secret_key      = var.source_secret_key
   destination_access_key = var.destination_access_key
@@ -233,17 +89,14 @@ module "s3_crr" {
   create_destination_bucket = true
 
   tags = {
-    ManagedBy = "Terraform"
+    Environment = "production"
   }
-}
-
-# Outputs
-output "crr_summary" {
-  value = module.s3_crr.summary
 }
 ```
 
-Create a `variables.tf`:
+> **Security**: Never hardcode credentials in `.tf` files. Always use environment variables or a secure secrets manager.
+
+## Variables
 
 ```hcl
 variable "source_access_key" {
@@ -324,81 +177,46 @@ destination_secret_key = "je7MtGbClwBF/2Zp9Utk/h3yCo8nvbEXAMPLEKEY"
 
 ## How It Works
 
-1. **Provider Configuration**: Uses Terraform provider aliases to manage two separate S3/IAM environments
-2. **Account Discovery**: Retrieves account IDs via STS GetCallerIdentity
-3. **IAM Setup**: Creates policies and roles with appropriate permissions
-4. **S3 Configuration**: Enables versioning (required for CRR) and configures replication
-5. **Dependency Management**: Ensures resources are created in the correct order
+1. Creates IAM policies and roles on both source and destination
+2. Enables bucket versioning (required for CRR)
+3. Configures replication from source to destination
+4. Uses Scality Backbeat service for replication
 
-## Scality-Specific Configuration
+**Scality-Specific Settings:**
+- `assume_role_principal = "backbeat"` - Scality's replication service
+- `s3_use_path_style = true` - Required for Scality endpoints
 
-This module is designed for Scality with the following defaults:
-
-- `assume_role_principal = "backbeat"` (Scality's replication service)
-- `force_path_style = true` (required for Scality)
-- `skip_credentials_validation = true`
-- `skip_metadata_api_check = true`
-
-## Deployment Steps
-
-1. **Initialize Terraform**:
-   ```bash
-   terraform init
-   ```
-
-2. **Review the plan**:
-   ```bash
-   terraform plan
-   ```
-
-3. **Apply the configuration**:
-   ```bash
-   terraform apply
-   ```
-
-4. **Verify replication**:
-   ```bash
-   # Upload a test object to source
-   aws --profile source --endpoint-url https://source.scality.local \
-     s3 cp test.txt s3://my-source-bucket/
-
-   # Check if it replicates to destination
-   aws --profile destination --endpoint-url https://destination.scality.local \
-     s3 ls s3://my-destination-bucket/
-   ```
-
-## Cleanup
-
-To destroy all resources:
+## Deployment
 
 ```bash
-terraform destroy
+# Set environment variables for credentials
+export SCALITY_SOURCE_ACCESS_KEY="..."
+export SCALITY_SOURCE_SECRET_KEY="..."
+export SCALITY_DESTINATION_ACCESS_KEY="..."
+export SCALITY_DESTINATION_SECRET_KEY="..."
+
+# Deploy
+terraform init
+terraform plan
+terraform apply
 ```
 
-**Note**: This will remove all IAM policies, roles, and optionally the buckets (if created by Terraform). Replication configurations will be removed.
+## Verify Replication
 
-## Comparison to Original Bash Script
+```bash
+# Upload test object
+aws --endpoint-url https://source.scality.local \
+  s3 cp test.txt s3://my-source-bucket/
 
-| Feature | Bash Script | This Terraform Module |
-|---------|-------------|----------------------|
-| Idempotency | Manual | Automatic (state-managed) |
-| Error Handling | Exit on error | Rollback on error |
-| Resource Tracking | None | Full state tracking |
-| Credentials | AWS profiles | Provider configuration |
-| Validation | Runtime | Plan-time |
-| Rollback | Manual | Automatic |
-| Audit Trail | Logs only | State + logs |
-| Reusability | Script execution | Module import |
+# Check destination
+aws --endpoint-url https://destination.scality.local \
+  s3 ls s3://my-destination-bucket/
+```
 
 ## Troubleshooting
 
-### Issue: Provider configuration errors
-
-**Solution**: Ensure endpoints are correctly set for S3, IAM, and STS.
-
-### Issue: Account ID not detected
-
-**Solution**: Set `source_account_id` and `destination_account_id` explicitly.
+**Provider errors**: Verify endpoints are set correctly for S3, IAM, and STS
+**Account ID not detected**: Set `source_account_id` and `destination_account_id` explicitly
 
 ### Issue: Replication not working
 
