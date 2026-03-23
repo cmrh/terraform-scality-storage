@@ -1,297 +1,117 @@
 # Scality Terraform Modules
 
-This directory contains reusable Terraform modules for Scality infrastructure.
+Reusable Terraform modules for managing Scality on-premises S3 storage infrastructure.
 
-## 🔒 Security First
-
-**All modules support secure credential management via environment variables.**
-
-See [Centralized Security Guide](../SECURITY.md) for complete best practices.
-
-### Quick Security Setup
-
-```bash
-# For any module
-cd <module-directory>
-cp .env.example .env
-vim .env  # Add your credentials
-source .env
-terraform apply  # Credentials automatically loaded
-```
-
-**Never commit credentials to version control!**
-
----
+> **Security**: Always use environment variables for credentials. Never commit secrets to git.
 
 ## Available Modules
 
-### 1. s3-crr
-**S3 Cross-Region Replication (CRR) Module**
+| Module | Description | Status |
+|--------|-------------|--------|
+| **[s3-crr](s3-crr/)** | Cross-Region Replication between Scality buckets |  Production |
+| **[s3-bucket](s3-bucket/)** | S3 bucket creation and configuration |  Production |
+| **[s3-bucket-lifecycle](s3-bucket-lifecycle/)** | S3 bucket lifecycle policies |  Production |
+| **[scality-account-management](scality-account-management/)** | IAM users, groups, and policies |  Production |
+| **[terraform-state-bootstrap](terraform-state-bootstrap/)** | Remote state backend setup |  Production |
 
-Configures bidirectional Cross-Region Replication between S3-compatible buckets.
+## Quick Start
 
-- **Location**: `s3-crr/`
-- **Purpose**: Automate CRR setup between Scality RING/Zenko buckets
-- **Documentation**: [s3-crr/README.md](s3-crr/README.md)
-- **Quick Start**: [s3-crr/QUICKSTART.md](s3-crr/QUICKSTART.md)
-- **Status**: ✅ Production Ready
+```bash
+# Set credentials via environment variables (recommended)
+export SCALITY_ENDPOINT="http://scality.example.com"
+export SCALITY_ACCESS_KEY="your-access-key"
+export SCALITY_SECRET_KEY="your-secret-key"
 
-**Features:**
-- Multi-provider configuration (source and destination)
-- Automatic IAM policy and role creation
-- Bucket versioning management
-- Replication configuration
-- Scality Backbeat integration
+# Use a module
+cd my-project
+cat > main.tf <<EOF
+module "bucket" {
+  source = "git::https://github.com/scality/scality-s3-tf-modules.git//s3-bucket"
 
-**Usage:**
+  bucket_name = "my-bucket"
+}
+EOF
+
+terraform init
+terraform apply
+```
+
+## Module Usage
+
+### From Git Repository
+
 ```hcl
-module "s3_crr" {
-  source = "../Modules/s3-crr"
+module "bucket" {
+  source = "git::https://github.com/scality/scality-s3-tf-modules.git//s3-bucket?ref=v1.0.0"
 
-  providers = {
-    aws.source      = aws.source
-    aws.destination = aws.destination
-  }
-
-  source_bucket_name      = "my-source-bucket"
-  destination_bucket_name = "my-dest-bucket"
-  # ... additional configuration
+  bucket_name = "my-bucket"
 }
 ```
 
-### 2. scality-account-management
-**Scality Account Management Module**
+### Local Path
 
-Manages Scality accounts and users.
+```hcl
+module "bucket" {
+  source = "../scality-s3-tf-modules/s3-bucket"
 
-- **Location**: `scality-account-management/`
-- **Purpose**: Account and user provisioning
-- **Status**: ℹ️ Check module for details
+  bucket_name = "my-bucket"
+}
+```
 
-### 3. terraform-state-bootstrap
-**Terraform State Bootstrap Module**
+## Security Best Practices
 
-Bootstraps Terraform remote state backend.
+**Always use environment variables for credentials:**
 
-- **Location**: `terraform-state-bootstrap/`
-- **Purpose**: Initial setup for Terraform state management
-- **Status**: ℹ️ Check module for details
+```bash
+export SCALITY_ENDPOINT="http://scality.example.com"
+export SCALITY_ACCESS_KEY="your-access-key"
+export SCALITY_SECRET_KEY="your-secret-key"
+```
 
-## Module Organization
+**In your Terraform code:**
 
-Each module follows this structure:
+```hcl
+provider "aws" {
+  region = "us-east-1"
+
+  endpoints {
+    s3 = var.s3_endpoint  # From TF_VAR_s3_endpoint or terraform.tfvars
+  }
+
+  access_key = var.access_key  # From environment
+  secret_key = var.secret_key  # From environment
+
+  skip_credentials_validation = true
+  skip_metadata_api_check     = true
+  skip_requesting_account_id  = true
+  s3_use_path_style           = true
+}
+```
+
+> **Never hardcode credentials in `.tf` files or commit them to git!**
+
+## Module Structure
+
+Each module follows standard Terraform conventions:
 
 ```
 module-name/
-├── README.md              # Module documentation
+├── README.md              # Documentation
 ├── variables.tf           # Input variables
-├── outputs.tf            # Output values
-├── main.tf (or *.tf)     # Resource definitions
-├── versions.tf           # Terraform/provider versions
+├── outputs.tf            # Outputs
+├── main.tf               # Resources
+├── versions.tf           # Provider requirements
 └── examples/             # Usage examples
     └── basic/
-        ├── main.tf
-        ├── variables.tf
-        └── README.md
-```
-
-## Using Modules
-
-### Local Path Reference
-
-From a project in the same repository:
-
-```hcl
-module "my_module" {
-  source = "../Modules/s3-crr"
-  # ... configuration
-}
-```
-
-### Relative Path from Root
-
-If your project is in `/home/cyrus/Documents/Development/Scality/Projects/my-project/`:
-
-```hcl
-module "s3_crr" {
-  source = "../../Terraform/Modules/s3-crr"
-  # ... configuration
-}
-```
-
-### Absolute Path (Not Recommended)
-
-```hcl
-module "s3_crr" {
-  source = "/home/cyrus/Documents/Development/Scality/Terraform/Modules/s3-crr"
-  # ... configuration
-}
-```
-
-### Git Repository (Future)
-
-Once modules are in a Git repository:
-
-```hcl
-module "s3_crr" {
-  source = "git::https://github.com/your-org/scality-terraform-modules.git//s3-crr?ref=v1.0.0"
-  # ... configuration
-}
-```
-
-## Best Practices
-
-### 1. Version Control
-- Keep modules in version control (Git)
-- Use semantic versioning (v1.0.0, v1.1.0, v2.0.0)
-- Tag stable releases
-
-### 2. Documentation
-- Each module must have a README.md
-- Include usage examples
-- Document all variables and outputs
-- Provide troubleshooting guides
-
-### 3. Testing
-- Test modules independently
-- Provide working examples
-- Document test procedures
-- Validate before production use
-
-### 4. Module Design
-- Keep modules focused (single responsibility)
-- Make modules reusable
-- Use sensible defaults
-- Validate inputs where possible
-- Provide comprehensive outputs
-
-### 5. Dependencies
-- Clearly document required providers
-- Specify minimum versions
-- Document external dependencies
-
-## Development Workflow
-
-### Creating a New Module
-
-1. **Create module directory**:
-   ```bash
-   mkdir -p /home/cyrus/Documents/Development/Scality/Terraform/Modules/new-module
-   cd /home/cyrus/Documents/Development/Scality/Terraform/Modules/new-module
-   ```
-
-2. **Create base files**:
-   ```bash
-   touch README.md versions.tf variables.tf outputs.tf main.tf
-   mkdir -p examples/basic
-   ```
-
-3. **Implement module**:
-   - Define resources in `.tf` files
-   - Document in README.md
-   - Create working example
-
-4. **Test module**:
-   ```bash
-   cd examples/basic
-   terraform init
-   terraform plan
-   terraform apply
-   ```
-
-5. **Document and commit**:
-   - Update main Modules README (this file)
-   - Commit to version control
-   - Tag if releasing a version
-
-### Updating an Existing Module
-
-1. **Make changes**:
-   - Update `.tf` files
-   - Update documentation
-   - Update examples if needed
-
-2. **Test changes**:
-   ```bash
-   cd examples/basic
-   terraform init -upgrade
-   terraform plan
-   ```
-
-3. **Version and release**:
-   - Update version in documentation
-   - Commit changes
-   - Tag new version
-
-## Module Registry (Future)
-
-Consider publishing modules to:
-- **Terraform Registry**: Public modules
-- **Private Registry**: Internal modules
-- **Artifactory/Nexus**: Enterprise artifact storage
-
-## Directory Structure
-
-```
-Terraform/
-├── Modules/                    # This directory
-│   ├── README.md              # This file
-│   ├── s3-crr/               # S3 CRR module
-│   ├── scality-account-management/
-│   └── terraform-state-bootstrap/
-│
-├── Environments/              # Environment-specific configs
-│   ├── dev/
-│   ├── staging/
-│   └── production/
-│
-└── Projects/                  # Specific projects using modules
-    └── my-project/
 ```
 
 ## Contributing
 
-When contributing new modules:
+1. Include comprehensive documentation in `README.md`
+2. Provide working examples in `examples/`
+3. Use semantic versioning for releases
+4. Test before submitting PRs
 
-1. Follow the standard module structure
-2. Include comprehensive documentation
-3. Provide working examples
-4. Add tests where possible
-5. Update this README with module details
-6. Submit for review before merging
+## License
 
-## Support
-
-For module-specific issues:
-- Check the module's README.md
-- Review examples in `examples/` directory
-- Check TESTING.md if available
-
-For general Terraform questions:
-- [Terraform Documentation](https://www.terraform.io/docs)
-- [Terraform Registry](https://registry.terraform.io/)
-
-For Scality-specific questions:
-- [Scality Documentation](https://documentation.scality.com/)
-- Internal Scality support channels
-
-## Quick Reference
-
-| Module | Purpose | Status | Docs |
-|--------|---------|--------|------|
-| s3-crr | S3 Cross-Region Replication | ✅ Ready | [README](s3-crr/README.md) |
-| scality-account-management | Account Management | ℹ️ TBD | Check module |
-| terraform-state-bootstrap | State Backend Setup | ℹ️ TBD | Check module |
-
-## Recent Updates
-
-- **2026-01-13**: Added `s3-crr` module for S3 Cross-Region Replication
-  - Migrated from bash script implementation
-  - Full documentation and examples included
-  - Production ready
-
----
-
-**Location**: `/home/cyrus/Documents/Development/Scality/Terraform/Modules/`
-**Maintainer**: Infrastructure Team
-**Last Updated**: 2026-01-13
+Apache 2.0

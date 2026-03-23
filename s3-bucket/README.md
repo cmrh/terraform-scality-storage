@@ -1,130 +1,36 @@
 # S3 Bucket Module
 
-Comprehensive Terraform/OpenTofu module for creating and configuring S3 buckets on Scality with all supported operations.
+Terraform module for creating and configuring S3 buckets on Scality on-premises storage.
 
 ## Features
 
-Complete implementation of all Scality-supported S3 bucket operations:
-
-- **Bucket Creation** - Create S3 buckets with location constraints
-- **Versioning** - Enable/suspend bucket versioning
-- **Encryption** - Default server-side encryption (SSE-S3 or SSE-KMS)
-- **ACL** - Canned ACLs or custom access control
-- **Bucket Policy** - JSON policy documents
-- **CORS** - Cross-origin resource sharing configuration
-- **Website Hosting** - Static website hosting with routing rules
-- **Object Lock** - WORM (Write Once Read Many) compliance
-- **Replication** - Cross-region replication setup
-- **Notifications** - Event notifications (SNS, SQS, Lambda)
-- **Tagging** - Bucket tags
-- **Public Access Block** - Control public access
+- Bucket creation with versioning
+- Server-side encryption (SSE-S3 or SSE-KMS)
+- Access control (ACL and bucket policies)
+- CORS configuration
+- Website hosting
+- Object lock (WORM compliance)
+- Event notifications
+- Tagging and public access controls
 
 ## Quick Start
 
-```hcl
-module "bucket" {
-  source = "../s3-bucket"
+**Set credentials via environment variables:**
 
-  bucket_name = "my-bucket"
-  tags = {
-    Environment = "production"
-  }
-}
+```bash
+export SCALITY_S3_ENDPOINT="http://scality.example.com"
+export SCALITY_ACCESS_KEY="your-access-key"
+export SCALITY_SECRET_KEY="your-secret-key"
 ```
 
-## Usage Examples
-
-### Basic Bucket
-
-```hcl
-module "simple_bucket" {
-  source = "../s3-bucket"
-
-  bucket_name = "my-simple-bucket"
-  acl         = "private"
-
-  tags = {
-    Project = "MyProject"
-  }
-}
-```
-
-### Versioned Bucket with Encryption
-
-```hcl
-module "versioned_bucket" {
-  source = "../s3-bucket"
-
-  bucket_name        = "my-versioned-bucket"
-  versioning_enabled = true
-  enable_encryption  = true
-  encryption_algorithm = "AES256"
-
-  tags = {
-    Versioned = "true"
-    Encrypted = "true"
-  }
-}
-```
-
-### Public Website Hosting
-
-```hcl
-module "website_bucket" {
-  source = "../s3-bucket"
-
-  bucket_name = "my-website"
-  acl         = "public-read"
-
-  enable_website_hosting  = true
-  website_index_document  = "index.html"
-  website_error_document  = "error.html"
-
-  enable_public_access_block = false
-
-  cors_rules = [
-    {
-      allowed_methods = ["GET", "HEAD"]
-      allowed_origins = ["*"]
-    }
-  ]
-}
-```
-
-### Bucket with Object Lock
-
-```hcl
-module "compliant_bucket" {
-  source = "../s3-bucket"
-
-  bucket_name        = "compliance-bucket"
-  versioning_enabled = true  # Required for object lock
-  enable_object_lock = true
-
-  object_lock_retention = {
-    mode = "COMPLIANCE"
-    days = 365
-  }
-}
-```
-
-## Standard Environment Variables
-
-This module uses standardized environment variable names (compatible with other Scality modules):
-
-- `SCALITY_S3_ENDPOINT` - S3 endpoint URL
-- `SCALITY_ACCESS_KEY` - Access key
-- `SCALITY_SECRET_KEY` - Secret key
-- `SCALITY_REGION` - AWS region (default: us-east-1)
-
-Configure your provider:
+**Configure provider:**
 
 ```hcl
 provider "aws" {
-  region = var.region
+  region = "us-east-1"
 
   endpoints {
-    s3 = var.s3_endpoint
+    s3 = var.s3_endpoint  # From environment
   }
 
   access_key = var.access_key
@@ -137,12 +43,63 @@ provider "aws" {
 }
 ```
 
-Set variables via environment:
+**Create a bucket:**
 
-```bash
-export TF_VAR_s3_endpoint="$SCALITY_S3_ENDPOINT"
-export TF_VAR_access_key="$SCALITY_ACCESS_KEY"
-export TF_VAR_secret_key="$SCALITY_SECRET_KEY"
+```hcl
+module "bucket" {
+  source = "git::https://github.com/scality/scality-s3-tf-modules.git//s3-bucket"
+
+  bucket_name = "my-bucket"
+  tags = {
+    Environment = "production"
+  }
+}
+```
+
+## Examples
+
+### Versioned Bucket with Encryption
+
+```hcl
+module "secure_bucket" {
+  source = "../s3-bucket"
+
+  bucket_name          = "my-secure-bucket"
+  versioning_enabled   = true
+  enable_encryption    = true
+  encryption_algorithm = "AES256"
+}
+```
+
+### Website Hosting
+
+```hcl
+module "website" {
+  source = "../s3-bucket"
+
+  bucket_name             = "my-website"
+  acl                     = "public-read"
+  enable_website_hosting  = true
+  website_index_document  = "index.html"
+  enable_public_access_block = false
+}
+```
+
+### Compliance Bucket (Object Lock)
+
+```hcl
+module "compliance" {
+  source = "../s3-bucket"
+
+  bucket_name        = "compliance-bucket"
+  versioning_enabled = true
+  enable_object_lock = true
+
+  object_lock_retention = {
+    mode = "COMPLIANCE"
+    days = 365
+  }
+}
 ```
 
 ## Inputs
@@ -186,44 +143,10 @@ See the [examples/](./examples/) directory:
 - `encrypted/` - Bucket with KMS encryption
 - `complete/` - Full-featured configuration
 
-## Supported Scality Operations
+## Supported Operations
 
-Based on [Scality S3C documentation](https://github.com/scality/cloudserver):
-
-- ✅ PUT Bucket - Create bucket
-- ✅ DELETE Bucket - Delete bucket
-- ✅ HEAD Bucket - Check bucket existence
-- ✅ PUT Bucket Versioning - Configure versioning
-- ✅ GET Bucket Versioning - Read versioning state
-- ✅ PUT Bucket Encryption - Configure encryption
-- ✅ GET Bucket Encryption - Read encryption config
-- ✅ DELETE Bucket Encryption - Remove encryption
-- ✅ PUT Bucket ACL - Set ACL
-- ✅ GET Bucket ACL - Read ACL
-- ✅ PUT Bucket Policy - Set policy
-- ✅ GET Bucket Policy - Read policy
-- ✅ DELETE Bucket Policy - Remove policy
-- ✅ PUT Bucket Tagging - Set tags
-- ✅ GET Bucket Tagging - Read tags
-- ✅ DELETE Bucket Tagging - Remove tags
-- ✅ PUT Bucket CORS - Configure CORS
-- ✅ GET Bucket CORS - Read CORS
-- ✅ DELETE Bucket CORS - Remove CORS
-- ✅ PUT Bucket Website - Configure website
-- ✅ GET Bucket Website - Read website config
-- ✅ DELETE Bucket Website - Remove website
-- ✅ PUT Bucket Replication - Configure replication
-- ✅ GET Bucket Replication - Read replication
-- ✅ DELETE Bucket Replication - Remove replication
-- ✅ PUT Bucket Notification - Configure notifications
-- ✅ GET Bucket Notification - Read notifications
-- ✅ PUT Object Lock Configuration - Configure object lock
-- ✅ GET Object Lock Configuration - Read object lock
+All standard S3 bucket operations supported by Scality including versioning, encryption, ACL, policies, CORS, website hosting, object lock, replication, notifications, and tagging.
 
 ## License
 
 Apache 2.0
-
-## Contributing
-
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
