@@ -1,117 +1,94 @@
 # Scality Terraform Modules
 
-Reusable Terraform modules for managing Scality on-premises S3 storage infrastructure.
+Composite Terraform/OpenTofu modules for production deployments on Scality
+storage. Built on the
+[`scality`](https://github.com/scality/terraform-provider-scality) provider
+(S3C / RING) and the
+[`artesca`](https://github.com/scality/terraform-provider-scality-artesca)
+provider (ARTESCA).
 
-> **Security**: Always use environment variables for credentials. Never commit secrets to git.
+> Compatible with both Terraform and [OpenTofu](https://opentofu.org/). Examples in this repo use `terraform`; substitute `tofu` if you use OpenTofu — the commands, syntax, and state files are identical.
 
-## Available Modules
+## Module catalog
 
-| Module | Description | Status |
-|--------|-------------|--------|
-| **[s3-crr](s3-crr/)** | Cross-Region Replication between Scality buckets |  Production |
-| **[s3-bucket](s3-bucket/)** | S3 bucket creation and configuration |  Production |
-| **[s3-bucket-lifecycle](s3-bucket-lifecycle/)** | S3 bucket lifecycle policies |  Production |
-| **[scality-account-management](scality-account-management/)** | IAM users, groups, and policies |  Production |
-| **[terraform-state-bootstrap](terraform-state-bootstrap/)** | Remote state backend setup |  Production |
+### Scality (S3C / RING)
 
-## Quick Start
+| Module | Status | Purpose |
+|---|---|---|
+| [`terraform-state-bootstrap`](modules/scality/terraform-state-bootstrap) | Available | Dedicated account + bucket for OpenTofu/Terraform state |
+| [`scality-account-management`](modules/scality/scality-account-management) | Available | Tenant account (Console-UI or headless) + stable access key |
+| [`application-identity`](modules/scality/application-identity) | Available | IAM user + access key + canned policy preset (read-only / read-write / bucket-admin) or custom JSON |
+| [`account-operator`](modules/scality/account-operator) | Available | Operator user (`iam:* + s3:*`) — recommended caller for downstream wrapper modules |
+| [`application-bucket`](modules/scality/application-bucket) | Available | Bucket + encryption + versioning + lifecycle hygiene |
+| [`compliance-bucket`](modules/scality/compliance-bucket) | Available | Bucket + object lock (GOVERNANCE / COMPLIANCE) + retention period |
+| [`s3-crr`](modules/scality/s3-crr) | Available | Cross-region replication (one-direction or bidirectional) between two clusters |
 
-```bash
-# Set credentials via environment variables (recommended)
-export SCALITY_ENDPOINT="http://scality.example.com"
-export SCALITY_ACCESS_KEY="your-access-key"
-export SCALITY_SECRET_KEY="your-secret-key"
+### ARTESCA
 
-# Use a module
-cd my-project
-cat > main.tf <<EOF
-module "bucket" {
-  source = "git::https://github.com/scality/scality-s3-tf-modules.git//s3-bucket"
+| Module | Status | Purpose |
+|---|---|---|
+| `artesca-account-management` | Planned | Tenant account + stable access key |
+| `application-identity` | Planned | IAM user + access key + policy |
+| `storage-location` | Planned | Backend location + optional endpoint |
+| `application-bucket` | Planned | Bucket + optional expiration workflow |
+| `tiered-bucket` | Planned | Bucket + transition workflow |
+| `replication-stream` | Planned | Overlay/location-based replication |
+| `terraform-state-bootstrap` | Planned | State bucket on ARTESCA |
 
-  bucket_name = "my-bucket"
-}
-EOF
+### Hybrid (both providers)
 
-terraform init
-terraform apply
+| Module | Status | Purpose |
+|---|---|---|
+| `ring-backed-artesca-location` | Planned | Use S3C/RING as an ARTESCA backend location |
+
+## Repository layout
+
+```
+modules/
+├── scality/   # S3C / RING modules
+├── artesca/   # ARTESCA modules
+└── hybrid/    # Modules that compose both providers
+
+examples/      # One example per module, mirrors module layout
+docs/          # Cross-module guidance
 ```
 
-## Module Usage
-
-### From Git Repository
+## Consuming a module
 
 ```hcl
-module "bucket" {
-  source = "git::https://github.com/scality/scality-s3-tf-modules.git//s3-bucket?ref=v1.0.0"
+module "tofu_state" {
+  source = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/terraform-state-bootstrap?ref=v0.1.0"
 
-  bucket_name = "my-bucket"
+  account_email = "platform@example.com"
+  bucket_name   = "platform-tofu-state"
 }
 ```
 
-### Local Path
+Each module's `README.md` documents its inputs, outputs, and any provider
+quirks relevant to that use case.
+
+## Provider configuration
+
+These modules expect provider configuration to live in the consuming root
+module. Example:
 
 ```hcl
-module "bucket" {
-  source = "../scality-s3-tf-modules/s3-bucket"
-
-  bucket_name = "my-bucket"
-}
-```
-
-## Security Best Practices
-
-**Always use environment variables for credentials:**
-
-```bash
-export SCALITY_ENDPOINT="http://scality.example.com"
-export SCALITY_ACCESS_KEY="your-access-key"
-export SCALITY_SECRET_KEY="your-secret-key"
-```
-
-**In your Terraform code:**
-
-```hcl
-provider "aws" {
-  region = "us-east-1"
-
-  endpoints {
-    s3 = var.s3_endpoint  # From TF_VAR_s3_endpoint or terraform.tfvars
+terraform {
+  required_providers {
+    scality = {
+      source  = "scality/scality"
+      version = "~> 0.4"
+    }
   }
-
-  access_key = var.access_key  # From environment
-  secret_key = var.secret_key  # From environment
-
-  skip_credentials_validation = true
-  skip_metadata_api_check     = true
-  skip_requesting_account_id  = true
-  s3_use_path_style           = true
 }
+
+provider "scality" {}  # picks up SCALITY_ENDPOINT / SCALITY_ACCESS_KEY / SCALITY_SECRET_KEY env vars
 ```
 
-> **Never hardcode credentials in `.tf` files or commit them to git!**
-
-## Module Structure
-
-Each module follows standard Terraform conventions:
-
-```
-module-name/
-├── README.md              # Documentation
-├── variables.tf           # Input variables
-├── outputs.tf            # Outputs
-├── main.tf               # Resources
-├── versions.tf           # Provider requirements
-└── examples/             # Usage examples
-    └── basic/
-```
-
-## Contributing
-
-1. Include comprehensive documentation in `README.md`
-2. Provide working examples in `examples/`
-3. Use semantic versioning for releases
-4. Test before submitting PRs
+For ARTESCA modules, also declare the `artesca` provider — see the
+[provider README](https://github.com/scality/terraform-provider-scality-artesca)
+for required environment variables.
 
 ## License
 
-Apache 2.0
+Apache 2.0 — see [LICENSE](LICENSE).

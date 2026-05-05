@@ -9,9 +9,15 @@ variable "account_email" {
   description = "Email address registered against the dedicated state account. Forces account replacement if changed."
 }
 
+variable "console_login" {
+  type        = bool
+  default     = true
+  description = "When true (default), creates a scality_console_account with a randomly generated UI password (exposed via console_password output) — useful for admins who want to verify the state account or bucket via the Console UI. When false, creates a scality_account (headless; supports account_attributes). Defaulting to true gives parity with scality-account-management. Switching after apply is destructive."
+}
+
 variable "account_attributes" {
   type        = map(string)
-  description = "Custom attributes (key-value metadata) applied to the dedicated state account. Same purpose as tags for buckets. Max 10 attributes per account."
+  description = "Custom attributes (key-value metadata) applied to the dedicated state account. Same purpose as tags for buckets. Max 10 attributes per account. Only effective when console_login = false (scality_console_account does not accept custom attributes)."
   default = {
     managed_by = "terraform"
     purpose    = "state-file"

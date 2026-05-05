@@ -1,17 +1,32 @@
+resource "scality_console_account" "state" {
+  count = var.console_login ? 1 : 0
+
+  account_name             = var.account_name
+  email                    = var.account_email
+  generate_random_password = true
+}
+
 resource "scality_account" "state" {
+  count = var.console_login ? 0 : 1
+
   name              = var.account_name
   email_address     = var.account_email
   custom_attributes = var.account_attributes
 }
 
-resource "scality_account_access_key" "state" {
-  account_access_key = scality_account.state.access_key
-  account_secret_key = scality_account.state.secret_key
+# Layered stable key — only when using the Console resource (its bootstrap
+# key belongs to the UI lifecycle). The IAM (scality_account) bootstrap
+# key is already Terraform-owned and used directly.
+resource "scality_account_access_key" "stable" {
+  count = var.console_login ? 1 : 0
+
+  account_access_key = scality_console_account.state[0].access_key
+  account_secret_key = scality_console_account.state[0].secret_key
 }
 
 locals {
-  ak = scality_account_access_key.state.access_key
-  sk = scality_account_access_key.state.secret_key
+  ak = var.console_login ? scality_account_access_key.stable[0].access_key : scality_account.state[0].access_key
+  sk = var.console_login ? scality_account_access_key.stable[0].secret_key : scality_account.state[0].secret_key
 }
 
 resource "scality_bucket" "state" {
