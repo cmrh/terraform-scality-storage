@@ -5,15 +5,26 @@ on:
     branches: [main]
   pull_request:
 
+env:
+  TOFU_VERSION: "1.10.0"
+  TFLINT_VERSION: "0.55.0"
+
 jobs:
   fmt:
     name: tofu fmt
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: opentofu/setup-opentofu@v1
-        with:
-          tofu_version: latest
+
+      - name: Install OpenTofu
+        run: |
+          set -euo pipefail
+          curl -fsSLo /tmp/tofu.zip \
+            "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip"
+          sudo unzip -j -q -o /tmp/tofu.zip tofu -d /usr/local/bin/
+          sudo chmod +x /usr/local/bin/tofu
+          tofu --version
+
       - name: Check formatting
         run: tofu fmt -check -recursive
 
@@ -22,11 +33,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: terraform-linters/setup-tflint@v4
-        with:
-          tflint_version: latest
+
+      - name: Install tflint
+        run: |
+          set -euo pipefail
+          curl -fsSLo /tmp/tflint.zip \
+            "https://github.com/terraform-linters/tflint/releases/download/v${TFLINT_VERSION}/tflint_linux_amd64.zip"
+          sudo unzip -j -q -o /tmp/tflint.zip tflint -d /usr/local/bin/
+          sudo chmod +x /usr/local/bin/tflint
+          tflint --version
+
       - name: Initialize tflint
         run: tflint --init
+
       - name: Run tflint
         run: tflint --recursive --format compact
 
