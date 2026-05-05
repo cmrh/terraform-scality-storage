@@ -1,0 +1,37 @@
+name: lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  fmt:
+    name: tofu fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: latest
+      - name: Check formatting
+        run: tofu fmt -check -recursive
+
+  tflint:
+    name: tflint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+      - name: Initialize tflint
+        run: tflint --init
+      - name: Run tflint
+        run: tflint --recursive --format compact
+
+  # `tofu validate` is intentionally absent: the scality provider is not yet
+  # published to a public registry, so `tofu init` cannot fetch it. Re-add a
+  # `validate` job (init -backend=false + validate per module) once the
+  # provider is on the public registry, or wire in a dev_overrides /
+  # release-binary install step.
