@@ -13,14 +13,16 @@ cluster to the other.
 ## What it creates
 
 On the **source** cluster:
-- IAM managed policy granting replication permissions on both buckets
+- IAM managed policy granting replication permissions on the **source
+  bucket**
 - IAM role with a `backbeat` service trust policy
 - Role-policy attachment
 - A `crr-operator` user, inline policy, and access key — internal to
   CRR mechanics. Credentials are not surfaced.
 
 On the **destination** cluster:
-- The same set: IAM policy, role, attachment, internal `crr-operator` user
+- The same set: IAM policy (scoped to the **destination bucket**),
+  role, attachment, internal `crr-operator` user
 
 Replication wiring:
 - `scality_bucket_replication` on the source bucket pointing at the
@@ -28,10 +30,13 @@ Replication wiring:
 - A second `scality_bucket_replication` on the destination bucket
   pointing back at the source bucket (only when `bidirectional = true`)
 
-The IAM policy on each side is **symmetric** — it grants read and write
-on both buckets — so the same configuration supports either one-direction
-or bidirectional setups. Toggling `bidirectional` only adds or removes
-the reverse `scality_bucket_replication`.
+Each side's IAM policy is identical in shape and action set but
+**scoped to its local bucket only** — backbeat on each cluster only
+holds permissions on its own bucket. The role-pair wired into
+`scality_bucket_replication.role` (`source_role_arn,dest_role_arn`)
+handles cross-cluster routing. The same configuration supports
+one-direction or bidirectional setups; toggling `bidirectional` only
+adds or removes the reverse `scality_bucket_replication`.
 
 ## Two-provider configuration
 
