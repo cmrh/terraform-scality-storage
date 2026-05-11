@@ -22,13 +22,3 @@ output "bidirectional" {
   description = "Whether reverse replication (dest → source) is also configured."
   value       = var.bidirectional
 }
-
-output "source_crr_operator_username" {
-  description = "Username of the CRR operator on the source cluster. Provided for reference; the operator is internal to CRR mechanics — its credentials are not surfaced. Use the application-identity module to grant application or verification access to the bucket."
-  value       = scality_user.source_crr_operator.username
-}
-
-output "dest_crr_operator_username" {
-  description = "Username of the CRR operator on the destination cluster. Provided for reference; the operator is internal to CRR mechanics — its credentials are not surfaced. Use the application-identity module to grant application or verification access to the bucket."
-  value       = scality_user.dest_crr_operator.username
-}

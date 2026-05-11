@@ -1,6 +1,9 @@
 # Local-only AI assistant context — not committed
 CLAUDE.md
 
+# Local-only presentation materials — not committed
+presentation/
+
 # Terraform / OpenTofu
 **/.terraform/
 **/.terraform.lock.hcl
