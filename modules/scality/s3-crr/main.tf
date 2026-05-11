@@ -2,11 +2,6 @@ locals {
   source_bucket_arn = "arn:aws:s3:::${var.source_bucket_name}"
   dest_bucket_arn   = "arn:aws:s3:::${var.dest_bucket_name}"
 
-  # Internal CRR operator user — fixed name; the customer-facing pattern
-  # for application or verification access is to create a separate user
-  # via the application-identity module.
-  crr_operator_username = "crr-operator"
-
   # Backbeat assumes the IAM role to perform replication on each side.
   backbeat_trust_policy = jsonencode({
     Version = "2012-10-17"
@@ -155,88 +150,4 @@ resource "scality_bucket_replication" "dest_to_source" {
     scality_iam_role_policy_attachment.source,
     scality_iam_role_policy_attachment.dest,
   ]
-}
-
-# --- CRR operator user on the source cluster (internal) ---
-
-resource "scality_user" "source_crr_operator" {
-  provider = scality.source
-
-  account_access_key = var.source_account_access_key
-  account_secret_key = var.source_account_secret_key
-  username           = local.crr_operator_username
-}
-
-resource "scality_user_policy" "source_crr_operator" {
-  provider = scality.source
-
-  account_access_key = var.source_account_access_key
-  account_secret_key = var.source_account_secret_key
-  username           = scality_user.source_crr_operator.username
-  policy_name        = "${local.crr_operator_username}-policy"
-  policy_document = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect   = "Allow"
-        Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
-        Resource = "${local.source_bucket_arn}/*"
-      },
-      {
-        Effect   = "Allow"
-        Action   = ["s3:ListBucket"]
-        Resource = local.source_bucket_arn
-      },
-    ]
-  })
-}
-
-resource "scality_user_access_key" "source_crr_operator" {
-  provider = scality.source
-
-  account_access_key = var.source_account_access_key
-  account_secret_key = var.source_account_secret_key
-  username           = scality_user.source_crr_operator.username
-}
-
-# --- CRR operator user on the destination cluster (internal) ---
-
-resource "scality_user" "dest_crr_operator" {
-  provider = scality.dest
-
-  account_access_key = var.dest_account_access_key
-  account_secret_key = var.dest_account_secret_key
-  username           = local.crr_operator_username
-}
-
-resource "scality_user_policy" "dest_crr_operator" {
-  provider = scality.dest
-
-  account_access_key = var.dest_account_access_key
-  account_secret_key = var.dest_account_secret_key
-  username           = scality_user.dest_crr_operator.username
-  policy_name        = "${local.crr_operator_username}-policy"
-  policy_document = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect   = "Allow"
-        Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
-        Resource = "${local.dest_bucket_arn}/*"
-      },
-      {
-        Effect   = "Allow"
-        Action   = ["s3:ListBucket"]
-        Resource = local.dest_bucket_arn
-      },
-    ]
-  })
-}
-
-resource "scality_user_access_key" "dest_crr_operator" {
-  provider = scality.dest
-
-  account_access_key = var.dest_account_access_key
-  account_secret_key = var.dest_account_secret_key
-  username           = scality_user.dest_crr_operator.username
 }

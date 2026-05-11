@@ -1,28 +1,50 @@
 # scality / s3-crr
 
-Configures cross-region replication (CRR) between two Scality buckets
-on **two independent clusters**. The buckets must already exist (with
-versioning enabled — typically created via `application-bucket` on
-each cluster). This module wires up the IAM roles, policies, and
-replication configuration that S3 needs to ship objects from one
-cluster to the other.
+Wires up the cross-region replication (CRR) feature on Scality: IAM
+roles and policies on each cluster, plus the `scality_bucket_replication`
+configuration that backbeat acts on. Supports one-direction
+(source → dest) and bidirectional (active-active) topologies via a
+single variable.
+
+CRR end-to-end is a **composed feature** — see "Where this module
+fits" below. This module's contract is narrow on purpose: give it
+pre-existing bucket names and operator credentials on each cluster,
+and it makes replication work between them. It does not create
+accounts, buckets, or application users — those are owned by their
+respective modules.
 
 > Compatible with both Terraform and OpenTofu. Examples below use
 > `terraform`; substitute `tofu` if you use OpenTofu.
 
-## What it creates
+## Where this module fits
+
+CRR is delivered end-to-end by composing several modules. Each owns
+one piece of the feature:
+
+| Module | Owns | Per cluster |
+|---|---|---|
+| `scality-account-management` | An account | One on each |
+| `account-operator` | Operator user + credentials on the account (used to call this module) | One on each |
+| `application-bucket` | The source / destination bucket, with versioning on | One on each |
+| **`s3-crr`** (this module) | IAM roles, policies, attachments, and the replication configuration(s) | Both sides, in one call |
+| `application-identity` (optional) | Application users with scoped bucket access — e.g., a writer on source and a reader on dest for replication verification | As needed |
+
+The "Full composition" example under [Usage](#usage) chains these in
+order. If you already have accounts, operator credentials, and
+buckets on each cluster, you can skip straight to calling `s3-crr`
+with those existing inputs.
+
+## What this module creates
 
 On the **source** cluster:
 - IAM managed policy granting replication permissions on the **source
   bucket**
 - IAM role with a `backbeat` service trust policy
 - Role-policy attachment
-- A `crr-operator` user, inline policy, and access key — internal to
-  CRR mechanics. Credentials are not surfaced.
 
 On the **destination** cluster:
 - The same set: IAM policy (scoped to the **destination bucket**),
-  role, attachment, internal `crr-operator` user
+  role, attachment
 
 Replication wiring:
 - `scality_bucket_replication` on the source bucket pointing at the
@@ -37,6 +59,15 @@ holds permissions on its own bucket. The role-pair wired into
 handles cross-cluster routing. The same configuration supports
 one-direction or bidirectional setups; toggling `bidirectional` only
 adds or removes the reverse `scality_bucket_replication`.
+
+**No user is created for CRR.** Replication is performed by the
+**backbeat service** on each cluster, which assumes the IAM role
+above (its trust policy grants `sts:AssumeRole` to
+`Principal.Service = "backbeat"`). The role's permissions are what
+backbeat uses to read locally and write to the counterpart bucket —
+no user-side credential is involved in CRR itself. For application
+traffic or for verifying replication after apply, use
+`application-identity`.
 
 ## Two-provider configuration
 
@@ -180,10 +211,11 @@ module "crr" {
 
 ## Granting application access and verifying replication
 
-The internal `crr-operator` user this module creates supports CRR's
-replication mechanics. Its credentials are not surfaced — application
-access and manual verification go through dedicated users created via
-the `application-identity` module.
+Application access and manual verification of replication go through
+dedicated users created with the `application-identity` module — this
+module does not create any users itself. Backbeat performs the
+replication via the IAM role above; no user credential is part of the
+CRR wiring.
 
 Example: a writer on the source side and a reader on the destination
 side, useful both for application traffic and for confirming
@@ -257,8 +289,6 @@ AWS_ACCESS_KEY_ID=$DST_AK AWS_SECRET_ACCESS_KEY=$DST_SK \
 | `source_role_arn` | Source-cluster IAM role ARN (assumed by backbeat). | No |
 | `dest_role_arn` | Destination-cluster IAM role ARN. | No |
 | `bidirectional` | Whether reverse replication is configured. | No |
-| `source_crr_operator_username` | Source-cluster CRR operator username (for reference). | No |
-| `dest_crr_operator_username` | Destination-cluster CRR operator username (for reference). | No |
 
 ## Caveats
 
@@ -278,7 +308,9 @@ AWS_ACCESS_KEY_ID=$DST_AK AWS_SECRET_ACCESS_KEY=$DST_SK \
   The IAM roles and policies are symmetric, so the rest of the wiring
   stays in place.
 - **Use `application-identity` for application or verification access.**
-  The `crr-operator` user is internal to CRR and its credentials are
-  not surfaced.
-- **Protect your state file.** It contains the CRR operator's secret
-  key (held internally) along with caller credentials.
+  Backbeat handles replication via the IAM role this module creates;
+  no user-side credential is part of the CRR mechanics. For app
+  traffic or replication verification, layer `application-identity`
+  on each side.
+- **Protect your state file.** It contains the caller credentials
+  passed in for each cluster.
