@@ -22,12 +22,22 @@ output "access_key" {
   description = "S3 access key for the application user. Configure the application's AWS_ACCESS_KEY_ID with this value."
   value       = scality_user_access_key.this.access_key_id
   sensitive   = true
+
+  # Ensure the inline policy is attached before downstream consumers
+  # use this key, and equivalently, that downstream consumers are torn
+  # down before the policy is removed during destroy. Without this,
+  # Terraform may destroy the policy in parallel with dependents,
+  # leaving the user without permissions mid-destroy and failing
+  # subsequent IAM calls.
+  depends_on = [scality_user_policy.this]
 }
 
 output "secret_key" {
   description = "S3 secret key paired with access_key. Configure the application's AWS_SECRET_ACCESS_KEY with this value."
   value       = scality_user_access_key.this.secret_access_key
   sensitive   = true
+
+  depends_on = [scality_user_policy.this]
 }
 
 output "policy_name" {
