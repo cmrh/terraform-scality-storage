@@ -1,0 +1,83 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  fmt:
+    name: tofu fmt
+    runs-on: tf-module-runner
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check formatting
+        run: tofu fmt -check -recursive
+
+  tflint:
+    name: tflint
+    runs-on: tf-module-runner
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize tflint
+        run: tflint --init
+
+      - name: Run tflint
+        run: tflint --recursive --format compact
+
+  validate:
+    name: tofu validate
+    runs-on: tf-module-runner
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download scality provider release
+        env:
+          GH_TOKEN: ${{ secrets.PROVIDER_RELEASES_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/.tf-dev"
+          cd "$GITHUB_WORKSPACE/.tf-dev"
+          gh release download --repo scality/terraform-provider-scality \
+            --pattern '*linux_amd64.zip' --output provider.zip --clobber
+          unzip -o provider.zip
+          mv terraform-provider-scality_v* terraform-provider-scality
+          chmod +x terraform-provider-scality
+
+      - name: Configure dev_overrides
+        run: |
+          set -euo pipefail
+          cat > "$GITHUB_WORKSPACE/.terraformrc" <<EOF
+          provider_installation {
+            dev_overrides {
+              "scality/scality" = "$GITHUB_WORKSPACE/.tf-dev"
+            }
+            direct {}
+          }
+          EOF
+          echo "TF_CLI_CONFIG_FILE=$GITHUB_WORKSPACE/.terraformrc" >> "$GITHUB_ENV"
+
+      - name: tofu validate (modules)
+        run: |
+          set -euo pipefail
+          for dir in modules/scality/*/; do
+            echo "::group::$dir"
+            # dev_overrides supplies the provider, so skip `tofu init`
+            # (it would query the registry for the unpublished provider and
+            # fail). `tofu get` installs child modules without touching the
+            # registry, which is all `tofu validate` needs here.
+            (cd "$dir" && tofu get && tofu validate)
+            echo "::endgroup::"
+          done
+
+      - name: tofu validate (examples)
+        run: |
+          set -euo pipefail
+          find examples -mindepth 2 -name main.tf -printf "%h\n" | while read -r dir; do
+            echo "::group::$dir"
+            # See note above: skip `tofu init` under dev_overrides.
+            (cd "$dir" && tofu get && tofu validate)
+            echo "::endgroup::"
+          done
