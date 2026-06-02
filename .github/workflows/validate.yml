@@ -64,7 +64,11 @@ jobs:
           set -euo pipefail
           for dir in modules/scality/*/; do
             echo "::group::$dir"
-            (cd "$dir" && tofu init -backend=false && tofu validate)
+            # dev_overrides supplies the provider, so skip `tofu init`
+            # (it would query the registry for the unpublished provider and
+            # fail). `tofu get` installs child modules without touching the
+            # registry, which is all `tofu validate` needs here.
+            (cd "$dir" && tofu get && tofu validate)
             echo "::endgroup::"
           done
 
@@ -73,6 +77,7 @@ jobs:
           set -euo pipefail
           find examples -mindepth 2 -name main.tf -printf "%h\n" | while read -r dir; do
             echo "::group::$dir"
-            (cd "$dir" && tofu init -backend=false && tofu validate)
+            # See note above: skip `tofu init` under dev_overrides.
+            (cd "$dir" && tofu get && tofu validate)
             echo "::endgroup::"
           done

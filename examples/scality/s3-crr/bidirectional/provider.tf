@@ -20,8 +20,8 @@ terraform {
 
   required_providers {
     scality = {
-      source = "scality/scality"
-      # Pin to a tag in production, e.g. version = "~> 0.4"
+      source  = "scality/scality"
+      version = "~> 0.4"
     }
   }
 }
