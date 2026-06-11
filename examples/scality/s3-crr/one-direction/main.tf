@@ -14,8 +14,8 @@ module "source_account" {
   source    = "../../../../modules/scality/scality-account-management"
   providers = { scality = scality }
 
-  account_name  = "crr-source"
-  account_email = "crr-source@example.com"
+  account_name  = "${var.name_prefix}source"
+  account_email = "${var.name_prefix}source@example.com"
   console_login = false
 }
 
@@ -33,7 +33,7 @@ module "source_bucket" {
 
   account_access_key = module.source_operator.access_key
   account_secret_key = module.source_operator.secret_key
-  bucket_name        = "crr-source-data"
+  bucket_name        = "${var.name_prefix}source-data"
 }
 
 # ============================================================
@@ -44,8 +44,8 @@ module "dest_account" {
   source    = "../../../../modules/scality/scality-account-management"
   providers = { scality = scality.dest }
 
-  account_name  = "crr-dest"
-  account_email = "crr-dest@example.com"
+  account_name  = "${var.name_prefix}dest"
+  account_email = "${var.name_prefix}dest@example.com"
   console_login = false
 }
 
@@ -63,7 +63,7 @@ module "dest_bucket" {
 
   account_access_key = module.dest_operator.access_key
   account_secret_key = module.dest_operator.secret_key
-  bucket_name        = "crr-dest-data"
+  bucket_name        = "${var.name_prefix}dest-data"
 }
 
 # ============================================================
@@ -99,7 +99,7 @@ module "source_writer" {
   account_access_key = module.source_operator.access_key
   account_secret_key = module.source_operator.secret_key
 
-  username       = "crr-source-writer"
+  username       = "${var.name_prefix}source-writer"
   bucket_arns    = [module.source_bucket.bucket_arn]
   access_pattern = "read-write"
 }
@@ -111,7 +111,7 @@ module "dest_reader" {
   account_access_key = module.dest_operator.access_key
   account_secret_key = module.dest_operator.secret_key
 
-  username       = "crr-dest-reader"
+  username       = "${var.name_prefix}dest-reader"
   bucket_arns    = [module.dest_bucket.bucket_arn]
   access_pattern = "read-only"
 }

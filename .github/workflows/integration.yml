@@ -5,6 +5,11 @@ on:
     types: [published]
   workflow_dispatch:
 
+# Run JS actions (e.g. actions/checkout) on the Node 24 runtime — silences the
+# Node-version deprecation warning.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 # Serialize integration runs — only one apply/destroy cycle against the
 # shared test clusters at a time.
 concurrency:
@@ -31,6 +36,10 @@ jobs:
       # Per-run unique account name for operator-test to avoid collisions
       # if a previous run failed to clean up.
       TF_VAR_account_name: "ci-${{ github.run_id }}-operator-test"
+
+      # Same idea for the s3-crr examples: a per-run prefix on every account /
+      # bucket / user name so a failed destroy can't collide with the next run.
+      TF_VAR_name_prefix: "ci-${{ github.run_id }}-"
 
     steps:
       - uses: actions/checkout@v4
@@ -69,7 +78,7 @@ jobs:
         working-directory: examples/scality/operator-test
         run: |
           set -euo pipefail
-          tofu init
+          tofu get # dev_overrides supplies the provider; `tofu init` would query the registry and fail
           tofu apply -auto-approve
 
       - name: operator-test — destroy
@@ -85,7 +94,7 @@ jobs:
         working-directory: examples/scality/s3-crr/one-direction
         run: |
           set -euo pipefail
-          tofu init
+          tofu get # dev_overrides supplies the provider; `tofu init` would query the registry and fail
           tofu apply -auto-approve
 
       - name: s3-crr one-direction — destroy
@@ -101,7 +110,7 @@ jobs:
         working-directory: examples/scality/s3-crr/bidirectional
         run: |
           set -euo pipefail
-          tofu init
+          tofu get # dev_overrides supplies the provider; `tofu init` would query the registry and fail
           tofu apply -auto-approve
 
       - name: s3-crr bidirectional — destroy

@@ -15,6 +15,12 @@ variable "dest_secret_key" {
   description = "Cluster-level admin secret key paired with dest_access_key."
 }
 
+variable "name_prefix" {
+  type        = string
+  default     = "crr-bidir-"
+  description = "Prefix for every created name (accounts, buckets, users). Override in CI (TF_VAR_name_prefix, e.g. \"ci-<run_id>-\") to avoid collisions across concurrent runs or after a failed destroy."
+}
+
 terraform {
   required_version = ">= 1.0"
 
