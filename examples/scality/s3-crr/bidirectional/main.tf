@@ -13,8 +13,8 @@ module "source_account" {
   source    = "../../../../modules/scality/scality-account-management"
   providers = { scality = scality }
 
-  account_name  = "crr-bidir-source"
-  account_email = "crr-bidir-source@example.com"
+  account_name  = "${var.name_prefix}source"
+  account_email = "${var.name_prefix}source@example.com"
   console_login = false
 }
 
@@ -32,7 +32,7 @@ module "source_bucket" {
 
   account_access_key = module.source_operator.access_key
   account_secret_key = module.source_operator.secret_key
-  bucket_name        = "crr-bidir-source-data"
+  bucket_name        = "${var.name_prefix}source-data"
 }
 
 # ============================================================
@@ -43,8 +43,8 @@ module "dest_account" {
   source    = "../../../../modules/scality/scality-account-management"
   providers = { scality = scality.dest }
 
-  account_name  = "crr-bidir-dest"
-  account_email = "crr-bidir-dest@example.com"
+  account_name  = "${var.name_prefix}dest"
+  account_email = "${var.name_prefix}dest@example.com"
   console_login = false
 }
 
@@ -62,7 +62,7 @@ module "dest_bucket" {
 
   account_access_key = module.dest_operator.access_key
   account_secret_key = module.dest_operator.secret_key
-  bucket_name        = "crr-bidir-dest-data"
+  bucket_name        = "${var.name_prefix}dest-data"
 }
 
 # ============================================================
@@ -100,7 +100,7 @@ module "source_writer" {
   account_access_key = module.source_operator.access_key
   account_secret_key = module.source_operator.secret_key
 
-  username       = "crr-bidir-source-writer"
+  username       = "${var.name_prefix}source-writer"
   bucket_arns    = [module.source_bucket.bucket_arn]
   access_pattern = "read-write"
 }
@@ -112,7 +112,7 @@ module "dest_writer" {
   account_access_key = module.dest_operator.access_key
   account_secret_key = module.dest_operator.secret_key
 
-  username       = "crr-bidir-dest-writer"
+  username       = "${var.name_prefix}dest-writer"
   bucket_arns    = [module.dest_bucket.bucket_arn]
   access_pattern = "read-write"
 }
