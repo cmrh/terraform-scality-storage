@@ -76,8 +76,8 @@ module. Example:
 terraform {
   required_providers {
     scality = {
-      source  = "scality/scality"
-      version = "~> 0.4"
+      source  = "cmrh/scality"
+      version = "~> 1.0"
     }
   }
 }
@@ -88,6 +88,10 @@ provider "scality" {}  # picks up SCALITY_ENDPOINT / SCALITY_ACCESS_KEY / SCALIT
 For ARTESCA modules, also declare the `artesca` provider — see the
 [provider README](https://github.com/scality/terraform-provider-scality-artesca)
 for required environment variables.
+
+Air-gapped or dark-site deployments that can't reach the public registry at
+init time: see [docs/offline-install.md](docs/offline-install.md) for setting
+up a provider mirror.
 
 ## License
 

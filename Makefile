@@ -13,9 +13,9 @@ fmt:
 fmt-check:
 	tofu fmt -check -recursive
 
-# Validate every module. Requires the scality provider to be available
-# locally — either from a public registry (not yet) or via dev_overrides
-# pointing at a built binary. Not run in CI yet.
+# Validate every module. `tofu init` pulls the scality provider
+# (cmrh/scality) from the public registry. Also run in CI by
+# .github/workflows/validate.yml.
 validate:
 	@set -e; \
 	shopt -s nullglob; \
