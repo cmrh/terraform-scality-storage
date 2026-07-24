@@ -48,7 +48,8 @@ Same as the rest of this repo: pass operator credentials (output of
 
 ```hcl
 module "audit_logs" {
-  source = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/compliance-bucket?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/compliance-bucket"
+  version = "~> 1.0"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -68,7 +69,8 @@ module "audit_logs" {
 
 ```hcl
 module "compliance_staging" {
-  source = "...//modules/scality/compliance-bucket?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/compliance-bucket"
+  version = "~> 1.0"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -83,7 +85,8 @@ module "compliance_staging" {
 
 ```hcl
 module "audit_logs" {
-  source = "...//modules/scality/compliance-bucket?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/compliance-bucket"
+  version = "~> 1.0"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -96,7 +99,8 @@ module "audit_logs" {
 # Audit writer — IAM allows write but the COMPLIANCE lock prevents
 # deletes during retention regardless of IAM permissions.
 module "audit_writer" {
-  source = "...//modules/scality/application-identity?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/application-identity"
+  version = "~> 1.0"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key

@@ -97,7 +97,8 @@ provider "scality" {
 }
 
 module "crr" {
-  source = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/s3-crr?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/s3-crr"
+  version = "~> 1.0"
 
   providers = {
     scality.source = scality.src
@@ -123,7 +124,8 @@ for break-glass.
 # --- Source cluster ---
 
 module "source_account" {
-  source    = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/scality-account-management?ref=v0.1.0"
+  source    = "cmrh/storage/scality//modules/scality/scality-account-management"
+  version   = "~> 1.0"
   providers = { scality = scality.src }
 
   account_name  = "crr-source"
@@ -131,7 +133,8 @@ module "source_account" {
 }
 
 module "source_operator" {
-  source    = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/account-operator?ref=v0.1.0"
+  source    = "cmrh/storage/scality//modules/scality/account-operator"
+  version   = "~> 1.0"
   providers = { scality = scality.src }
 
   account_access_key = module.source_account.access_key
@@ -139,7 +142,8 @@ module "source_operator" {
 }
 
 module "source_bucket" {
-  source    = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/application-bucket?ref=v0.1.0"
+  source    = "cmrh/storage/scality//modules/scality/application-bucket"
+  version   = "~> 1.0"
   providers = { scality = scality.src }
 
   account_access_key = module.source_operator.access_key
@@ -150,7 +154,8 @@ module "source_bucket" {
 # --- Destination cluster ---
 
 module "dest_account" {
-  source    = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/scality-account-management?ref=v0.1.0"
+  source    = "cmrh/storage/scality//modules/scality/scality-account-management"
+  version   = "~> 1.0"
   providers = { scality = scality.dst }
 
   account_name  = "crr-dest"
@@ -158,7 +163,8 @@ module "dest_account" {
 }
 
 module "dest_operator" {
-  source    = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/account-operator?ref=v0.1.0"
+  source    = "cmrh/storage/scality//modules/scality/account-operator"
+  version   = "~> 1.0"
   providers = { scality = scality.dst }
 
   account_access_key = module.dest_account.access_key
@@ -166,7 +172,8 @@ module "dest_operator" {
 }
 
 module "dest_bucket" {
-  source    = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/application-bucket?ref=v0.1.0"
+  source    = "cmrh/storage/scality//modules/scality/application-bucket"
+  version   = "~> 1.0"
   providers = { scality = scality.dst }
 
   account_access_key = module.dest_operator.access_key
@@ -177,7 +184,8 @@ module "dest_bucket" {
 # --- CRR ---
 
 module "crr" {
-  source = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/s3-crr?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/s3-crr"
+  version = "~> 1.0"
 
   providers = {
     scality.source = scality.src
@@ -200,7 +208,8 @@ Add a single line:
 
 ```hcl
 module "crr" {
-  source = "...//modules/scality/s3-crr?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/s3-crr"
+  version = "~> 1.0"
   providers = { scality.source = scality.src, scality.dest = scality.dst }
 
   # ...all other inputs as above...
@@ -224,7 +233,8 @@ replication after `terraform apply`:
 ```hcl
 # Source-side writer — for the application or for uploading test objects
 module "source_writer" {
-  source    = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/application-identity?ref=v0.1.0"
+  source    = "cmrh/storage/scality//modules/scality/application-identity"
+  version   = "~> 1.0"
   providers = { scality = scality.src }
 
   account_access_key = module.source_operator.access_key
@@ -237,7 +247,8 @@ module "source_writer" {
 
 # Destination-side reader — for confirming that replicated objects landed
 module "dest_reader" {
-  source    = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/application-identity?ref=v0.1.0"
+  source    = "cmrh/storage/scality//modules/scality/application-identity"
+  version   = "~> 1.0"
   providers = { scality = scality.dst }
 
   account_access_key = module.dest_operator.access_key

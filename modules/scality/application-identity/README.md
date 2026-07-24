@@ -46,7 +46,8 @@ for *any* account principal with sufficient IAM privileges
 
 ```hcl
 module "acme_app" {
-  source = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/application-identity?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/application-identity"
+  version = "~> 1.0"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -61,7 +62,8 @@ module "acme_app" {
 
 ```hcl
 module "analytics_reader" {
-  source = "...//modules/scality/application-identity?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/application-identity"
+  version = "~> 1.0"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -79,7 +81,8 @@ module "analytics_reader" {
 
 ```hcl
 module "acme_app_special" {
-  source = "...//modules/scality/application-identity?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/application-identity"
+  version = "~> 1.0"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key

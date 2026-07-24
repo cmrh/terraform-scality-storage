@@ -32,7 +32,8 @@ Reserve account-root credentials for break-glass scenarios.
 
 ```hcl
 module "acme_data" {
-  source = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/application-bucket?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/application-bucket"
+  version = "~> 1.0"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -49,7 +50,8 @@ module "acme_data" {
 
 ```hcl
 module "acme_logs" {
-  source = "...//modules/scality/application-bucket?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/application-bucket"
+  version = "~> 1.0"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -63,7 +65,8 @@ module "acme_logs" {
 
 ```hcl
 module "acme_data" {
-  source = "...//modules/scality/application-bucket?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/application-bucket"
+  version = "~> 1.0"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -72,7 +75,8 @@ module "acme_data" {
 }
 
 module "acme_app" {
-  source = "...//modules/scality/application-identity?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/application-identity"
+  version = "~> 1.0"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -87,7 +91,8 @@ module "acme_app" {
 
 ```hcl
 module "acme_archive" {
-  source = "...//modules/scality/application-bucket?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/application-bucket"
+  version = "~> 1.0"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key

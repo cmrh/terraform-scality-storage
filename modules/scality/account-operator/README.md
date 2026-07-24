@@ -42,7 +42,8 @@ a named place in the catalog.
 ```hcl
 # 1. Create the tenant account (account-root credentials are emitted here)
 module "tenant_acme" {
-  source        = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/scality-account-management?ref=v0.1.0"
+  source        = "cmrh/storage/scality//modules/scality/scality-account-management"
+  version       = "~> 1.0"
   account_name  = "acme"
   account_email = "platform@acme.example.com"
 }
@@ -50,7 +51,8 @@ module "tenant_acme" {
 # 2. Bootstrap the operator using account-root credentials — only place
 #    those credentials are consumed
 module "acme_operator" {
-  source = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/account-operator?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/account-operator"
+  version = "~> 1.0"
 
   account_access_key = module.tenant_acme.access_key
   account_secret_key = module.tenant_acme.secret_key
@@ -58,7 +60,8 @@ module "acme_operator" {
 
 # 3. Everything downstream uses operator credentials
 module "acme_app" {
-  source = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/application-identity?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/application-identity"
+  version = "~> 1.0"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key

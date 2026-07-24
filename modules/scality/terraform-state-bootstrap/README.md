@@ -60,7 +60,8 @@ terraform {
 provider "scality" {}
 
 module "tf_state" {
-  source = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/terraform-state-bootstrap?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/terraform-state-bootstrap"
+  version = "~> 1.0"
 
   account_email = "platform@example.com"
   bucket_name   = "platform-tf-state"
@@ -86,7 +87,8 @@ after first login.
 
 ```hcl
 module "tf_state" {
-  source = "...//modules/scality/terraform-state-bootstrap?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/terraform-state-bootstrap"
+  version = "~> 1.0"
 
   account_email = "platform@example.com"
   bucket_name   = "platform-tf-state"
