@@ -55,14 +55,31 @@ docs/          # Cross-module guidance
 
 ## Consuming a module
 
+Published to the Terraform and OpenTofu registries as
+**`cmrh/storage/scality`**. Each use-case module is a registry *submodule*,
+addressed with the `//modules/<product>/<name>` path. Pin a version:
+
 ```hcl
 module "tofu_state" {
-  source = "git::https://github.com/scality/scality-s3-tf-modules.git//modules/scality/terraform-state-bootstrap?ref=v0.1.0"
+  source  = "cmrh/storage/scality//modules/scality/terraform-state-bootstrap"
+  version = "~> 1.0"
 
   account_email = "platform@example.com"
   bucket_name   = "platform-tofu-state"
 }
 ```
+
+`terraform` resolves this from `registry.terraform.io` and `tofu` from
+`registry.opentofu.org` — the collection is published to both. For a specific
+commit or branch, or without the registry, a Git source works too:
+
+```hcl
+source = "git::https://github.com/cmrh/terraform-scality-storage.git//modules/scality/terraform-state-bootstrap?ref=v1.0.0"
+```
+
+**Air-gapped or restricted networks** (no registry or GitHub access) need both
+the modules and the provider served locally — see
+[docs/offline-install.md](docs/offline-install.md).
 
 Each module's `README.md` documents its inputs, outputs, and any provider
 quirks relevant to that use case.
