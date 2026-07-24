@@ -51,8 +51,8 @@ export SCALITY_SECRET_KEY="admin-secret-key"
 terraform {
   required_providers {
     scality = {
-      source  = "scality/scality"
-      version = "~> 0.4"
+      source  = "cmrh/scality"
+      version = "~> 1.0"
     }
   }
 }

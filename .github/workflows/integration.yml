@@ -44,32 +44,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download scality provider release
-        env:
-          GH_TOKEN: ${{ secrets.PROVIDER_RELEASES_TOKEN }}
-        run: |
-          set -euo pipefail
-          mkdir -p "$GITHUB_WORKSPACE/.tf-dev"
-          cd "$GITHUB_WORKSPACE/.tf-dev"
-          gh release download --repo scality/terraform-provider-scality \
-            --pattern '*linux_amd64.zip' --output provider.zip --clobber
-          unzip -o provider.zip
-          mv terraform-provider-scality_v* terraform-provider-scality
-          chmod +x terraform-provider-scality
-
-      - name: Configure dev_overrides
-        run: |
-          set -euo pipefail
-          cat > "$GITHUB_WORKSPACE/.terraformrc" <<EOF
-          provider_installation {
-            dev_overrides {
-              "scality/scality" = "$GITHUB_WORKSPACE/.tf-dev"
-            }
-            direct {}
-          }
-          EOF
-          echo "TF_CLI_CONFIG_FILE=$GITHUB_WORKSPACE/.terraformrc" >> "$GITHUB_ENV"
-
       # ============================================================
       # operator-test — operator pattern lifecycle regression
       # ============================================================
@@ -78,7 +52,7 @@ jobs:
         working-directory: examples/scality/operator-test
         run: |
           set -euo pipefail
-          tofu get # dev_overrides supplies the provider; `tofu init` would query the registry and fail
+          tofu init
           tofu apply -auto-approve
 
       - name: operator-test — destroy
@@ -94,7 +68,7 @@ jobs:
         working-directory: examples/scality/s3-crr/one-direction
         run: |
           set -euo pipefail
-          tofu get # dev_overrides supplies the provider; `tofu init` would query the registry and fail
+          tofu init
           tofu apply -auto-approve
 
       - name: s3-crr one-direction — destroy
@@ -110,7 +84,7 @@ jobs:
         working-directory: examples/scality/s3-crr/bidirectional
         run: |
           set -euo pipefail
-          tofu get # dev_overrides supplies the provider; `tofu init` would query the registry and fail
+          tofu init
           tofu apply -auto-approve
 
       - name: s3-crr bidirectional — destroy

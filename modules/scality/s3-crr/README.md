@@ -78,8 +78,8 @@ cluster — passed in via `providers` at the module call site:
 terraform {
   required_providers {
     scality = {
-      source  = "scality/scality"
-      version = "~> 0.4"
+      source  = "cmrh/scality"
+      version = "~> 1.0"
     }
   }
 }
