@@ -1,0 +1,6 @@
+# Inherit the default Gitleaks ruleset. If a placeholder in docs or examples
+# is ever flagged, allowlist that exact value with an anchored regex
+# (^value$) — never a path exemption, so a real credential pasted into any
+# file is still flagged.
+[extend]
+useDefault = true
