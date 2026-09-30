@@ -5,55 +5,84 @@ on:
     branches: [main]
   pull_request:
 
-# Run JS actions (e.g. actions/checkout) on the Node 24 runtime — silences the
-# Node-version deprecation warning.
+permissions:
+  contents: read
+
+# One run per ref; a new push to a PR supersedes the previous run.
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+# Pinned tool versions. Every module and example must pass under both
+# engines. Jobs call the Makefile targets so CI and `make check` stay identical.
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  TOFU_VERSION: "1.12.6"
+  TERRAFORM_VERSION: "1.16.4"
+  TFLINT_VERSION: "v0.64.0"
 
 jobs:
   fmt:
-    name: tofu fmt
-    runs-on: tf-module-runner
+    name: fmt (${{ matrix.engine }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [tofu, terraform]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+
+      - uses: opentofu/setup-opentofu@v2
+        if: matrix.engine == 'tofu'
+        with:
+          tofu_version: ${{ env.TOFU_VERSION }}
+          tofu_wrapper: false
+
+      - uses: hashicorp/setup-terraform@v4
+        if: matrix.engine == 'terraform'
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
 
       - name: Check formatting
-        run: tofu fmt -check -recursive
+        run: make fmt-check ENGINE=${{ matrix.engine }}
 
   tflint:
     name: tflint
-    runs-on: tf-module-runner
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: Initialize tflint
-        run: tflint --init
+      - uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: ${{ env.TFLINT_VERSION }}
 
       - name: Run tflint
-        run: tflint --recursive --format compact
+        run: make lint
+        env:
+          # Avoids GitHub API rate limits when tflint --init fetches plugins.
+          GITHUB_TOKEN: ${{ github.token }}
 
   validate:
-    name: tofu validate
-    runs-on: tf-module-runner
+    name: validate (${{ matrix.engine }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [tofu, terraform]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: tofu validate (modules)
-        run: |
-          set -euo pipefail
-          for dir in modules/scality/*/; do
-            echo "::group::$dir"
-            # init pulls the scality provider from the public registry;
-            # -backend=false so validation needs no backend credentials.
-            (cd "$dir" && tofu init -backend=false && tofu validate)
-            echo "::endgroup::"
-          done
+      - uses: opentofu/setup-opentofu@v2
+        if: matrix.engine == 'tofu'
+        with:
+          tofu_version: ${{ env.TOFU_VERSION }}
+          tofu_wrapper: false
 
-      - name: tofu validate (examples)
-        run: |
-          set -euo pipefail
-          find examples -mindepth 2 -name main.tf -printf "%h\n" | while read -r dir; do
-            echo "::group::$dir"
-            (cd "$dir" && tofu init -backend=false && tofu validate)
-            echo "::endgroup::"
-          done
+      - uses: hashicorp/setup-terraform@v4
+        if: matrix.engine == 'terraform'
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Validate modules and examples
+        run: make validate ENGINE=${{ matrix.engine }}
