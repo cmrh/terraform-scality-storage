@@ -19,6 +19,7 @@ provider (ARTESCA).
 | [`scality-account-management`](modules/scality/scality-account-management) | Available | Tenant account (Console-UI or headless) + stable access key |
 | [`application-identity`](modules/scality/application-identity) | Available | IAM user + access key + canned policy preset (read-only / read-write / bucket-admin) or custom JSON |
 | [`account-operator`](modules/scality/account-operator) | Available | Operator user (`iam:* + s3:*`) — recommended caller for downstream wrapper modules |
+| [`delegated-admin-role`](modules/scality/delegated-admin-role) | Available | Sub-account role a single management-account user assumes (provider `assume_role`) to manage the sub-account's buckets and IAM |
 | [`application-bucket`](modules/scality/application-bucket) | Available | Bucket + encryption + versioning + lifecycle hygiene |
 | [`compliance-bucket`](modules/scality/compliance-bucket) | Available | Bucket + object lock (GOVERNANCE / COMPLIANCE) + retention period |
 | [`s3-crr`](modules/scality/s3-crr) | Available | Cross-region replication (one-direction or bidirectional) between two clusters |
