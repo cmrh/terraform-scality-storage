@@ -153,8 +153,7 @@ resource "scality_bucket" "data" {
 - **Trust matches the ARN string, not a unique user ID.** Deleting the
   management user and recreating it *with the same name* gets the role
   access back. After a compromise:
-  - Delete the user, or rotate its access key. Either one invalidates the
-    leaked keys.
+  - Rotate the management user's access key, or delete the user.
   - Create the replacement user under a **new name**, and update
     `trusted_user_arn` in every sub-account.
   - Role sessions last **1 hour**. Plan for sessions issued before the
