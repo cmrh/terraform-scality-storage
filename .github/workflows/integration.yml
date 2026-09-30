@@ -42,7 +42,7 @@ jobs:
       TF_VAR_name_prefix: "ci-${{ github.run_id }}-"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # ============================================================
       # operator-test — operator pattern lifecycle regression
