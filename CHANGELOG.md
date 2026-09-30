@@ -17,6 +17,8 @@ No release has been published yet. Pre-migration tags are being retired (#5).
 - Repository governance: `CODEOWNERS`, `SECURITY.md`, `CONTRIBUTING.md`,
   `RELEASING.md`, issue and pull request templates, Dependabot. (#3)
 - actionlint for GitHub Actions workflows, in CI and `make check`. (#3)
+- Gitleaks secret scanning on push and pull requests, plus a weekly and
+  on-demand full-history scan. (#4)
 
 ### Changed
 - CI validates every module and example with both OpenTofu and Terraform, on
