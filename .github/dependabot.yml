@@ -1,0 +1,24 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - ci
+
+  # Provider version constraints in modules and examples. `**` isn't a
+  # documented wildcard, so each directory depth is listed explicitly.
+  - package-ecosystem: terraform
+    directories:
+      - /
+      - /modules/*/*
+      - /examples/*/*
+      - /examples/*/*/*
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies

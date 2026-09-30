@@ -19,6 +19,7 @@ env:
   TOFU_VERSION: "1.12.6"
   TERRAFORM_VERSION: "1.16.4"
   TFLINT_VERSION: "v0.64.0"
+  ACTIONLINT_VERSION: "1.7.12"
 
 jobs:
   fmt:
@@ -61,6 +62,28 @@ jobs:
         env:
           # Avoids GitHub API rate limits when tflint --init fetches plugins.
           GITHUB_TOKEN: ${{ github.token }}
+
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Pinned release, checksum-verified. shellcheck (preinstalled on
+      # ubuntu-latest) is picked up automatically for run: scripts.
+      - name: Install actionlint
+        run: |
+          base="https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}"
+          tarball="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          curl -sSfLO "${base}/${tarball}"
+          curl -sSfLO "${base}/actionlint_${ACTIONLINT_VERSION}_checksums.txt"
+          grep " ${tarball}\$" "actionlint_${ACTIONLINT_VERSION}_checksums.txt" | sha256sum -c -
+          mkdir -p "${RUNNER_TEMP}/bin"
+          tar -xzf "${tarball}" -C "${RUNNER_TEMP}/bin" actionlint
+          echo "${RUNNER_TEMP}/bin" >> "${GITHUB_PATH}"
+
+      - name: Run actionlint
+        run: make actionlint
 
   validate:
     name: validate (${{ matrix.engine }})

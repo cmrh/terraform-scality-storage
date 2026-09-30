@@ -111,6 +111,12 @@ Air-gapped or dark-site deployments that can't reach the public registry at
 init time: see [docs/offline-install.md](docs/offline-install.md) for setting
 up a provider mirror.
 
+## Contributing
+
+Changes start from an issue. See [CONTRIBUTING.md](CONTRIBUTING.md) for the
+workflow and `make check`, [CHANGELOG.md](CHANGELOG.md) for release history,
+and [SECURITY.md](SECURITY.md) for reporting vulnerabilities privately.
+
 ## License
 
 Apache 2.0 — see [LICENSE](LICENSE).
