@@ -23,3 +23,6 @@ No release has been published yet. Pre-migration tags are being retired (#5).
 ### Changed
 - CI validates every module and example with both OpenTofu and Terraform, on
   GitHub-hosted runners, with pinned tool versions. (#2)
+- `delegated-admin-role` README: compromise guidance no longer claims that
+  rotating the key or deleting the user invalidates leaked keys, which was
+  untested. It now lists only the actions. (#9)
