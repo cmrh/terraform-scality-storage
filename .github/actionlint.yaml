@@ -1,0 +1,5 @@
+self-hosted-runner:
+  # Custom label of the self-hosted runner used only by integration.yml
+  # (needs lab access). All other workflows run on GitHub-hosted runners.
+  labels:
+    - tf-module-runner

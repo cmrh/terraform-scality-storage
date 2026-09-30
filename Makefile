@@ -8,10 +8,10 @@ SHELL       := bash
 # example must pass under both — `make validate-all` runs each in turn.
 ENGINE ?= tofu
 
-.PHONY: check fmt fmt-check validate validate-all lint
+.PHONY: check fmt fmt-check validate validate-all lint actionlint
 
 # Run the same checks CI runs.
-check: fmt-check lint validate-all
+check: fmt-check lint actionlint validate-all
 
 # Format every .tf file in place.
 fmt:
@@ -54,3 +54,8 @@ validate-all:
 lint:
 	tflint --init
 	tflint --recursive --format compact
+
+# Lint GitHub Actions workflows (config in .github/actionlint.yaml). Also
+# shell-checks run: scripts when shellcheck is installed.
+actionlint:
+	actionlint
