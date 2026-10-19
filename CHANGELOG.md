@@ -11,7 +11,7 @@ No release has been published yet. Pre-migration tags are being retired (#5).
 ### Added
 - `access-log-bucket` module and `examples/scality/access-logging`: a server
   access log bucket with delivery policy, encryption and retention, plus
-  logging on source buckets. Requires cmrh/scality 1.1.5. (#16)
+  logging on source buckets. Requires cmrh/scality 1.1.6. (#16)
 - `delegated-admin-role` module: a sub-account IAM role that a single
   management-account user assumes (provider `assume_role`) to manage the
   sub-account's buckets and IAM. (#1)
@@ -24,6 +24,9 @@ No release has been published yet. Pre-migration tags are being retired (#5).
   on-demand full-history scan. (#4)
 
 ### Changed
+- Every module and example requires cmrh/scality 1.1.6 or later. Earlier
+  1.1.x releases have bugs these modules hit; on 1.1.5 and earlier,
+  `compliance-bucket` fails at plan. (#18)
 - CI validates every module and example with both OpenTofu and Terraform, on
   GitHub-hosted runners, with pinned tool versions. (#2)
 - `delegated-admin-role` README: compromise guidance no longer claims that
