@@ -3,10 +3,8 @@ terraform {
 
   required_providers {
     scality = {
-      source = "cmrh/scality"
-      # Cross-account trust + the provider assume_role block that consumes
-      # this role were validated on 1.1.0.
-      version = "~> 1.1"
+      source  = "cmrh/scality"
+      version = "~> 1.1, >= 1.1.6"
     }
   }
 }
