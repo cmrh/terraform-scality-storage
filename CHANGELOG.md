@@ -9,6 +9,9 @@ and the project follows [Semantic Versioning](https://semver.org/).
 No release has been published yet. Pre-migration tags are being retired (#5).
 
 ### Added
+- `access-log-bucket` module and `examples/scality/access-logging`: a server
+  access log bucket with delivery policy, encryption and retention, plus
+  logging on source buckets. Requires cmrh/scality 1.1.5. (#16)
 - `delegated-admin-role` module: a sub-account IAM role that a single
   management-account user assumes (provider `assume_role`) to manage the
   sub-account's buckets and IAM. (#1)
