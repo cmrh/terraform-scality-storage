@@ -6,7 +6,10 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-No release has been published yet. Pre-migration tags are being retired (#5).
+## [1.0.0] - 2026-10-20
+
+First public release, published to the Terraform and OpenTofu registries as
+`cmrh/storage/scality`. (#7)
 
 ### Added
 - `artesca/edge-replication` and `scality/ring-replication-target` modules,
