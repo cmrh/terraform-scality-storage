@@ -8,10 +8,10 @@ SHELL       := bash
 # example must pass under both — `make validate-all` runs each in turn.
 ENGINE ?= tofu
 
-.PHONY: check fmt fmt-check validate validate-all lint actionlint
+.PHONY: check fmt fmt-check validate validate-all lint actionlint runner-guard
 
 # Run the same checks CI runs.
-check: fmt-check lint actionlint validate-all
+check: fmt-check lint actionlint runner-guard validate-all
 
 # Format every .tf file in place.
 fmt:
@@ -59,3 +59,8 @@ lint:
 # shell-checks run: scripts when shellcheck is installed.
 actionlint:
 	actionlint
+
+# Only integration.yml may use the self-hosted runner, and only from
+# manual, scheduled, release or repository_dispatch triggers.
+runner-guard:
+	.github/scripts/runner-guard.sh
