@@ -24,11 +24,13 @@ provider (ARTESCA).
 | [`access-log-bucket`](modules/scality/access-log-bucket) | Available | Log bucket + delivery policy + retention, and access logging on source buckets |
 | [`compliance-bucket`](modules/scality/compliance-bucket) | Available | Bucket + object lock (GOVERNANCE / COMPLIANCE) + retention period |
 | [`s3-crr`](modules/scality/s3-crr) | Available | Cross-region replication (one-direction or bidirectional) between two clusters |
+| [`ring-replication-target`](modules/scality/ring-replication-target) | Available | Versioned bucket + least-privilege user for an ARTESCA RING location to replicate into |
 
 ### ARTESCA
 
 | Module | Status | Purpose |
 |---|---|---|
+| [`edge-replication`](modules/artesca/edge-replication) | Available | Account + users + bucket replicated to a RING location (pair with `ring-replication-target`; see [`examples/hybrid/artesca-edge-to-ring`](examples/hybrid/artesca-edge-to-ring)) |
 | `artesca-account-management` | Planned | Tenant account + stable access key |
 | `application-identity` | Planned | IAM user + access key + policy |
 | `storage-location` | Planned | Backend location + optional endpoint |
