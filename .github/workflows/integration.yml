@@ -1,9 +1,8 @@
 name: integration
 
-# Live-cluster tests on the self-hosted runner. Allowed triggers only (see
-# runner-guard): manual, weekly, on our release, and when the provider
-# publishes a release (repository_dispatch "provider-release" with
-# client_payload.version).
+# Live-cluster tests on the self-hosted runner: the data paths our examples
+# document and their teardown steps. Resource-level behaviour is covered by
+# the providers' acceptance tests. Allowed triggers only (see runner-guard).
 on:
   workflow_dispatch:
     inputs:
@@ -11,14 +10,10 @@ on:
         description: "Space-separated configs to run (empty = all)"
         required: false
         default: ""
-      provider_version:
-        description: "Wait for this cmrh/scality version on the registries first"
-        required: false
-        default: ""
-  schedule:
-    - cron: "0 6 * * 1"
   release:
     types: [published]
+  # Sent by a provider's release workflow:
+  # client_payload: { "provider": "scality" | "artesca", "version": "x.y.z" }
   repository_dispatch:
     types: [provider-release]
 
@@ -32,45 +27,39 @@ concurrency:
 
 # Keep in step with validate.yml.
 env:
-  TOFU_VERSION: "1.12.6"
   TERRAFORM_VERSION: "1.16.4"
 
 jobs:
   integration:
-    name: apply, re-plan, destroy
+    name: apply, check data path, re-plan, destroy
     runs-on: tf-module-runner
     environment: integration-clusters
-    timeout-minutes: 180
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v7
-
-      - uses: opentofu/setup-opentofu@v2
-        with:
-          tofu_version: ${{ env.TOFU_VERSION }}
-          tofu_wrapper: false
 
       - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
 
-      - name: Run suite (tofu, then terraform)
+      - name: Run suite
         env:
+          ENGINE: terraform
           CONFIGS: ${{ inputs.configs }}
-          PROVIDER_VERSION: ${{ github.event.client_payload.version || inputs.provider_version }}
+          PROVIDER_NAME: ${{ github.event.client_payload.provider }}
+          PROVIDER_VERSION: ${{ github.event.client_payload.version }}
           RUN_PREFIX: ci${{ github.run_id }}${{ github.run_attempt }}
           SCALITY_ENDPOINT: ${{ vars.SCALITY_PRIMARY_ENDPOINT }}
           SCALITY_ACCESS_KEY: ${{ secrets.SCALITY_PRIMARY_ACCESS_KEY }}
           SCALITY_SECRET_KEY: ${{ secrets.SCALITY_PRIMARY_SECRET_KEY }}
-          SCALITY_CONSOLE_ENDPOINT: ${{ vars.SCALITY_PRIMARY_CONSOLE_ENDPOINT }}
-          SCALITY_CONSOLE_USERNAME: ${{ vars.SCALITY_PRIMARY_CONSOLE_USERNAME }}
-          SCALITY_CONSOLE_PASSWORD: ${{ secrets.SCALITY_PRIMARY_CONSOLE_PASSWORD }}
           TF_VAR_dest_endpoint: ${{ vars.SCALITY_DR_ENDPOINT }}
           TF_VAR_dest_access_key: ${{ secrets.SCALITY_DR_ACCESS_KEY }}
           TF_VAR_dest_secret_key: ${{ secrets.SCALITY_DR_SECRET_KEY }}
-        run: |
-          fail=0
-          for engine in tofu terraform; do
-            ENGINE=$engine .github/scripts/integration.sh || fail=1
-          done
-          exit "$fail"
+          ARTESCA_MANAGEMENT_ENDPOINT: ${{ vars.ARTESCA_MANAGEMENT_ENDPOINT }}
+          ARTESCA_OIDC_URL: ${{ vars.ARTESCA_OIDC_URL }}
+          ARTESCA_S3_ENDPOINT: ${{ vars.ARTESCA_S3_ENDPOINT }}
+          ARTESCA_INSECURE_SKIP_VERIFY: ${{ vars.ARTESCA_INSECURE_SKIP_VERIFY }}
+          ARTESCA_USERNAME: ${{ vars.ARTESCA_USERNAME }}
+          ARTESCA_PASSWORD: ${{ secrets.ARTESCA_PASSWORD }}
+        run: .github/scripts/integration.sh
