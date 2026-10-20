@@ -46,6 +46,6 @@ Pre-releases use a suffix (`v1.3.0-rc1`).
 
 ## Registry publishing
 
-Not yet published. The repository is private while features are added. Once
-public, both registries pick up new tags automatically. The module address will
-be `cmrh/storage/scality`.
+The module address is `cmrh/storage/scality` on both the Terraform and
+OpenTofu registries. After pushing a tag, check that the new version is listed
+on both before announcing it.
