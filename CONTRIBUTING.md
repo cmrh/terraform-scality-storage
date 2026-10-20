@@ -63,7 +63,7 @@ it as unavailable.
 
 ## Module conventions
 
-- **Layout:** `modules/<product>/<name>/` with `main.tf`, `variables.tf`,
+- **Layout:** `modules/<product>-<name>/` with `main.tf`, `variables.tf`,
   `outputs.tf`, `versions.tf` and `README.md`. Add a matching example under
   `examples/<product>/<name>/` for anything non-trivial.
 - **Every variable and output** has a `type` (variables) and a `description`

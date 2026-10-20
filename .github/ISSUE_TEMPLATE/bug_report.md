@@ -12,7 +12,7 @@ A clear description of what's wrong.
 
 ## Affected module
 
-- Module path (e.g. `modules/scality/application-bucket`):
+- Module path (e.g. `modules/scality-application-bucket`):
 - Module version (tag or commit):
 
 ## Reproduction

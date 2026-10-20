@@ -27,7 +27,7 @@ Copy this repository into the consuming configuration's tree — e.g. under
 
 ```hcl
 module "tofu_state" {
-  source = "./vendor/terraform-scality-storage/modules/scality/terraform-state-bootstrap"
+  source = "./vendor/terraform-scality-storage/modules/scality-terraform-state-bootstrap"
 
   account_email = "platform@example.com"
   bucket_name   = "platform-tofu-state"
@@ -42,7 +42,7 @@ If the site can reach an internal Git server, mirror the repository there and
 point a Git source at that host:
 
 ```hcl
-source = "git::https://git.internal.example.com/mirror/terraform-scality-storage.git//modules/scality/terraform-state-bootstrap?ref=v1.0.0"
+source = "git::https://git.internal.example.com/mirror/terraform-scality-storage.git//modules/scality-terraform-state-bootstrap?ref=v1.0.0"
 ```
 
 ---

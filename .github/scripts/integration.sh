@@ -107,7 +107,7 @@ verdict() {
 }
 
 run_access_logging() {
-  local d=$ex/scality/access-logging ok=0 rp=1 ds=0 ak sk app logs i
+  local d=$ex/access-logging ok=0 rp=1 ds=0 ak sk app logs i
   if apply "$d"; then
     ak=$(out "$d" operator_access_key); sk=$(out "$d" operator_secret_key); mask "$ak"; mask "$sk"
     app=$(out "$d" app_bucket); logs=$(out "$d" log_bucket)
@@ -129,7 +129,7 @@ run_access_logging() {
 }
 
 run_edge() {
-  local d=$ex/hybrid/artesca-edge-to-ring ok=0 rp=1 ds=0 rak rsk ring edge aak ask
+  local d=$ex/artesca-edge-to-ring ok=0 rp=1 ds=0 rak rsk ring edge aak ask
   export TF_VAR_ring_endpoint=$SCALITY_ENDPOINT
   if apply "$d"; then
     rak=$(out "$d" ring_operator_access_key); rsk=$(out "$d" ring_operator_secret_key); mask "$rak"; mask "$rsk"
@@ -153,7 +153,7 @@ run_edge() {
 }
 
 run_crr() {
-  local d=$ex/scality/s3-crr/one-direction ok=0 rp=1 ds=0 wak wsk sak ssk dak dsk src dst
+  local d=$ex/s3-crr-one-direction ok=0 rp=1 ds=0 wak wsk sak ssk dak dsk src dst
   if apply "$d"; then
     wak=$(out "$d" source_writer_access_key); wsk=$(out "$d" source_writer_secret_key)
     sak=$(out "$d" source_operator_access_key); ssk=$(out "$d" source_operator_secret_key)
@@ -172,7 +172,7 @@ run_crr() {
 }
 
 run_delegated_admin() {
-  local b=$ex/scality/delegated-admin/bootstrap m=$ex/scality/delegated-admin/managed ok=0 rp=0 r ds=0
+  local b=$ex/delegated-admin-bootstrap m=$ex/delegated-admin-managed ok=0 rp=0 r ds=0
   if apply "$b"; then
     replan "$b"; r=$?; (( r > rp )) && rp=$r
     TF_VAR_delegator_access_key=$(out "$b" delegator_access_key)

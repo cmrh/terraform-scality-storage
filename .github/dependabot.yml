@@ -14,9 +14,8 @@ updates:
   - package-ecosystem: terraform
     directories:
       - /
-      - /modules/*/*
-      - /examples/*/*
-      - /examples/*/*/*
+      - /modules/*
+      - /examples/*
     schedule:
       interval: weekly
     open-pull-requests-limit: 5

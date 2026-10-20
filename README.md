@@ -15,22 +15,22 @@ provider (ARTESCA).
 
 | Module | Status | Purpose |
 |---|---|---|
-| [`terraform-state-bootstrap`](modules/scality/terraform-state-bootstrap) | Available | Dedicated account + bucket for OpenTofu/Terraform state |
-| [`scality-account-management`](modules/scality/scality-account-management) | Available | Tenant account (Console-UI or headless) + stable access key |
-| [`application-identity`](modules/scality/application-identity) | Available | IAM user + access key + canned policy preset (read-only / read-write / bucket-admin) or custom JSON |
-| [`account-operator`](modules/scality/account-operator) | Available | Operator user (`iam:* + s3:*`) — recommended caller for downstream wrapper modules |
-| [`delegated-admin-role`](modules/scality/delegated-admin-role) | Available | Sub-account role a single management-account user assumes (provider `assume_role`) to manage the sub-account's buckets and IAM |
-| [`application-bucket`](modules/scality/application-bucket) | Available | Bucket + encryption + versioning + lifecycle hygiene |
-| [`access-log-bucket`](modules/scality/access-log-bucket) | Available | Log bucket + delivery policy + retention, and access logging on source buckets |
-| [`compliance-bucket`](modules/scality/compliance-bucket) | Available | Bucket + object lock (GOVERNANCE / COMPLIANCE) + retention period |
-| [`s3-crr`](modules/scality/s3-crr) | Available | Cross-region replication (one-direction or bidirectional) between two clusters |
-| [`ring-replication-target`](modules/scality/ring-replication-target) | Available | Versioned bucket + least-privilege user for an ARTESCA RING location to replicate into |
+| [`terraform-state-bootstrap`](modules/scality-terraform-state-bootstrap) | Available | Dedicated account + bucket for OpenTofu/Terraform state |
+| [`scality-account-management`](modules/scality-account-management) | Available | Tenant account (Console-UI or headless) + stable access key |
+| [`application-identity`](modules/scality-application-identity) | Available | IAM user + access key + canned policy preset (read-only / read-write / bucket-admin) or custom JSON |
+| [`account-operator`](modules/scality-account-operator) | Available | Operator user (`iam:* + s3:*`) — recommended caller for downstream wrapper modules |
+| [`delegated-admin-role`](modules/scality-delegated-admin-role) | Available | Sub-account role a single management-account user assumes (provider `assume_role`) to manage the sub-account's buckets and IAM |
+| [`application-bucket`](modules/scality-application-bucket) | Available | Bucket + encryption + versioning + lifecycle hygiene |
+| [`access-log-bucket`](modules/scality-access-log-bucket) | Available | Log bucket + delivery policy + retention, and access logging on source buckets |
+| [`compliance-bucket`](modules/scality-compliance-bucket) | Available | Bucket + object lock (GOVERNANCE / COMPLIANCE) + retention period |
+| [`s3-crr`](modules/scality-s3-crr) | Available | Cross-region replication (one-direction or bidirectional) between two clusters |
+| [`ring-replication-target`](modules/scality-ring-replication-target) | Available | Versioned bucket + least-privilege user for an ARTESCA RING location to replicate into |
 
 ### ARTESCA
 
 | Module | Status | Purpose |
 |---|---|---|
-| [`edge-replication`](modules/artesca/edge-replication) | Available | Account + users + bucket replicated to a RING location (pair with `ring-replication-target`; see [`examples/hybrid/artesca-edge-to-ring`](examples/hybrid/artesca-edge-to-ring)) |
+| [`edge-replication`](modules/artesca-edge-replication) | Available | Account + users + bucket replicated to a RING location (pair with `ring-replication-target`; see [`examples/artesca-edge-to-ring`](examples/artesca-edge-to-ring)) |
 | `artesca-account-management` | Planned | Tenant account + stable access key |
 | `application-identity` | Planned | IAM user + access key + policy |
 | `storage-location` | Planned | Backend location + optional endpoint |
@@ -49,11 +49,10 @@ provider (ARTESCA).
 
 ```
 modules/
-├── scality/   # S3C / RING modules
-├── artesca/   # ARTESCA modules
-└── hybrid/    # Modules that compose both providers
+├── scality-<name>/   # S3C / RING modules
+└── artesca-<name>/   # ARTESCA modules
 
-examples/      # One example per module, mirrors module layout
+examples/<name>/      # Runnable examples; hybrid ones use both providers
 docs/          # Cross-module guidance
 ```
 
@@ -61,11 +60,11 @@ docs/          # Cross-module guidance
 
 Published to the Terraform and OpenTofu registries as
 **`cmrh/storage/scality`**. Each use-case module is a registry *submodule*,
-addressed with the `//modules/<product>/<name>` path. Pin a version:
+addressed with the `//modules/<product>-<name>` path. Pin a version:
 
 ```hcl
 module "tofu_state" {
-  source  = "cmrh/storage/scality//modules/scality/terraform-state-bootstrap"
+  source  = "cmrh/storage/scality//modules/scality-terraform-state-bootstrap"
   version = "~> 1.0"
 
   account_email = "platform@example.com"
@@ -78,7 +77,7 @@ module "tofu_state" {
 commit or branch, or without the registry, a Git source works too:
 
 ```hcl
-source = "git::https://github.com/cmrh/terraform-scality-storage.git//modules/scality/terraform-state-bootstrap?ref=v1.0.0"
+source = "git::https://github.com/cmrh/terraform-scality-storage.git//modules/scality-terraform-state-bootstrap?ref=v1.0.0"
 ```
 
 **Air-gapped or restricted networks** (no registry or GitHub access) need both
