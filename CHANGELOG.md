@@ -9,6 +9,10 @@ and the project follows [Semantic Versioning](https://semver.org/).
 No release has been published yet. Pre-migration tags are being retired (#5).
 
 ### Added
+- `artesca/edge-replication` and `scality/ring-replication-target` modules,
+  and `examples/hybrid/artesca-edge-to-ring`: an ARTESCA bucket replicated to
+  a RING bucket through a RING location, using a RING key limited to that
+  bucket. (#23)
 - `access-log-bucket` module and `examples/scality/access-logging`: a server
   access log bucket with delivery policy, encryption and retention, plus
   logging on source buckets. Requires cmrh/scality 1.1.6. (#16)

@@ -1,93 +1,76 @@
 name: integration
 
+# Live-cluster tests on the self-hosted runner. Allowed triggers only (see
+# runner-guard): manual, weekly, on our release, and when the provider
+# publishes a release (repository_dispatch "provider-release" with
+# client_payload.version).
 on:
+  workflow_dispatch:
+    inputs:
+      configs:
+        description: "Space-separated configs to run (empty = all)"
+        required: false
+        default: ""
+      provider_version:
+        description: "Wait for this cmrh/scality version on the registries first"
+        required: false
+        default: ""
+  schedule:
+    - cron: "0 6 * * 1"
   release:
     types: [published]
-  workflow_dispatch:
+  repository_dispatch:
+    types: [provider-release]
 
-# Run JS actions (e.g. actions/checkout) on the Node 24 runtime — silences the
-# Node-version deprecation warning.
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+permissions:
+  contents: read
 
-# Serialize integration runs — only one apply/destroy cycle against the
-# shared test clusters at a time.
+# One run at a time against the shared clusters.
 concurrency:
   group: integration-clusters
   cancel-in-progress: false
 
+# Keep in step with validate.yml.
+env:
+  TOFU_VERSION: "1.12.6"
+  TERRAFORM_VERSION: "1.16.4"
+
 jobs:
   integration:
-    name: apply + destroy
+    name: apply, re-plan, destroy
     runs-on: tf-module-runner
     environment: integration-clusters
-    env:
-      # Default scality provider reads credentials from these env vars.
-      SCALITY_ENDPOINT:   ${{ vars.SCALITY_PRIMARY_ENDPOINT }}
-      SCALITY_ACCESS_KEY: ${{ secrets.SCALITY_PRIMARY_ACCESS_KEY }}
-      SCALITY_SECRET_KEY: ${{ secrets.SCALITY_PRIMARY_SECRET_KEY }}
-
-      # Bidirectional CRR example reads the destination cluster via
-      # explicit TF_VAR_dest_* inputs (see examples/scality/s3-crr/bidirectional/provider.tf).
-      TF_VAR_dest_endpoint:   ${{ vars.SCALITY_DR_ENDPOINT }}
-      TF_VAR_dest_access_key: ${{ secrets.SCALITY_DR_ACCESS_KEY }}
-      TF_VAR_dest_secret_key: ${{ secrets.SCALITY_DR_SECRET_KEY }}
-
-      # Per-run unique account name for operator-test to avoid collisions
-      # if a previous run failed to clean up.
-      TF_VAR_account_name: "ci-${{ github.run_id }}-operator-test"
-
-      # Same idea for the s3-crr examples: a per-run prefix on every account /
-      # bucket / user name so a failed destroy can't collide with the next run.
-      TF_VAR_name_prefix: "ci-${{ github.run_id }}-"
-
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v7
 
-      # ============================================================
-      # operator-test — operator pattern lifecycle regression
-      # ============================================================
-      - name: operator-test — apply
-        id: opt_apply
-        working-directory: examples/scality/operator-test
+      - uses: opentofu/setup-opentofu@v2
+        with:
+          tofu_version: ${{ env.TOFU_VERSION }}
+          tofu_wrapper: false
+
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Run suite (tofu, then terraform)
+        env:
+          CONFIGS: ${{ inputs.configs }}
+          PROVIDER_VERSION: ${{ github.event.client_payload.version || inputs.provider_version }}
+          RUN_PREFIX: ci${{ github.run_id }}${{ github.run_attempt }}
+          SCALITY_ENDPOINT: ${{ vars.SCALITY_PRIMARY_ENDPOINT }}
+          SCALITY_ACCESS_KEY: ${{ secrets.SCALITY_PRIMARY_ACCESS_KEY }}
+          SCALITY_SECRET_KEY: ${{ secrets.SCALITY_PRIMARY_SECRET_KEY }}
+          SCALITY_CONSOLE_ENDPOINT: ${{ vars.SCALITY_PRIMARY_CONSOLE_ENDPOINT }}
+          SCALITY_CONSOLE_USERNAME: ${{ vars.SCALITY_PRIMARY_CONSOLE_USERNAME }}
+          SCALITY_CONSOLE_PASSWORD: ${{ secrets.SCALITY_PRIMARY_CONSOLE_PASSWORD }}
+          TF_VAR_dest_endpoint: ${{ vars.SCALITY_DR_ENDPOINT }}
+          TF_VAR_dest_access_key: ${{ secrets.SCALITY_DR_ACCESS_KEY }}
+          TF_VAR_dest_secret_key: ${{ secrets.SCALITY_DR_SECRET_KEY }}
         run: |
-          set -euo pipefail
-          tofu init
-          tofu apply -auto-approve
-
-      - name: operator-test — destroy
-        if: always() && steps.opt_apply.outcome != 'skipped'
-        working-directory: examples/scality/operator-test
-        run: tofu destroy -auto-approve
-
-      # ============================================================
-      # s3-crr one-direction
-      # ============================================================
-      - name: s3-crr one-direction — apply
-        id: crr1_apply
-        working-directory: examples/scality/s3-crr/one-direction
-        run: |
-          set -euo pipefail
-          tofu init
-          tofu apply -auto-approve
-
-      - name: s3-crr one-direction — destroy
-        if: always() && steps.crr1_apply.outcome != 'skipped'
-        working-directory: examples/scality/s3-crr/one-direction
-        run: tofu destroy -auto-approve
-
-      # ============================================================
-      # s3-crr bidirectional
-      # ============================================================
-      - name: s3-crr bidirectional — apply
-        id: crr2_apply
-        working-directory: examples/scality/s3-crr/bidirectional
-        run: |
-          set -euo pipefail
-          tofu init
-          tofu apply -auto-approve
-
-      - name: s3-crr bidirectional — destroy
-        if: always() && steps.crr2_apply.outcome != 'skipped'
-        working-directory: examples/scality/s3-crr/bidirectional
-        run: tofu destroy -auto-approve
+          fail=0
+          for engine in tofu terraform; do
+            ENGINE=$engine .github/scripts/integration.sh || fail=1
+          done
+          exit "$fail"

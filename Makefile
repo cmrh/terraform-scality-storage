@@ -8,7 +8,7 @@ SHELL       := bash
 # example must pass under both — `make validate-all` runs each in turn.
 ENGINE ?= tofu
 
-.PHONY: check fmt fmt-check validate validate-all lint actionlint runner-guard
+.PHONY: check fmt fmt-check validate validate-all lint actionlint runner-guard integration
 
 # Run the same checks CI runs.
 check: fmt-check lint actionlint runner-guard validate-all
@@ -64,3 +64,8 @@ actionlint:
 # manual, scheduled, release or repository_dispatch triggers.
 runner-guard:
 	.github/scripts/runner-guard.sh
+
+# Live-cluster suite (apply, re-plan, destroy) with $(ENGINE). Needs cluster
+# credentials in the environment; see .github/scripts/integration.sh.
+integration:
+	ENGINE=$(ENGINE) .github/scripts/integration.sh
