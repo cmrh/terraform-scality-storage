@@ -33,7 +33,7 @@ fmt-check:
 # their examples only — under both engines.
 validate:
 	@shopt -s nullglob; \
-	dirs=(modules/*/*/ $$(find examples -mindepth 2 -name main.tf -printf '%h\n' | sort)); \
+	dirs=(modules/*/ $$(find examples -mindepth 2 -name main.tf -printf '%h\n' | sort)); \
 	for dir in "$${dirs[@]}"; do \
 		if [[ $$dir == modules/* ]] && grep -qs configuration_aliases "$$dir"*.tf; then \
 			printf '\n=== %s validate: %s (skipped: needs caller-supplied provider aliases; validated through its examples) ===\n' "$(ENGINE)" "$$dir"; \

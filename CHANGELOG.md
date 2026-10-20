@@ -6,6 +6,17 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- **Every module and example path changed.** Modules and examples now sit
+  one level deep, so the Terraform Registry lists them as submodules and
+  examples. Update `source` addresses (#30):
+  - `//modules/scality/<name>` → `//modules/scality-<name>`
+    (`scality-account-management` keeps its name)
+  - `//modules/artesca/edge-replication` → `//modules/artesca-edge-replication`
+  - `examples/<group>/.../<name>` → `examples/<name>`; the two-stage examples
+    are `delegated-admin-bootstrap`/`-managed` and
+    `s3-crr-one-direction`/`-bidirectional`
+
 ## [1.0.0] - 2026-10-20
 
 First public release, published to the Terraform and OpenTofu registries as
