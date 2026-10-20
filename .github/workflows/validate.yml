@@ -85,6 +85,15 @@ jobs:
       - name: Run actionlint
         run: make actionlint
 
+  runner-guard:
+    name: runner-guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check self-hosted runner usage
+        run: make runner-guard
+
   validate:
     name: validate (${{ matrix.engine }})
     runs-on: ubuntu-latest
