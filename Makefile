@@ -65,7 +65,7 @@ actionlint:
 runner-guard:
 	.github/scripts/runner-guard.sh
 
-# Live-cluster suite (apply, re-plan, destroy) with $(ENGINE). Needs cluster
+# Live-cluster suite (data paths + teardown), terraform by default. Needs cluster
 # credentials in the environment; see .github/scripts/integration.sh.
 integration:
-	ENGINE=$(ENGINE) .github/scripts/integration.sh
+	.github/scripts/integration.sh
