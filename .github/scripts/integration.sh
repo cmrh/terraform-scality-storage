@@ -25,6 +25,10 @@ all="access-logging artesca-edge-to-ring s3-crr-one-direction delegated-admin"
 CONFIGS=${CONFIGS:-$all}
 RUN_PREFIX=${RUN_PREFIX:-local$(date +%s)}
 export TF_DATA_DIR=.terraform/$ENGINE TF_IN_AUTOMATION=1 TF_INPUT=0 AWS_DEFAULT_REGION=us-east-1
+# Use only published providers: ignore any CLI config (e.g. dev_overrides) on the host.
+cli_config=$(mktemp)
+trap 'rm -f "$cli_config"' EXIT
+export TF_CLI_CONFIG_FILE=$cli_config
 in_gha=${GITHUB_ACTIONS:-}
 artesca_tls=()
 [[ ${ARTESCA_INSECURE_SKIP_VERIFY:-} == true ]] && artesca_tls=(--no-verify-ssl)
@@ -87,6 +91,8 @@ replan() {
 }
 
 destroy() {
+  # Nothing to destroy (e.g. init failed before anything was created).
+  [[ -z $(cd "$1" && tf state list 2>/dev/null) ]] && return 0
   (cd "$1" && tf destroy -auto-approve -no-color) || return 1
   [[ $(cd "$1" && tf state list 2>/dev/null | wc -l) == 0 ]]
 }
