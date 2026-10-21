@@ -17,6 +17,9 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - `artesca-application-bucket` module and `examples/artesca-application-bucket`:
   a bucket with versioning, encryption, optional tags and an optional
   expiration rule. (#37)
+- `artesca-storage-location` module and `examples/artesca-storage-location`:
+  an ARTESCA location backed by a RING bucket, with an optional S3 endpoint.
+  (#38)
 
 ### Changed
 - **Every module and example path changed.** Modules and examples now sit
