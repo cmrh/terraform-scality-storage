@@ -28,6 +28,10 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - `scality-ring-replication-target`: `purpose` input. `tiering` gives the key
   read and delete rights for ARTESCA transitions; `replication` (default)
   keeps the write-only key. (#39)
+- `artesca-terraform-state-bootstrap` module and
+  `examples/artesca-terraform-state-bootstrap`: a dedicated account, a
+  versioned and encrypted state bucket, and a user that can read and write
+  only that bucket. (#40)
 
 ### Changed
 - **Every module and example path changed.** Modules and examples now sit
