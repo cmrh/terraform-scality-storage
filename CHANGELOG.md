@@ -6,6 +6,8 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-21
+
 ### Changed
 - **Every module and example path changed.** Modules and examples now sit
   one level deep, so the Terraform Registry lists them as submodules and
@@ -16,6 +18,7 @@ and the project follows [Semantic Versioning](https://semver.org/).
   - `examples/<group>/.../<name>` → `examples/<name>`; the two-stage examples
     are `delegated-admin-bootstrap`/`-managed` and
     `s3-crr-one-direction`/`-bidirectional`
+- README links to the providers point at their `cmrh` repositories.
 
 ## [1.0.0] - 2026-10-20
 
