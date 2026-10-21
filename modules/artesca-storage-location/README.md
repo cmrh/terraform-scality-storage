@@ -24,6 +24,8 @@ as a replication destination.
   deletes them there.
 - ARTESCA can reach the endpoint. It checks the bucket when it creates the
   location.
+- Prefer an `https://` endpoint for every type: the location's key and the
+  data pass through it.
 - `versity-tape`: an `https://` endpoint. Setting up TLS is up to you: a
   certificate that ARTESCA trusts, or ARTESCA configured not to verify it.
 
@@ -35,7 +37,7 @@ module "location" {
   version = "~> 1.1"
 
   name        = "ring-archive"
-  endpoint    = "http://ring.example.com:8000"
+  endpoint    = "https://s3.ring.example.com"
   bucket_name = module.ring_bucket.bucket_name
   access_key  = module.ring_bucket.access_key
   secret_key  = module.ring_bucket.secret_key

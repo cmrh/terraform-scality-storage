@@ -15,7 +15,7 @@ of the RING bucket.
 
 ```sh
 # RING (superadmin, creates the RING account)
-export SCALITY_ENDPOINT=http://your-ring:8080
+export SCALITY_ENDPOINT=https://s3.ring.example.com
 export SCALITY_ACCESS_KEY=...
 export SCALITY_SECRET_KEY=...
 
@@ -26,7 +26,7 @@ export ARTESCA_USERNAME=...
 export ARTESCA_PASSWORD=...
 export ARTESCA_S3_ENDPOINT=https://...
 
-export TF_VAR_ring_endpoint=http://your-ring:8080   # as reached from ARTESCA
+export TF_VAR_ring_endpoint=https://s3.ring.example.com   # as reached from ARTESCA
 
 terraform init
 terraform apply

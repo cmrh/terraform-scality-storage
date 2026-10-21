@@ -32,6 +32,8 @@ and the project follows [Semantic Versioning](https://semver.org/).
   `examples/artesca-terraform-state-bootstrap`: a dedicated account, a
   versioned and encrypted state bucket, and a user that can read and write
   only that bucket. (#40)
+- `examples/artesca-ring-backed-bucket`: an ARTESCA bucket whose data is
+  stored in a RING bucket, through a RING location. (#41)
 
 ### Changed
 - **Every module and example path changed.** Modules and examples now sit
@@ -44,6 +46,8 @@ and the project follows [Semantic Versioning](https://semver.org/).
     are `delegated-admin-bootstrap`/`-managed` and
     `s3-crr-one-direction`/`-bidirectional`
 - README links to the providers point at their `cmrh` repositories.
+- Docs use `https://` endpoints in examples and recommend TLS for RING
+  endpoints.
 
 ## [1.0.0] - 2026-10-20
 

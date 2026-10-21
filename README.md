@@ -43,7 +43,7 @@ provider (ARTESCA).
 
 | Module | Status | Purpose |
 |---|---|---|
-| `ring-backed-artesca-location` | Planned | Use S3C/RING as an ARTESCA backend location |
+| [`artesca-ring-backed-bucket`](examples/artesca-ring-backed-bucket) (example) | Available | ARTESCA bucket whose data is stored in a RING bucket |
 
 ## Repository layout
 

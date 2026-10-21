@@ -7,7 +7,7 @@ limited to what ARTESCA needs, then an ARTESCA location backed by that bucket.
 
 ```sh
 # RING (superadmin, creates the RING account)
-export SCALITY_ENDPOINT=http://your-ring:8080
+export SCALITY_ENDPOINT=https://s3.ring.example.com
 export SCALITY_ACCESS_KEY=...
 export SCALITY_SECRET_KEY=...
 
@@ -17,7 +17,7 @@ export ARTESCA_OIDC_URL=https://...
 export ARTESCA_USERNAME=...
 export ARTESCA_PASSWORD=...
 
-export TF_VAR_ring_endpoint=http://your-ring:8080   # as reached from ARTESCA
+export TF_VAR_ring_endpoint=https://s3.ring.example.com   # as reached from ARTESCA
 # optional: export TF_VAR_endpoint_hostname=archive.s3.example.com
 
 terraform init
