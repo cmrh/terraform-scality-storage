@@ -33,7 +33,7 @@ provider (ARTESCA).
 | [`edge-replication`](modules/artesca-edge-replication) | Available | Account + users + bucket replicated to a RING location (pair with `ring-replication-target`; see [`examples/artesca-edge-to-ring`](examples/artesca-edge-to-ring)) |
 | [`artesca-account-management`](modules/artesca-account-management) | Available | Account + S3 keys |
 | [`artesca-application-identity`](modules/artesca-application-identity) | Available | IAM user + access key + policy preset (read-only / read-write / bucket-admin) or custom JSON |
-| `storage-location` | Planned | Backend location + optional endpoint |
+| [`artesca-storage-location`](modules/artesca-storage-location) | Available | RING-backed location + optional endpoint |
 | [`artesca-application-bucket`](modules/artesca-application-bucket) | Available | Bucket + versioning + encryption + tags + optional expiration |
 | `tiered-bucket` | Planned | Bucket + transition workflow |
 | `replication-stream` | Planned | Overlay/location-based replication |
