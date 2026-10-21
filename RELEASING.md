@@ -19,14 +19,12 @@ Pre-releases use a suffix (`v1.3.0-rc1`).
 
 ## Release flow
 
-1. **Check `main` is green**, including both engines (`validate (tofu)`,
-   `validate (terraform)`).
-2. **Run the integration workflow** against the lab clusters
-   (`Actions > integration > Run workflow`) for anything that changed resource
-   behavior.
-3. **Update `CHANGELOG.md`:** move `[Unreleased]` into a new
+1. **Check `main` is green**: every required check, including both engines
+   (`validate (tofu)`, `validate (terraform)`). The integration workflow is
+   not a release gate.
+2. **Update `CHANGELOG.md`:** move `[Unreleased]` into a new
    `## [X.Y.Z] - YYYY-MM-DD` section, through a normal PR.
-4. **Tag the merge commit** on `main` and push the tag:
+3. **Tag the merge commit** on `main` and push the tag:
 
    ```bash
    git switch main && git pull --ff-only
@@ -34,7 +32,7 @@ Pre-releases use a suffix (`v1.3.0-rc1`).
    git push origin vX.Y.Z
    ```
 
-5. **Create the GitHub release** from the tag, using the CHANGELOG section as
+4. **Create the GitHub release** from the tag, using the CHANGELOG section as
    the notes.
 
 ## Rules
