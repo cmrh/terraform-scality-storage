@@ -11,17 +11,17 @@ variable "name" {
 variable "type" {
   type        = string
   default     = "ring-s3"
-  description = "Backend type. Only \"ring-s3\" (Scality RING S3) is supported for now. Forces replacement."
+  description = "Backend type: \"ring-s3\" (Scality RING S3) or \"versity-tape\" (Versity tape archive, a cold location; the endpoint must be https://). Forces replacement."
 
   validation {
-    condition     = contains(["ring-s3"], var.type)
-    error_message = "type must be \"ring-s3\"."
+    condition     = contains(["ring-s3", "versity-tape"], var.type)
+    error_message = "type must be \"ring-s3\" or \"versity-tape\"."
   }
 }
 
 variable "endpoint" {
   type        = string
-  description = "S3 endpoint URL of the backend, as ARTESCA reaches it."
+  description = "S3 endpoint URL of the backend, as ARTESCA reaches it. Must be https:// for versity-tape."
 }
 
 variable "bucket_name" {
@@ -32,7 +32,7 @@ variable "bucket_name" {
 variable "access_key" {
   type        = string
   sensitive   = true
-  description = "Backend access key. It needs s3:GetBucketVersioning and s3:GetBucketLocation on the bucket, and s3:PutObject on its objects."
+  description = "Backend access key. See README for the permissions each use needs."
 }
 
 variable "secret_key" {

@@ -24,7 +24,7 @@ provider (ARTESCA).
 | [`access-log-bucket`](modules/scality-access-log-bucket) | Available | Log bucket + delivery policy + retention, and access logging on source buckets |
 | [`compliance-bucket`](modules/scality-compliance-bucket) | Available | Bucket + object lock (GOVERNANCE / COMPLIANCE) + retention period |
 | [`s3-crr`](modules/scality-s3-crr) | Available | Cross-region replication (one-direction or bidirectional) between two clusters |
-| [`ring-replication-target`](modules/scality-ring-replication-target) | Available | Versioned bucket + least-privilege user for an ARTESCA RING location to replicate into |
+| [`ring-replication-target`](modules/scality-ring-replication-target) | Available | Versioned bucket + least-privilege key for an ARTESCA RING location (replication or tiering) |
 
 ### ARTESCA
 
@@ -33,9 +33,9 @@ provider (ARTESCA).
 | [`edge-replication`](modules/artesca-edge-replication) | Available | Account + users + bucket replicated to a RING location (pair with `ring-replication-target`; see [`examples/artesca-edge-to-ring`](examples/artesca-edge-to-ring)) |
 | [`artesca-account-management`](modules/artesca-account-management) | Available | Account + S3 keys |
 | [`artesca-application-identity`](modules/artesca-application-identity) | Available | IAM user + access key + policy preset (read-only / read-write / bucket-admin) or custom JSON |
-| [`artesca-storage-location`](modules/artesca-storage-location) | Available | RING-backed location + optional endpoint |
+| [`artesca-storage-location`](modules/artesca-storage-location) | Available | RING or Versity tape location + optional endpoint |
 | [`artesca-application-bucket`](modules/artesca-application-bucket) | Available | Bucket + versioning + encryption + tags + optional expiration |
-| `tiered-bucket` | Planned | Bucket + transition workflow |
+| [`artesca-tiered-bucket`](modules/artesca-tiered-bucket) | Available | Bucket whose objects move to a RING (warm) or Versity tape (cold) location |
 | `replication-stream` | Planned | Overlay/location-based replication |
 | `terraform-state-bootstrap` | Planned | State bucket on ARTESCA |
 

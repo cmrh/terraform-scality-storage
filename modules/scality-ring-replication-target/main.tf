@@ -1,15 +1,25 @@
 locals {
   bucket_arn = "arn:aws:s3:::${var.bucket_name}"
 
-  # ARTESCA's RING location needs only these: it reads the bucket's
-  # versioning and location when the location is created, and writes
-  # replicas with PutObject.
-  replication_policy = jsonencode({
+  # What ARTESCA's RING location needs, by purpose:
+  # - replication: checks the bucket's versioning and location when the
+  #   location is created, and writes replicas with PutObject.
+  # - tiering: the data lives only on RING, so ARTESCA also reads it back
+  #   and deletes it there.
+  actions = {
+    replication = ["s3:GetBucketVersioning", "s3:GetBucketLocation", "s3:PutObject"]
+    tiering = [
+      "s3:GetBucketVersioning", "s3:GetBucketLocation", "s3:PutObject",
+      "s3:GetObject", "s3:GetObjectVersion", "s3:DeleteObject", "s3:DeleteObjectVersion",
+    ]
+  }
+
+  location_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Sid      = "ArtescaReplication"
+      Sid      = "ArtescaLocation"
       Effect   = "Allow"
-      Action   = ["s3:GetBucketVersioning", "s3:GetBucketLocation", "s3:PutObject"]
+      Action   = local.actions[var.purpose]
       Resource = [local.bucket_arn, "${local.bucket_arn}/*"]
     }]
   })
@@ -30,5 +40,5 @@ module "replication_user" {
   account_secret_key = var.account_secret_key
   username           = var.username
   policy_name        = var.policy_name
-  policy_document    = local.replication_policy
+  policy_document    = local.location_policy
 }
