@@ -14,6 +14,9 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - `artesca-application-identity` module and
   `examples/artesca-application-identity`: an IAM user with an access key and
   a preset or custom policy over specific buckets. (#36)
+- `artesca-application-bucket` module and `examples/artesca-application-bucket`:
+  a bucket with versioning, encryption, optional tags and an optional
+  expiration rule. (#37)
 
 ### Changed
 - **Every module and example path changed.** Modules and examples now sit
