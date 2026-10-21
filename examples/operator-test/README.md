@@ -23,7 +23,7 @@ must outlive every resource that uses the operator's keys).
 Provider credentials via environment:
 
 ```sh
-export SCALITY_ENDPOINT=http://your-cluster:8080
+export SCALITY_ENDPOINT=https://s3.example.com
 export SCALITY_ACCESS_KEY=...
 export SCALITY_SECRET_KEY=...
 ```

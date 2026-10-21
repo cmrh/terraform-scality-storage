@@ -2,7 +2,7 @@
 
 A versioned RING bucket that an ARTESCA RING location writes into, plus a user
 whose key the location uses. The key can only do what its `purpose` needs:
-replication (`artesca-edge-replication`) or tiering (`artesca-tiered-bucket`).
+replication (`artesca-edge-replication`), or tiering and RING-backed buckets.
 
 > Compatible with both Terraform and OpenTofu. Examples below use
 > `terraform`; substitute `tofu` if you use OpenTofu.
@@ -15,11 +15,12 @@ replication (`artesca-edge-replication`) or tiering (`artesca-tiered-bucket`).
   - `replication` (default): `s3:GetBucketVersioning`, `s3:GetBucketLocation`,
     `s3:PutObject`
   - `tiering`: the same, plus `s3:GetObject`, `s3:GetObjectVersion`,
-    `s3:DeleteObject`, `s3:DeleteObjectVersion`. Use it when ARTESCA moves
-    objects to the bucket (`artesca-tiered-bucket`): the data then lives only
-    on RING. Reads through ARTESCA fail without the read actions, and without
-    the delete actions a permanent delete through ARTESCA leaves the data on
-    RING.
+    `s3:DeleteObject`, `s3:DeleteObjectVersion`. Use it when the data lives
+    only on RING: a tiered bucket (`artesca-tiered-bucket`) or a bucket stored
+    on the location (`examples/artesca-ring-backed-bucket`). Reads through
+    ARTESCA fail without the read actions. With the delete actions, a
+    permanent delete through ARTESCA removes the object from RING; without
+    them, the data stays there.
 
 ## Prerequisites
 

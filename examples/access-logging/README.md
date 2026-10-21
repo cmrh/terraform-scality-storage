@@ -9,7 +9,7 @@ Server access logging must be enabled on the cluster.
 ## Run
 
 ```sh
-export SCALITY_ENDPOINT=http://your-cluster:8080
+export SCALITY_ENDPOINT=https://s3.example.com
 export SCALITY_ACCESS_KEY=...   # superadmin
 export SCALITY_SECRET_KEY=...
 

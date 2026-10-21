@@ -24,7 +24,7 @@ apply.
 ## Run
 
 ```sh
-export SCALITY_ENDPOINT=http://your-cluster:8080
+export SCALITY_ENDPOINT=https://s3.example.com
 export SCALITY_ACCESS_KEY=...   # superadmin, used only by bootstrap
 export SCALITY_SECRET_KEY=...
 

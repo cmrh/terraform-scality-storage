@@ -25,7 +25,8 @@ which creates the RING bucket and the key the location uses.
 ## Prerequisites
 
 - cmrh/artesca provider 1.1 or later.
-- ARTESCA can reach the RING S3 endpoint.
+- ARTESCA can reach the RING S3 endpoint. Prefer `https://`: the location's
+  key and every replicated object pass through it.
 - A RING bucket and key that the location can use, from
   `ring-replication-target`.
 
