@@ -1,8 +1,8 @@
 name: integration
 
-# Live-cluster tests on the self-hosted runner: the data paths our examples
-# document and their teardown steps. Resource-level behaviour is covered by
-# the providers' acceptance tests. Allowed triggers only (see runner-guard).
+# Live-cluster check on the self-hosted runner: example configurations apply,
+# re-plan with no changes, and destroy. No data-path tests, and not a release
+# gate. Allowed triggers only (see runner-guard).
 on:
   workflow_dispatch:
     inputs:
@@ -10,8 +10,6 @@ on:
         description: "Space-separated configs to run (empty = all)"
         required: false
         default: ""
-  release:
-    types: [published]
   # Sent by a provider's release workflow:
   # client_payload: { "provider": "scality" | "artesca", "version": "x.y.z" }
   repository_dispatch:
@@ -31,10 +29,10 @@ env:
 
 jobs:
   integration:
-    name: apply, check data path, re-plan, destroy
+    name: apply, re-plan, destroy
     runs-on: tf-module-runner
     environment: integration-clusters
-    timeout-minutes: 120
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
 

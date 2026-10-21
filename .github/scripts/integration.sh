@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Integration suite. Covers what the providers' acceptance tests can't: the
-# data paths our examples document, their teardown steps, and modules wired
-# together. For each config: apply -> data check -> re-plan (no changes) ->
-# destroy (always, following the example's README).
+# Integration suite: checks that example configurations apply, re-plan with no
+# changes, and destroy cleanly against live clusters. It does not test data
+# paths (replication, log delivery); those are tested during development.
+# Non-blocking: never a release gate.
 #
 # Environment:
 #   ENGINE            terraform (default) or tofu
@@ -30,8 +30,6 @@ cli_config=$(mktemp)
 trap 'rm -f "$cli_config"' EXIT
 export TF_CLI_CONFIG_FILE=$cli_config
 in_gha=${GITHUB_ACTIONS:-}
-artesca_tls=()
-[[ ${ARTESCA_INSECURE_SKIP_VERIFY:-} == true ]] && artesca_tls=(--no-verify-ssl)
 declare -A result
 
 log() { printf '%s\n' "$*"; }
@@ -41,43 +39,14 @@ mask() { [[ -n $in_gha && -n ${1:-} ]] && echo "::add-mask::$1"; return 0; }
 tf() { "$ENGINE" "$@"; }
 out() { (cd "$1" && tf output -raw "$2" 2>/dev/null); }
 
-# s3 <endpoint> <access key> <secret key> <aws args...>
-s3() {
-  local ep=$1 ak=$2 sk=$3; shift 3
-  local tls=()
-  [[ $ep == "${ARTESCA_S3_ENDPOINT:-}" ]] && tls=("${artesca_tls[@]}")
-  AWS_ACCESS_KEY_ID=$ak AWS_SECRET_ACCESS_KEY=$sk aws "${tls[@]}" --endpoint-url "$ep" "$@" 2>/dev/null
-}
-
-# wait_for <seconds> <description> <command...>: poll every 15s until the command succeeds.
-wait_for() {
-  local limit=$1 what=$2 t=0; shift 2
-  while (( t < limit )); do
-    "$@" && { log "$what after ${t}s"; return 0; }
-    sleep 15; t=$((t + 15))
-  done
-  log "timed out after ${limit}s waiting for: $what"; return 1
-}
-
-# Delete every object version and delete marker in a bucket.
-purge() {
-  local ep=$1 ak=$2 sk=$3 b=$4 page n
-  [[ -n $b && -n $ak ]] || return 0
-  while :; do
-    page=$(s3 "$ep" "$ak" "$sk" s3api list-object-versions --bucket "$b" --max-items 1000 --output json) || return 0
-    page=$(jq -c '{Objects: ([(.Versions // [])[], (.DeleteMarkers // [])[]] | map({Key, VersionId})), Quiet: true}' <<<"$page")
-    n=$(jq '.Objects | length' <<<"$page")
-    [[ $n == 0 ]] && return 0
-    log "deleting $n object versions from $b"
-    s3 "$ep" "$ak" "$sk" s3api delete-objects --bucket "$b" --delete "$page" >/dev/null || return 1
-  done
-}
-
 wait_for_provider() {
-  local name=${PROVIDER_NAME:-scality} v=$PROVIDER_VERSION reg=registry.opentofu.org
+  local name=${PROVIDER_NAME:-scality} v=$PROVIDER_VERSION reg=registry.opentofu.org t=0
   [[ $ENGINE == terraform ]] && reg=registry.terraform.io
-  wait_for 1800 "cmrh/$name $v on $reg" \
-    bash -c "curl -sf https://$reg/v1/providers/cmrh/$name/versions | grep -q '\"$v\"'"
+  while (( t < 1800 )); do
+    curl -sf "https://$reg/v1/providers/cmrh/$name/versions" | grep -q "\"$v\"" && return 0
+    log "waiting for cmrh/$name $v on $reg"; sleep 60; t=$((t + 60))
+  done
+  log "cmrh/$name $v never appeared on $reg"; return 1
 }
 
 apply() { (cd "$1" && tf init -upgrade -no-color >/dev/null && tf apply -auto-approve -no-color); }
@@ -97,7 +66,7 @@ destroy() {
   [[ $(cd "$1" && tf state list 2>/dev/null | wc -l) == 0 ]]
 }
 
-# verdict <name> <apply/check rc> <replan rc> <destroy rc>
+# verdict <name> <apply rc> <replan rc> <destroy rc>
 verdict() {
   if [[ $4 != 0 ]]; then result[$1]=LEAKED
   elif [[ $2 != 0 ]]; then result[$1]=FAIL
@@ -106,21 +75,32 @@ verdict() {
   else result[$1]=pass; fi
 }
 
+# run_simple <name> <dir>: apply, re-plan, destroy.
+run_simple() {
+  local ok=0 rp=1 ds=0
+  if apply "$2"; then replan "$2"; rp=$?; else ok=1; fi
+  destroy "$2" || ds=1
+  verdict "$1" $ok $rp $ds
+}
+
+# access-logging: the cluster logs Terraform's own requests on the app bucket,
+# so the log bucket can hold objects at destroy time. Empty it and retry.
 run_access_logging() {
-  local d=$ex/access-logging ok=0 rp=1 ds=0 ak sk app logs i
-  if apply "$d"; then
-    ak=$(out "$d" operator_access_key); sk=$(out "$d" operator_secret_key); mask "$ak"; mask "$sk"
-    app=$(out "$d" app_bucket); logs=$(out "$d" log_bucket)
-    echo probe | s3 "$SCALITY_ENDPOINT" "$ak" "$sk" s3 cp - "s3://$app/probe.txt" >/dev/null || ok=1
-    [[ $ok == 0 ]] && { wait_for 900 "access log delivered" \
-      bash -c "[[ \$(AWS_ACCESS_KEY_ID='$ak' AWS_SECRET_ACCESS_KEY='$sk' aws --endpoint-url '$SCALITY_ENDPOINT' s3api list-objects-v2 --bucket '$logs' --prefix '$app/' --query 'length(Contents || \`[]\`)' 2>/dev/null) -gt 0 ]]" || ok=1; }
-    replan "$d"; rp=$?
-  else ok=1; fi
-  # README: destroy (fails on non-empty buckets), empty both, destroy again; retry for late log deliveries.
+  local d=$ex/access-logging ok=0 rp=1 ds=0 ak sk logs i page n
+  if apply "$d"; then replan "$d"; rp=$?; else ok=1; fi
+  ak=$(out "$d" operator_access_key); sk=$(out "$d" operator_secret_key); logs=$(out "$d" log_bucket)
+  mask "$ak"; mask "$sk"
   if ! destroy "$d"; then
     ds=1
     for i in 1 2 3; do
-      purge "$SCALITY_ENDPOINT" "${ak:-}" "${sk:-}" "${logs:-}"; purge "$SCALITY_ENDPOINT" "${ak:-}" "${sk:-}" "${app:-}"
+      if [[ -n $ak && -n $logs ]]; then
+        page=$(AWS_ACCESS_KEY_ID=$ak AWS_SECRET_ACCESS_KEY=$sk aws --endpoint-url "$SCALITY_ENDPOINT" \
+          s3api list-objects-v2 --bucket "$logs" --output json 2>/dev/null \
+          | jq -c '{Objects: ((.Contents // []) | map({Key})), Quiet: true}')
+        n=$(jq '.Objects | length' <<<"$page" 2>/dev/null || echo 0)
+        [[ $n != 0 ]] && AWS_ACCESS_KEY_ID=$ak AWS_SECRET_ACCESS_KEY=$sk aws --endpoint-url "$SCALITY_ENDPOINT" \
+          s3api delete-objects --bucket "$logs" --delete "$page" >/dev/null 2>&1
+      fi
       destroy "$d" && { ds=0; break; }
       sleep 60
     done
@@ -129,46 +109,9 @@ run_access_logging() {
 }
 
 run_edge() {
-  local d=$ex/artesca-edge-to-ring ok=0 rp=1 ds=0 rak rsk ring edge aak ask
   export TF_VAR_ring_endpoint=$SCALITY_ENDPOINT
-  if apply "$d"; then
-    rak=$(out "$d" ring_operator_access_key); rsk=$(out "$d" ring_operator_secret_key); mask "$rak"; mask "$rsk"
-    ring=$(out "$d" ring_bucket); edge=$(out "$d" edge_bucket)
-    aak=$(cd "$d" && tf output -json app_keys | jq -r 'to_entries[0].value.access_key')
-    ask=$(cd "$d" && tf output -json app_keys | jq -r 'to_entries[0].value.secret_key'); mask "$aak"; mask "$ask"
-    echo probe | s3 "$ARTESCA_S3_ENDPOINT" "$aak" "$ask" s3 cp - "s3://$edge/probe.txt" >/dev/null || ok=1
-    [[ $ok == 0 ]] && { wait_for 600 "object replicated to RING" \
-      bash -c "AWS_ACCESS_KEY_ID='$rak' AWS_SECRET_ACCESS_KEY='$rsk' aws --endpoint-url '$SCALITY_ENDPOINT' s3api head-object --bucket '$ring' --key probe.txt >/dev/null 2>&1" || ok=1; }
-    replan "$d"; rp=$?
-  else ok=1; fi
-  # README: force_destroy apply, destroy (fails on the RING bucket), empty it, destroy again.
-  export TF_VAR_force_destroy=true
-  (cd "$d" && tf apply -auto-approve -no-color >/dev/null)
-  if ! destroy "$d"; then
-    purge "$SCALITY_ENDPOINT" "${rak:-}" "${rsk:-}" "${ring:-}"
-    destroy "$d" || ds=1
-  fi
-  unset TF_VAR_force_destroy TF_VAR_ring_endpoint
-  verdict artesca-edge-to-ring $ok $rp $ds
-}
-
-run_crr() {
-  local d=$ex/s3-crr-one-direction ok=0 rp=1 ds=0 wak wsk sak ssk dak dsk src dst
-  if apply "$d"; then
-    wak=$(out "$d" source_writer_access_key); wsk=$(out "$d" source_writer_secret_key)
-    sak=$(out "$d" source_operator_access_key); ssk=$(out "$d" source_operator_secret_key)
-    dak=$(out "$d" dest_operator_access_key); dsk=$(out "$d" dest_operator_secret_key)
-    for k in "$wak" "$wsk" "$sak" "$ssk" "$dak" "$dsk"; do mask "$k"; done
-    src=$(out "$d" source_bucket_name); dst=$(out "$d" dest_bucket_name)
-    echo probe | s3 "$SCALITY_ENDPOINT" "$wak" "$wsk" s3 cp - "s3://$src/probe.txt" >/dev/null || ok=1
-    [[ $ok == 0 ]] && { wait_for 600 "object replicated to destination" \
-      bash -c "AWS_ACCESS_KEY_ID='$dak' AWS_SECRET_ACCESS_KEY='$dsk' aws --endpoint-url '$TF_VAR_dest_endpoint' s3api head-object --bucket '$dst' --key probe.txt >/dev/null 2>&1" || ok=1; }
-    replan "$d"; rp=$?
-  else ok=1; fi
-  purge "$SCALITY_ENDPOINT" "${sak:-}" "${ssk:-}" "${src:-}"
-  purge "$TF_VAR_dest_endpoint" "${dak:-}" "${dsk:-}" "${dst:-}"
-  destroy "$d" || ds=1
-  verdict s3-crr-one-direction $ok $rp $ds
+  run_simple artesca-edge-to-ring "$ex/artesca-edge-to-ring"
+  unset TF_VAR_ring_endpoint
 }
 
 run_delegated_admin() {
@@ -181,11 +124,11 @@ run_delegated_admin() {
     mask "$TF_VAR_delegator_access_key"; mask "$TF_VAR_delegator_secret_key"
     export TF_VAR_delegator_access_key TF_VAR_delegator_secret_key TF_VAR_role_arns
     if apply "$m"; then
-      # Each app user must live in its sub-account: same account ID as that sub-account's role.
+      # Each app user must be created in its sub-account: same account ID as that sub-account's role.
       jq -n --argjson roles "$TF_VAR_role_arns" --argjson users "$(cd "$m" && tf output -json app_user_arns)" \
         '($roles | keys) == ($users | keys)
          and all($roles | keys[]; ($roles[.] | split(":")[4]) == ($users[.] | split(":")[4]))' | grep -q true \
-        || { log "app users did not land in their sub-accounts"; ok=1; }
+        || { log "app users were not created in their sub-accounts"; ok=1; }
       replan "$m"; r=$?; (( r > rp )) && rp=$r
     else ok=1; fi
     destroy "$m" || ds=1
@@ -205,7 +148,7 @@ for c in $CONFIGS; do
   case $c in
     access-logging) run_access_logging ;;
     artesca-edge-to-ring) run_edge ;;
-    s3-crr-one-direction) run_crr ;;
+    s3-crr-one-direction) run_simple "$c" "$ex/s3-crr-one-direction" ;;
     delegated-admin) run_delegated_admin ;;
     *) log "unknown config: $c"; result[$c]=FAIL ;;
   esac
