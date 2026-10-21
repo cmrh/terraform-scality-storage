@@ -2,9 +2,9 @@
 
 Composite Terraform/OpenTofu modules for production deployments on Scality
 storage. Built on the
-[`scality`](https://github.com/scality/terraform-provider-scality) provider
+[`scality`](https://github.com/cmrh/terraform-provider-scality) provider
 (S3C / RING) and the
-[`artesca`](https://github.com/scality/terraform-provider-scality-artesca)
+[`artesca`](https://github.com/cmrh/terraform-provider-artesca)
 provider (ARTESCA).
 
 > Compatible with both Terraform and [OpenTofu](https://opentofu.org/). Examples in this repo use `terraform`; substitute `tofu` if you use OpenTofu — the commands, syntax, and state files are identical.
@@ -77,7 +77,7 @@ module "tofu_state" {
 commit or branch, or without the registry, a Git source works too:
 
 ```hcl
-source = "git::https://github.com/cmrh/terraform-scality-storage.git//modules/scality-terraform-state-bootstrap?ref=v1.0.0"
+source = "git::https://github.com/cmrh/terraform-scality-storage.git//modules/scality-terraform-state-bootstrap?ref=v1.1.0"
 ```
 
 **Air-gapped or restricted networks** (no registry or GitHub access) need both
@@ -106,7 +106,7 @@ provider "scality" {}  # picks up SCALITY_ENDPOINT / SCALITY_ACCESS_KEY / SCALIT
 ```
 
 For ARTESCA modules, also declare the `artesca` provider — see the
-[provider README](https://github.com/scality/terraform-provider-scality-artesca)
+[provider README](https://github.com/cmrh/terraform-provider-artesca)
 for required environment variables.
 
 Air-gapped or dark-site deployments that can't reach the public registry at
