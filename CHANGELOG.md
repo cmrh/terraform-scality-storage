@@ -11,6 +11,9 @@ and the project follows [Semantic Versioning](https://semver.org/).
 ### Added
 - `artesca-account-management` module and `examples/artesca-account`: an
   ARTESCA account and its S3 keys. (#35)
+- `artesca-application-identity` module and
+  `examples/artesca-application-identity`: an IAM user with an access key and
+  a preset or custom policy over specific buckets. (#36)
 
 ### Changed
 - **Every module and example path changed.** Modules and examples now sit
