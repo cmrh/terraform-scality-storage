@@ -8,6 +8,10 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [1.1.0] - 2026-10-21
 
+### Added
+- `artesca-account-management` module and `examples/artesca-account`: an
+  ARTESCA account and its S3 keys. (#35)
+
 ### Changed
 - **Every module and example path changed.** Modules and examples now sit
   one level deep, so the Terraform Registry lists them as submodules and

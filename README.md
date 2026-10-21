@@ -31,7 +31,7 @@ provider (ARTESCA).
 | Module | Status | Purpose |
 |---|---|---|
 | [`edge-replication`](modules/artesca-edge-replication) | Available | Account + users + bucket replicated to a RING location (pair with `ring-replication-target`; see [`examples/artesca-edge-to-ring`](examples/artesca-edge-to-ring)) |
-| `artesca-account-management` | Planned | Tenant account + stable access key |
+| [`artesca-account-management`](modules/artesca-account-management) | Available | Account + S3 keys |
 | `application-identity` | Planned | IAM user + access key + policy |
 | `storage-location` | Planned | Backend location + optional endpoint |
 | `application-bucket` | Planned | Bucket + optional expiration workflow |
