@@ -20,6 +20,14 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - `artesca-storage-location` module and `examples/artesca-storage-location`:
   an ARTESCA location backed by a RING bucket, with an optional S3 endpoint.
   (#38)
+- `artesca-tiered-bucket` module and `examples/artesca-tiered-bucket`: a
+  bucket whose objects move to another location after a number of days.
+  (#39)
+- `artesca-storage-location`: `versity-tape` type for a cold Versity tape
+  archive location; its endpoint must be `https://`. (#39)
+- `scality-ring-replication-target`: `purpose` input. `tiering` gives the key
+  read and delete rights for ARTESCA transitions; `replication` (default)
+  keeps the write-only key. (#39)
 
 ### Changed
 - **Every module and example path changed.** Modules and examples now sit

@@ -1,14 +1,15 @@
 # artesca-storage-location
 
-An ARTESCA storage location backed by a Scality RING bucket, with an optional
-S3 endpoint that serves it.
+An ARTESCA storage location backed by a Scality RING bucket or a Versity tape
+archive, with an optional S3 endpoint that serves it.
 
 > Compatible with both Terraform and OpenTofu. Examples below use
 > `terraform`; substitute `tofu` if you use OpenTofu.
 
 ## What it creates
 
-- `artesca_location`: type `location-scality-ring-s3-v1`
+- `artesca_location`: type `location-scality-ring-s3-v1` (`ring-s3`) or
+  `location-versity-tape-archive-v1` (`versity-tape`, a cold location)
 - `artesca_endpoint`: when `endpoint_hostname` is set
 
 Use the location as an `artesca-application-bucket` `location_constraint`, or
@@ -17,11 +18,14 @@ as a replication destination.
 ## Prerequisites
 
 - cmrh/artesca provider 1.1 or later.
-- A RING bucket, and a key with `s3:GetBucketVersioning`,
-  `s3:GetBucketLocation` and `s3:PutObject` on it.
-  `scality-ring-replication-target` creates both.
-- ARTESCA can reach the RING S3 endpoint. ARTESCA checks the bucket when it
-  creates the location.
+- A bucket on the backend and a key for it. For a RING bucket,
+  `scality-ring-replication-target` creates both; use `purpose = "tiering"`
+  when ARTESCA moves objects to the location, since it then reads and
+  deletes them there.
+- ARTESCA can reach the endpoint. It checks the bucket when it creates the
+  location.
+- `versity-tape`: an `https://` endpoint. Setting up TLS is up to you: a
+  certificate that ARTESCA trusts, or ARTESCA configured not to verify it.
 
 ## Usage
 
@@ -43,10 +47,10 @@ module "location" {
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `name` | string | (required) | Location name: lowercase letters, numbers and hyphens, starting with a letter. Instance-wide. Forces replacement. |
-| `type` | string | `"ring-s3"` | Backend type. Only `ring-s3` for now. Forces replacement. |
-| `endpoint` | string | (required) | RING S3 endpoint, as ARTESCA reaches it. |
-| `bucket_name` | string | (required) | Target RING bucket. |
-| `access_key` | string (sensitive) | (required) | RING key. |
+| `type` | string | `"ring-s3"` | `ring-s3` or `versity-tape`. Forces replacement. |
+| `endpoint` | string | (required) | Backend endpoint, as ARTESCA reaches it. `https://` for `versity-tape`. |
+| `bucket_name` | string | (required) | Target bucket. |
+| `access_key` | string (sensitive) | (required) | Backend key. |
 | `secret_key` | string (sensitive) | (required) | Paired with `access_key`. |
 | `bucket_match` | bool | `true` | `true`: objects keep their keys at the bucket root. `false`: under a prefix named after the source bucket. Forces replacement. |
 | `size_limit_gb` | number | `null` | Storage size limit. |

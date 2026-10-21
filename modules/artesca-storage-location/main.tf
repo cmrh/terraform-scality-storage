@@ -1,6 +1,7 @@
 locals {
   location_types = {
-    "ring-s3" = "location-scality-ring-s3-v1"
+    "ring-s3"      = "location-scality-ring-s3-v1"
+    "versity-tape" = "location-versity-tape-archive-v1"
   }
 }
 
@@ -15,6 +16,13 @@ resource "artesca_location" "this" {
     bucket_match = var.bucket_match
     access_key   = var.access_key
     secret_key   = var.secret_key
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.type != "versity-tape" || startswith(var.endpoint, "https://")
+      error_message = "A versity-tape location needs an https:// endpoint; ARTESCA uses TLS to reach cold backends."
+    }
   }
 }
 

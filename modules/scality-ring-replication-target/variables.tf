@@ -15,6 +15,17 @@ variable "bucket_name" {
   description = "Target bucket for replicated objects. One per ARTESCA source bucket."
 }
 
+variable "purpose" {
+  type        = string
+  default     = "replication"
+  description = "How ARTESCA uses the bucket: \"replication\" (default; write-only key) or \"tiering\" (transitions; the key can also read and delete objects)."
+
+  validation {
+    condition     = contains(["replication", "tiering"], var.purpose)
+    error_message = "purpose must be \"replication\" or \"tiering\"."
+  }
+}
+
 variable "username" {
   type        = string
   default     = "artesca-replication"
