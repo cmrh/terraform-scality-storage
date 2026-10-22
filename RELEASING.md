@@ -12,8 +12,8 @@ always including the patch number (`v1.2.0`, not `v1.2`).
 | Bump | When |
 |---|---|
 | **Patch** (`v1.2.1`) | Bug fixes, documentation, no interface change |
-| **Minor** (`v1.3.0`) | New modules, new optional inputs, new outputs |
-| **Major** (`v2.0.0`) | Breaking changes: removed or renamed inputs or outputs, changed defaults that alter existing resources, raised minimum provider/engine versions, anything that forces replacement of existing resources on upgrade |
+| **Minor** (`v1.3.0`) | New modules, new optional inputs, new outputs. Also raised minimum provider versions, and new defaults that add resources to existing deployments; the CHANGELOG lists each under **Changed** |
+| **Major** (`v2.0.0`) | Breaking changes: removed or renamed inputs, outputs or module paths, and anything that forces replacement of existing resources on upgrade |
 
 Pre-releases use a suffix (`v1.3.0-rc1`).
 

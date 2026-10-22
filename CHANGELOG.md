@@ -6,6 +6,11 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- `RELEASING.md`: a minor release may raise minimum provider versions and add
+  default resources, listed in the CHANGELOG; a major release is for removed
+  or renamed inputs, outputs or module paths, and replacements on upgrade.
+
 ## [1.2.0] - 2026-10-22
 
 ### Added
