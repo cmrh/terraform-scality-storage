@@ -13,7 +13,7 @@ terraform {
     }
     artesca = {
       source  = "cmrh/artesca"
-      version = "~> 1.1"
+      version = "~> 1.2"
     }
   }
 }
@@ -29,6 +29,18 @@ variable "name" {
   type        = string
   default     = "edge-01"
   description = "Base name for the accounts, buckets and location. Override (TF_VAR_name) to avoid collisions."
+}
+
+variable "mode" {
+  type        = string
+  default     = "ring-s3"
+  description = "\"ring-s3\" (RING S3 location with a write-only key) or \"crr\" (CRR location over STS with a destination role)."
+}
+
+variable "ring_sts_endpoint" {
+  type        = string
+  default     = null
+  description = "RING STS endpoint, as ARTESCA reaches it. Required for mode = \"crr\"."
 }
 
 variable "force_destroy" {
@@ -63,6 +75,7 @@ module "ring_target" {
   account_access_key = module.ring_operator.access_key
   account_secret_key = module.ring_operator.secret_key
   bucket_name        = "${var.name}-replica"
+  purpose            = var.mode == "crr" ? "crr" : "replication"
 }
 
 module "edge" {
@@ -72,6 +85,10 @@ module "edge" {
   account_email = "${var.name}@edge.example.com"
   bucket_name   = "${var.name}-data"
   users         = ["${var.name}-app"]
+
+  mode              = var.mode
+  ring_sts_endpoint = var.ring_sts_endpoint
+  ring_role_arn     = module.ring_target.role_arn
 
   location_name    = "${var.name}-ring"
   ring_endpoint    = var.ring_endpoint
