@@ -9,6 +9,9 @@ and the project follows [Semantic Versioning](https://semver.org/).
 ### Added
 - `artesca-application-bucket`: `noncurrent_version_expiration_days`,
   `abort_incomplete_multipart_upload_days` and `expire_delete_markers`. (#48)
+- `artesca-tiered-bucket`: `noncurrent_transition_days` moves noncurrent
+  versions too, and `noncurrent_version_expiration_days` is passed through.
+  (#50)
 
 ### Changed
 - `artesca-application-bucket` adds a cleanup rule by default: noncurrent

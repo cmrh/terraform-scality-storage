@@ -12,6 +12,8 @@ days: a RING bucket (warm) or a Versity tape archive (cold).
   default
 - `artesca_bucket_workflow_transition`: moves current versions to
   `transition_location` after `transition_days`
+- a second transition for noncurrent versions, when
+  `noncurrent_transition_days` is set
 
 ## Prerequisites
 
@@ -49,6 +51,8 @@ module "bucket" {
 | `transition_location` | string | (required) | Location objects move to. |
 | `transition_days` | number | (required) | Days after creation when objects become eligible to move. |
 | `transition_prefix` | string | `null` | Only move keys with this prefix. |
+| `noncurrent_transition_days` | number | `null` | Also move versions this many days after they become noncurrent. Must be lower than `noncurrent_version_expiration_days`. |
+| `noncurrent_version_expiration_days` | number | `90` | Delete noncurrent versions after this many days. `null` keeps them. |
 | `sse_algorithm` | string | `"AES256"` | `"AES256"`, or `null` for no default encryption. |
 | `tags` | map(string) | `{}` | Bucket tags, up to 50. |
 | `force_destroy` | bool | `false` | Delete every object version on destroy. Apply before destroying. |
@@ -60,10 +64,12 @@ module "bucket" {
 | `bucket_name` | Bucket name. |
 | `bucket_arn` | Bucket ARN. |
 | `transition_rule_id` | Transition rule ID. |
+| `noncurrent_transition_rule_id` | Noncurrent-version transition rule ID, or null. |
 
 ## Caveats
 
 - **Objects move on ARTESCA's lifecycle schedule, not at an exact time.**
   `transition_days` makes an object eligible; even `0` doesn't move it
   immediately.
-- **Only current versions move.** Noncurrent versions stay on ARTESCA.
+- **Only current versions move by default.** Set `noncurrent_transition_days`
+  to move noncurrent versions too.
