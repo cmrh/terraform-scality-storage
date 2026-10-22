@@ -29,6 +29,23 @@ variable "transition_prefix" {
   description = "Only move objects whose key starts with this prefix. Null (default) moves all objects."
 }
 
+variable "noncurrent_transition_days" {
+  type        = number
+  default     = null
+  description = "Also move versions to transition_location this many days after they become noncurrent. Must be lower than noncurrent_version_expiration_days. Null (default) moves current versions only."
+
+  validation {
+    condition     = var.noncurrent_transition_days == null || try(var.noncurrent_transition_days >= 0 && floor(var.noncurrent_transition_days) == var.noncurrent_transition_days, false)
+    error_message = "noncurrent_transition_days must be a whole number of at least 0, or null."
+  }
+}
+
+variable "noncurrent_version_expiration_days" {
+  type        = number
+  default     = 90
+  description = "Delete versions this many days after they become noncurrent. Null keeps them."
+}
+
 variable "sse_algorithm" {
   type        = string
   default     = "AES256"
