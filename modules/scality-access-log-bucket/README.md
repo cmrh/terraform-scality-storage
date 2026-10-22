@@ -25,7 +25,7 @@ the source buckets that write to it.
 ```hcl
 module "access_logs" {
   source  = "cmrh/storage/scality//modules/scality-access-log-bucket"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.operator.access_key
   account_secret_key = module.operator.secret_key

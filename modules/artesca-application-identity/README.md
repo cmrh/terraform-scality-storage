@@ -33,7 +33,7 @@ None of the presets grants access to any other bucket.
 ```hcl
 module "app" {
   source  = "cmrh/storage/scality//modules/artesca-application-identity"
-  version = "~> 1.1"
+  version = "~> 1.2"
 
   account_name   = module.account.account_name
   username       = "app"
@@ -47,7 +47,7 @@ With a custom policy:
 ```hcl
 module "reporter" {
   source  = "cmrh/storage/scality//modules/artesca-application-identity"
-  version = "~> 1.1"
+  version = "~> 1.2"
 
   account_name = module.account.account_name
   username     = "reporter"

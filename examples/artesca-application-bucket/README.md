@@ -1,7 +1,9 @@
 # ARTESCA application bucket example
 
-Creates an account, a versioned and encrypted bucket with a tag and a
-30-day expiration rule, and an `app` user with read-write access to it.
+Creates an account, a versioned and encrypted bucket with a tag, a 30-day
+expiration rule and the module's default cleanup rule (noncurrent versions
+after 90 days, incomplete multipart uploads after 7), and an `app` user with
+read-write access to it.
 
 ## Run
 

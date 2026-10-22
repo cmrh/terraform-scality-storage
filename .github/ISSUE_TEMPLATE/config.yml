@@ -3,6 +3,9 @@ contact_links:
   - name: Security vulnerability
     url: https://github.com/cmrh/terraform-scality-storage/blob/main/SECURITY.md
     about: Please report security issues privately per SECURITY.md, not via public issues.
-  - name: Provider issue
+  - name: Provider issue (scality)
     url: https://github.com/cmrh/terraform-provider-scality/issues
     about: Bugs in scality_* resources themselves belong in the provider repository.
+  - name: Provider issue (artesca)
+    url: https://github.com/cmrh/terraform-provider-artesca/issues
+    about: Bugs in artesca_* resources themselves belong in the provider repository.

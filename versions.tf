@@ -6,5 +6,9 @@ terraform {
       source  = "cmrh/scality"
       version = "~> 1.1, >= 1.1.6"
     }
+    artesca = {
+      source  = "cmrh/artesca"
+      version = "~> 1.2"
+    }
   }
 }

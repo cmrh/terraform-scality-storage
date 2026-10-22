@@ -3,7 +3,8 @@
 Consuming these modules on a dark site — an air-gapped cluster, or any network
 with no egress to the public registries or `github.com` — means `init` has to
 resolve **two independent things locally**: the **modules** themselves, and the
-**`cmrh/scality` provider** they require. Vendoring the modules is not enough on
+**providers** they require: `cmrh/scality` for the `scality-*` modules and
+`cmrh/artesca` for the `artesca-*` modules. Vendoring the modules is not enough on
 its own; the provider still has to come from somewhere `init` can reach. This
 document covers both.
 
@@ -42,7 +43,7 @@ If the site can reach an internal Git server, mirror the repository there and
 point a Git source at that host:
 
 ```hcl
-source = "git::https://git.internal.example.com/mirror/terraform-scality-storage.git//modules/scality-terraform-state-bootstrap?ref=v1.1.0"
+source = "git::https://git.internal.example.com/mirror/terraform-scality-storage.git//modules/scality-terraform-state-bootstrap?ref=v1.2.0"
 ```
 
 ---
@@ -50,12 +51,13 @@ source = "git::https://git.internal.example.com/mirror/terraform-scality-storage
 ## Providers
 
 The modules declare the
-[`cmrh/scality`](https://registry.opentofu.org/providers/cmrh/scality) provider.
+[`cmrh/scality`](https://registry.opentofu.org/providers/cmrh/scality) and
+[`cmrh/artesca`](https://registry.opentofu.org/providers/cmrh/artesca)
+providers.
 A normal `init` pulls it from the registry over the internet; a dark site can't.
-Instead of carrying the binary around by hand (the old `dev_overrides`
-workaround), use a **provider mirror**: a registry-protocol-compatible copy that
-`init` resolves locally, with the lockfile keeping versions and checksums pinned
-so an offline init is byte-for-byte identical to an online one.
+Instead of carrying the binaries around by hand, use a **provider mirror**: a registry-protocol-compatible copy that
+`init` resolves locally. A lockfile committed from an online `init` pins the
+versions and checksums, and an offline `init` accepts it unchanged.
 
 Use the **filesystem mirror** unless you're serving many machines or CI runners,
 in which case stand up a **network mirror**.
@@ -77,6 +79,10 @@ terraform {
       source  = "cmrh/scality"
       version = "~> 1.1, >= 1.1.6"
     }
+    artesca = {
+      source  = "cmrh/artesca"
+      version = "~> 1.2"
+    }
   }
 }
 ```
@@ -90,8 +96,10 @@ tofu providers mirror \
   ./scality-mirror
 ```
 
-`./scality-mirror` now holds `registry.opentofu.org/cmrh/scality/...` with the
-provider zips and their `*.json` index files.
+`./scality-mirror` now holds `registry.opentofu.org/cmrh/scality/...` and
+`registry.opentofu.org/cmrh/artesca/...` with the provider zips and their
+`*.json` index files. With `terraform`, the directory is
+`registry.terraform.io/...` instead.
 
 **2. Move the mirror into the dark site** — copy the `scality-mirror/` directory
 across the air-gap (artifact repo, USB, internal package store) to somewhere
@@ -105,11 +113,11 @@ ship one centrally) and export `TF_CLI_CONFIG_FILE`:
 provider_installation {
   filesystem_mirror {
     path    = "/opt/tf-mirror/scality-mirror"
-    include = ["registry.opentofu.org/cmrh/scality"]
+    include = ["registry.opentofu.org/cmrh/*"]
   }
   # Block any accidental reach for the network registry.
   direct {
-    exclude = ["registry.opentofu.org/cmrh/scality"]
+    exclude = ["registry.opentofu.org/cmrh/*"]
   }
 }
 ```
@@ -121,12 +129,12 @@ export TF_CLI_CONFIG_FILE=/opt/tf-mirror/offline.tfrc
 **4. Init offline:**
 
 ```sh
-tofu init   # resolves cmrh/scality from the mirror, never touches the network
+tofu init   # resolves cmrh/* from the mirror, never touches the network
 ```
 
 ### Network mirror (for fleets / CI)
 
-If many hosts or pipeline runners need the provider, serve the same mirror
+If many hosts or pipeline runners need the providers, serve the same mirror
 directory over HTTPS as a [provider network
 mirror](https://opentofu.org/docs/internals/provider-network-mirror-protocol/)
 instead of copying a directory to every machine. Any static file server that

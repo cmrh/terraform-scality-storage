@@ -10,7 +10,7 @@ buckets within the account on Terraform's behalf.
 ## Why operator?
 
 Account-root credentials (the keys output by `scality-account-management`
-or `terraform-state-bootstrap`) are the foundational identity of an
+or `scality-terraform-state-bootstrap`) are the foundational identity of an
 account. Using them for routine Terraform operations:
 
 - Couples credential rotation to the account itself — account-root keys
@@ -43,7 +43,7 @@ a named place in the catalog.
 # 1. Create the tenant account (account-root credentials are emitted here)
 module "tenant_acme" {
   source        = "cmrh/storage/scality//modules/scality-account-management"
-  version       = "~> 1.0"
+  version       = "~> 1.2"
   account_name  = "acme"
   account_email = "platform@acme.example.com"
 }
@@ -52,7 +52,7 @@ module "tenant_acme" {
 #    those credentials are consumed
 module "acme_operator" {
   source  = "cmrh/storage/scality//modules/scality-account-operator"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.tenant_acme.access_key
   account_secret_key = module.tenant_acme.secret_key
@@ -61,7 +61,7 @@ module "acme_operator" {
 # 3. Everything downstream uses operator credentials
 module "acme_app" {
   source  = "cmrh/storage/scality//modules/scality-application-identity"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key

@@ -45,7 +45,7 @@ created and used in the same apply.
 ```hcl
 module "mgmt_account" {
   source  = "cmrh/storage/scality//modules/scality-account-management"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_name  = "mgmt"
   account_email = "mgmt@example.com"
@@ -53,7 +53,7 @@ module "mgmt_account" {
 
 module "sub_a_account" {
   source  = "cmrh/storage/scality//modules/scality-account-management"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_name  = "customer-a"
   account_email = "customer-a@example.com"
@@ -63,7 +63,7 @@ module "sub_a_account" {
 # allows sts:AssumeRole on the sub-accounts' roles only.
 module "delegator" {
   source  = "cmrh/storage/scality//modules/scality-application-identity"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.mgmt_account.access_key
   account_secret_key = module.mgmt_account.secret_key
@@ -82,7 +82,7 @@ module "delegator" {
 
 module "sub_a_admin" {
   source  = "cmrh/storage/scality//modules/scality-delegated-admin-role"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.sub_a_account.access_key
   account_secret_key = module.sub_a_account.secret_key
@@ -168,15 +168,8 @@ resource "scality_bucket" "data" {
   user is replaced, so every sub-account's role is replaced too, even when
   the name is unchanged. Build the ARN from the management account ID and
   the username instead, as in the example.
-- **If the role is deleted outside Terraform, plans fail.** The attachment's
-  refresh errors with `NoSuchEntity`, and every plan fails until you remove
-  it from state:
-
-  ```bash
-  terraform state rm 'module.<name>.scality_iam_role_policy_attachment.this'
-  ```
-
-  The next apply recreates the role and the attachment.
+- **If the role is deleted outside Terraform, the next plan recreates it**
+  along with its policy attachment.
 - **The default policy lets the role edit its own permissions.** `iam:*`
   includes the role and its policy. To restrict that, pass a
   `policy_document` with your own statements.

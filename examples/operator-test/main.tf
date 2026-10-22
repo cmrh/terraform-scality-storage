@@ -2,9 +2,8 @@
 #
 # Stands up an account, creates the operator user with account-root,
 # then has the operator stand up a bucket and an application user
-# (read-write on the bucket). Exists as both a runnable demo and the
-# regression test wired into the integration workflow — confirms the
-# operator pattern works end-to-end under both apply and destroy.
+# (read-write on the bucket). Confirms the operator pattern works
+# end-to-end under both apply and destroy.
 
 locals {
   account_attributes = {

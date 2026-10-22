@@ -2,8 +2,8 @@
 
 A versioned RING bucket that an ARTESCA RING location writes into, plus a user
 whose key the location uses. The key can only do what its `purpose` needs:
-replication (`artesca-edge-replication`, either mode), or tiering and
-RING-backed buckets.
+replication (`artesca-edge-replication`: `replication` for its `ring-s3`
+mode, `crr` for its `crr` mode), or tiering and RING-backed buckets.
 
 > Compatible with both Terraform and OpenTofu. Examples below use
 > `terraform`; substitute `tofu` if you use OpenTofu.
@@ -37,7 +37,7 @@ RING-backed buckets.
 ```hcl
 module "ring_target" {
   source  = "cmrh/storage/scality//modules/scality-ring-replication-target"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.operator.access_key
   account_secret_key = module.operator.secret_key
@@ -45,7 +45,8 @@ module "ring_target" {
 }
 ```
 
-Pass `bucket_name`, `access_key` and `secret_key` to the ARTESCA location.
+Pass `bucket_name`, `access_key` and `secret_key` to the ARTESCA location,
+and `role_arn` too for `crr`.
 Use one target bucket per ARTESCA source bucket.
 
 ## Inputs

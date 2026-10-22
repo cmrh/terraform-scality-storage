@@ -9,7 +9,7 @@ up orphaned multipart uploads and superseded object versions.
 
 ## What it creates
 
-- `scality_bucket` — versioned bucket with tags
+- `scality_bucket` — versioning on by default, with tags
 - `scality_bucket_encryption` — SSE-S3 by default; SSE-KMS opt-in
 - `scality_bucket_lifecycle` — three baseline rules, each independently
   toggle-able by setting its `_days` variable to `null`:
@@ -33,7 +33,7 @@ Reserve account-root credentials for break-glass scenarios.
 ```hcl
 module "acme_data" {
   source  = "cmrh/storage/scality//modules/scality-application-bucket"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -51,7 +51,7 @@ module "acme_data" {
 ```hcl
 module "acme_logs" {
   source  = "cmrh/storage/scality//modules/scality-application-bucket"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -66,7 +66,7 @@ module "acme_logs" {
 ```hcl
 module "acme_data" {
   source  = "cmrh/storage/scality//modules/scality-application-bucket"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -76,7 +76,7 @@ module "acme_data" {
 
 module "acme_app" {
   source  = "cmrh/storage/scality//modules/scality-application-identity"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -92,7 +92,7 @@ module "acme_app" {
 ```hcl
 module "acme_archive" {
   source  = "cmrh/storage/scality//modules/scality-application-bucket"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -138,8 +138,8 @@ module "acme_archive" {
 - **Empty the bucket before `terraform destroy`.** Bucket contents
   (current objects, all noncurrent versions, and delete markers) are
   outside Terraform's lifecycle and need to be cleared manually.
-- **For object lock / WORM compliance, use `compliance-bucket`.** Object
-  lock is a creation-only setting on the bucket.
+- **For object lock / WORM compliance, use `scality-compliance-bucket`.**
+  Object lock can't be added to an existing bucket (`InvalidBucketState`).
 - **For more complex lifecycle rules** (multiple prefixes, condition
   filters), use `scality_bucket_lifecycle` directly. This module covers
-  the common hygiene + single-prefix expiration cases.
+  the common hygiene + whole-bucket expiration cases.

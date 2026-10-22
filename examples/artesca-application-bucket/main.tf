@@ -1,7 +1,7 @@
 # ARTESCA application bucket example.
 #
-# account -> versioned, encrypted bucket with tags and 30-day expiration ->
-# app user with read-write access to it.
+# account -> versioned, encrypted bucket with tags, 30-day expiration and the
+# default cleanup rule -> app user with read-write access to it.
 
 terraform {
   required_version = ">= 1.5.0"

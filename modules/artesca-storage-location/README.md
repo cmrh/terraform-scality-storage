@@ -34,7 +34,7 @@ as a replication destination.
 ```hcl
 module "location" {
   source  = "cmrh/storage/scality//modules/artesca-storage-location"
-  version = "~> 1.1"
+  version = "~> 1.2"
 
   name        = "ring-archive"
   endpoint    = "https://s3.ring.example.com"

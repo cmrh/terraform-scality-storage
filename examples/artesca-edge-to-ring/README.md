@@ -1,12 +1,14 @@
 # ARTESCA edge to RING example
 
-An ARTESCA bucket replicated to a RING bucket.
+An ARTESCA bucket replicated to a RING bucket, through a RING S3 location
+(`mode = "ring-s3"`, the default) or CRR over STS (`mode = "crr"`).
 
 - **RING:** an account, an operator user, and a versioned target bucket with
-  a replication user (`ring-replication-target`).
-- **ARTESCA:** an account, an app user with a key, a versioned bucket, a RING
-  location using the replication user's key, and a replication rule
-  (`edge-replication`).
+  a replication user (`scality-ring-replication-target`). In `crr` mode the
+  user can only assume a destination role, which writes the replicas.
+- **ARTESCA:** an account, an app user with a key, a versioned bucket, a
+  location (RING S3 or CRR) using the replication user's key, and a
+  replication rule (`artesca-edge-replication`).
 
 Objects written to the ARTESCA bucket appear under the same keys at the root
 of the RING bucket.

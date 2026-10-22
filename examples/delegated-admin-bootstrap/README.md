@@ -59,7 +59,7 @@ runs from colliding.
 
 1. Add it to `sub_accounts` in the bootstrap and apply. This creates the
    account and its role, and extends `delegator`'s `sts:AssumeRole` policy.
-2. Add a `provider "scality"` block for it in `managed/provider.tf`, plus its
+2. Add a `provider "scality"` block for it in `../delegated-admin-managed/provider.tf`, plus its
    resources.
 
 Terraform doesn't support `for_each` on provider blocks, so each

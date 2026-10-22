@@ -17,6 +17,6 @@ Closes #
 ## Test plan
 
 - [ ] `make check` passes (fmt, tflint, actionlint, validate with **both** OpenTofu and Terraform)
-- [ ] Applied and destroyed on a real cluster (note which environment), or N/A for docs/CI-only changes
+- [ ] Applied and destroyed on a real cluster, or N/A for docs/CI-only changes
 - [ ] Module README updated (inputs, outputs, caveats)
 - [ ] `CHANGELOG.md` entry added under `[Unreleased]`

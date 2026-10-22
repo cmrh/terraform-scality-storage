@@ -47,7 +47,7 @@ for *any* account principal with sufficient IAM privileges
 ```hcl
 module "acme_app" {
   source  = "cmrh/storage/scality//modules/scality-application-identity"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -63,7 +63,7 @@ module "acme_app" {
 ```hcl
 module "analytics_reader" {
   source  = "cmrh/storage/scality//modules/scality-application-identity"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -82,7 +82,7 @@ module "analytics_reader" {
 ```hcl
 module "acme_app_special" {
   source  = "cmrh/storage/scality//modules/scality-application-identity"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -161,11 +161,7 @@ terraform output -raw acme_app_secret_key  # → AWS_SECRET_ACCESS_KEY
   new pair (re-create the resource).
 - **Don't reuse this user's keys for bucket management.** The application
   user is meant for workload data access, not infrastructure operations.
-  If a downstream resource (e.g., a `scality_bucket` in your root config)
-  uses this user's keys for bucket creation, declare a `depends_on` on
-  the policy in that consumer — otherwise destroy may remove the policy
-  before the bucket, leaving the user without permission to delete its
-  own bucket. The recommended pattern is to use **operator** creds for
+  The recommended pattern is to use **operator** creds for
   bucket management and **application-identity** creds only for
   application workload access.
 - **Protect your state file.** Contains the user's secret key in plain
