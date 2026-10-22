@@ -20,6 +20,12 @@ variable "versioning" {
   description = "Enable versioning. When false, the module leaves versioning unmanaged instead of suspending it."
 }
 
+variable "object_lock_enabled" {
+  type        = bool
+  default     = false
+  description = "Create the bucket with object lock. Requires versioning; can only be set at creation. Forces replacement."
+}
+
 variable "sse_algorithm" {
   type        = string
   default     = "AES256"

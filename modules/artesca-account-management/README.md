@@ -51,7 +51,7 @@ own login, so they don't need the account's keys. Use `access_key` and
 
 ## Caveats
 
-- **The keys exist only in state.** ARTESCA returns them once, at creation.
-  After an import they're empty.
-- **Destroy needs an empty account.** Its buckets, users, groups, roles and
-  policies must be deleted first.
+- **The keys are set at creation and kept in state.** After an import
+  they're empty.
+- **Destroy fails while the account still holds a bucket created outside
+  Terraform** (`Account not empty`).

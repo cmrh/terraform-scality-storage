@@ -45,6 +45,7 @@ Grant access with `artesca-application-identity`, passing
 | `account_name` | string | (required) | Account that owns the bucket. Forces replacement. |
 | `bucket_name` | string | (required) | Bucket name. Forces replacement. |
 | `location_constraint` | string | `null` | ARTESCA location for the bucket's data. Null uses ARTESCA's own storage. Forces replacement. |
+| `object_lock_enabled` | bool | `false` | Create the bucket with object lock (needs `versioning = true`). See caveats. |
 | `versioning` | bool | `true` | Enable versioning. `false` leaves versioning unmanaged, so a new bucket stays unversioned. |
 | `sse_algorithm` | string | `"AES256"` | `"AES256"`, or `null` for no default encryption. |
 | `tags` | map(string) | `{}` | Bucket tags, up to 50. |
@@ -67,9 +68,9 @@ Grant access with `artesca-application-identity`, passing
 
 ## Caveats
 
-- **`expiration_days` adds a delete marker on a versioned bucket.** The
-  older version then becomes noncurrent and is deleted by the cleanup rule.
-- **Cleanup and expiration are separate rules.** ARTESCA rejects delete-marker
-  removal in a rule that also expires current versions.
-- **Destroy needs an empty bucket** unless `force_destroy = true` was applied
-  first.
+- **Turning `object_lock_enabled` on for an existing bucket replaces it.** Run
+  `apply` a second time afterwards: the replacement drops the bucket's
+  encryption and lifecycle rules, and the second apply recreates them.
+  Setting it back to `false` leaves object lock on.
+- **Destroy fails on a bucket that still holds objects** (`Bucket not
+  empty`), unless `force_destroy = true` was applied first.
