@@ -5,6 +5,15 @@ resource "artesca_bucket" "this" {
   # null leaves versioning unmanaged; false would suspend it.
   versioning_enabled = var.versioning ? true : null
   force_destroy      = var.force_destroy
+  # Object lock can only be set at creation; null leaves it unmanaged.
+  object_lock_enabled = var.object_lock_enabled ? true : null
+
+  lifecycle {
+    precondition {
+      condition     = !var.object_lock_enabled || var.versioning
+      error_message = "object_lock_enabled requires versioning = true."
+    }
+  }
 }
 
 resource "artesca_bucket_encryption" "this" {

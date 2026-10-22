@@ -37,6 +37,7 @@ provider (ARTESCA).
 | [`artesca-application-bucket`](modules/artesca-application-bucket) | Available | Bucket + versioning + encryption + tags + optional expiration |
 | [`artesca-tiered-bucket`](modules/artesca-tiered-bucket) | Available | Bucket whose objects move to a RING (warm) or Versity tape (cold) location |
 | `replication-stream` | Planned | Overlay/location-based replication |
+| [`artesca-compliance-bucket`](modules/artesca-compliance-bucket) | Available | Bucket + object lock + default retention (GOVERNANCE / COMPLIANCE) |
 | [`artesca-terraform-state-bootstrap`](modules/artesca-terraform-state-bootstrap) | Available | Dedicated account + versioned state bucket + state user |
 
 ### Hybrid (both providers)

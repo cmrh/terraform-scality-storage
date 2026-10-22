@@ -12,6 +12,9 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - `artesca-tiered-bucket`: `noncurrent_transition_days` moves noncurrent
   versions too, and `noncurrent_version_expiration_days` is passed through.
   (#50)
+- `artesca-compliance-bucket` module and `examples/artesca-compliance-bucket`:
+  a bucket with object lock and a default retention. (#49)
+- `artesca-application-bucket`: `object_lock_enabled`. (#49)
 
 ### Changed
 - `artesca-application-bucket` adds a cleanup rule by default: noncurrent
