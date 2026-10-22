@@ -59,6 +59,34 @@ variable "expiration_prefix" {
   description = "Only expire objects whose key starts with this prefix. Null (default) applies the rule to all objects."
 }
 
+variable "noncurrent_version_expiration_days" {
+  type        = number
+  default     = 90
+  description = "Delete versions this many days after they become noncurrent. Null disables."
+
+  validation {
+    condition     = var.noncurrent_version_expiration_days == null || try(var.noncurrent_version_expiration_days >= 1 && floor(var.noncurrent_version_expiration_days) == var.noncurrent_version_expiration_days, false)
+    error_message = "noncurrent_version_expiration_days must be a whole number of at least 1, or null."
+  }
+}
+
+variable "abort_incomplete_multipart_upload_days" {
+  type        = number
+  default     = 7
+  description = "Abort incomplete multipart uploads this many days after they start, deleting their parts. Null disables."
+
+  validation {
+    condition     = var.abort_incomplete_multipart_upload_days == null || try(var.abort_incomplete_multipart_upload_days >= 1 && floor(var.abort_incomplete_multipart_upload_days) == var.abort_incomplete_multipart_upload_days, false)
+    error_message = "abort_incomplete_multipart_upload_days must be a whole number of at least 1, or null."
+  }
+}
+
+variable "expire_delete_markers" {
+  type        = bool
+  default     = false
+  description = "Remove delete markers that have no noncurrent versions left behind them."
+}
+
 variable "force_destroy" {
   type        = bool
   default     = false

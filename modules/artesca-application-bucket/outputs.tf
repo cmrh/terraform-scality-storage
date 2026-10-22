@@ -13,6 +13,11 @@ output "versioning" {
   description = "Whether versioning is enabled."
 }
 
+output "cleanup_rule_id" {
+  value       = try(artesca_bucket_workflow_expiration.cleanup[0].rule_id, null)
+  description = "Cleanup rule ID (noncurrent versions, incomplete uploads, delete markers), or null."
+}
+
 output "expiration_rule_id" {
   value       = try(artesca_bucket_workflow_expiration.this[0].rule_id, null)
   description = "Expiration rule ID (the workflow ID in the ARTESCA UI), or null."

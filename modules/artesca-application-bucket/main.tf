@@ -23,6 +23,20 @@ resource "artesca_bucket_tagging" "this" {
   tags         = var.tags
 }
 
+# Bucket-wide cleanup: noncurrent versions, incomplete multipart uploads and
+# delete markers. Kept apart from current-version expiration because ARTESCA
+# rejects delete-marker removal in a rule that also expires current versions.
+resource "artesca_bucket_workflow_expiration" "cleanup" {
+  count = (var.noncurrent_version_expiration_days != null || var.abort_incomplete_multipart_upload_days != null || var.expire_delete_markers) ? 1 : 0
+
+  account_name                                   = var.account_name
+  bucket_name                                    = artesca_bucket.this.name
+  enabled                                        = true
+  previous_version_trigger_delay_days            = var.noncurrent_version_expiration_days
+  incomplete_multipart_upload_trigger_delay_days = var.abort_incomplete_multipart_upload_days
+  expire_delete_markers                          = var.expire_delete_markers ? true : null
+}
+
 resource "artesca_bucket_workflow_expiration" "this" {
   count = var.expiration_days == null ? 0 : 1
 
