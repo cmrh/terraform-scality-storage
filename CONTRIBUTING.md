@@ -29,8 +29,8 @@ You'll need:
 - [actionlint](https://github.com/rhysd/actionlint) (for workflow changes)
 - A Scality cluster, for anything beyond static checks
 
-The modules use the published `cmrh/scality` provider from the public
-registries. `init` resolves it normally, so no local overrides are needed.
+The modules use the published `cmrh/scality` and `cmrh/artesca` providers
+from the public registries. `init` resolves it normally, so no local overrides are needed.
 
 ## Checks
 
@@ -40,7 +40,7 @@ Run the same checks CI runs:
 make check
 ```
 
-That's formatting, tflint, actionlint, then `validate` for every module and
+That's formatting, tflint, actionlint, runner-guard, then `validate` for every module and
 example under **both** engines. The individual targets:
 
 | Target | What it does |
@@ -51,8 +51,10 @@ example under **both** engines. The individual targets:
 | `make actionlint` | Lint GitHub Actions workflows |
 | `make validate ENGINE=tofu` | Validate with one engine |
 | `make validate-all` | Validate with both engines |
+| `make runner-guard` | Check that only `integration.yml` uses the self-hosted runner |
+| `make integration` | Apply, re-plan and destroy the integration configs against live clusters (needs credentials) |
 
-Modules that declare `configuration_aliases` (e.g. `s3-crr`) are validated
+Modules that declare `configuration_aliases` (e.g. `scality-s3-crr`) are validated
 through their examples, because Terraform can't validate them standalone.
 
 ## Engine parity
@@ -65,7 +67,7 @@ it as unavailable.
 
 - **Layout:** `modules/<product>-<name>/` with `main.tf`, `variables.tf`,
   `outputs.tf`, `versions.tf` and `README.md`. Add a matching example under
-  `examples/<product>/<name>/` for anything non-trivial.
+  `examples/<name>/` for anything non-trivial.
 - **Every variable and output** has a `type` (variables) and a `description`
   of one or two sentences.
 - **No provider blocks inside modules.** Provider configuration belongs to the
@@ -74,7 +76,7 @@ it as unavailable.
 - **The README** documents what the module creates, usage, inputs, outputs and
   caveats. Caveats state only behavior that has been tested.
 - **No credentials in any file** that could end up in git. Use environment
-  variables (`SCALITY_*` or `TF_VAR_*`). Never commit `.tfvars` files.
+  variables (`SCALITY_*`, `ARTESCA_*` or `TF_VAR_*`). Never commit `.tfvars` files.
 - **Test changes on a real cluster** for anything that creates resources, and
-  note the environment in the PR.
+  say in the PR what was tested. Leave out environment and lab names.
 - **Update `CHANGELOG.md`** under `[Unreleased]`.

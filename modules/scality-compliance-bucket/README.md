@@ -1,17 +1,16 @@
 # scality / compliance-bucket
 
-Provisions a Scality S3 bucket with **Object Lock** enabled — objects
-written to this bucket cannot be deleted or overwritten until their
-retention period expires. Suitable for audit logs, regulatory
-recordkeeping, immutable backups, and other WORM workloads.
+Provisions a Scality S3 bucket with **Object Lock** enabled and a default
+retention, so object versions written to it are locked for the retention
+period. Suitable for audit logs, regulatory recordkeeping, immutable
+backups, and other WORM workloads.
 
 > Compatible with both Terraform and OpenTofu. Examples below use
 > `terraform`; substitute `tofu` if you use OpenTofu.
 
 ## What it creates
 
-- `scality_bucket` with `object_lock_enabled = true` (versioning is
-  automatically enabled by S3 when object lock is set)
+- `scality_bucket` with `object_lock_enabled = true` and `versioning = true`
 - `scality_bucket_encryption` (SSE-S3 by default; SSE-KMS opt-in)
 - `scality_bucket_object_lock` — default retention mode and period
 - `scality_bucket_lifecycle` — abort incomplete multipart uploads (set
@@ -23,19 +22,16 @@ You must explicitly choose `retention_mode`:
 
 | Mode | Behavior |
 |---|---|
-| `GOVERNANCE` | Users with `s3:BypassGovernanceRetention` permission can override or delete locks. Suitable for testing, staging, or workflows where regulated overrides are acceptable. |
-| `COMPLIANCE` | No one — including the account root — can override or delete locks. Objects are immutable until their retention period expires. Suitable for regulatory WORM (audit logs, financial records, etc.). |
+| `GOVERNANCE` | A locked version can't be deleted, not even by the account root, unless the request sets `--bypass-governance-retention` (`x-amz-bypass-governance-retention`). |
+| `COMPLIANCE` | Stricter: meant for regulatory WORM, where locks can't be bypassed. |
 
-> `COMPLIANCE` is irrevocable for the duration of an object's retention
-> period. Test retention behavior in `GOVERNANCE` mode first if you are
-> not certain. Changing the mode after objects are written affects only
-> future objects.
+> Try `GOVERNANCE` first.
 
 ## Retention period
 
 Set **exactly one** of `retention_days` or `retention_years`. The chosen
-value applies to every new object written to the bucket as the *default*
-retention. Per-object overrides remain possible through the S3 API.
+value is the bucket's *default* retention, applied to object versions written
+to it.
 
 ## Recommended caller pattern
 
@@ -49,7 +45,7 @@ Same as the rest of this repo: pass operator credentials (output of
 ```hcl
 module "audit_logs" {
   source  = "cmrh/storage/scality//modules/scality-compliance-bucket"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -70,7 +66,7 @@ module "audit_logs" {
 ```hcl
 module "compliance_staging" {
   source  = "cmrh/storage/scality//modules/scality-compliance-bucket"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -86,7 +82,7 @@ module "compliance_staging" {
 ```hcl
 module "audit_logs" {
   source  = "cmrh/storage/scality//modules/scality-compliance-bucket"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -96,11 +92,10 @@ module "audit_logs" {
   retention_years = 7
 }
 
-# Audit writer — IAM allows write but the COMPLIANCE lock prevents
-# deletes during retention regardless of IAM permissions.
+# Audit writer — can write; locked versions stay until retention ends.
 module "audit_writer" {
   source  = "cmrh/storage/scality//modules/scality-application-identity"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -153,20 +148,15 @@ module "audit_writer" {
 
 ## Caveats
 
-- **Object lock is set at bucket creation only.** This module enables it
-  at creation. To put an existing non-lock-enabled bucket under WORM,
-  create a new compliance bucket and migrate the contents.
-- **`COMPLIANCE` retention is irrevocable.** Even the account root cannot
-  delete objects within their retention period. Choose this only when
-  regulatory or contractual immutability is required.
-- **Bucket destruction is blocked while objects are under active
-  retention.** With `COMPLIANCE`, the bucket cannot be destroyed until
-  every retained object has aged past its retention date.
-- **Default retention applies to new objects only.** Existing objects
-  retain their original lock state if the retention configuration is
-  changed later.
-- **Lifecycle rules other than MPU abort are intentionally excluded.**
-  Expiring noncurrent versions or current objects via lifecycle would
-  conflict with object lock semantics. If you need post-retention
-  cleanup, configure `scality_bucket_lifecycle` directly with rules
-  scoped to ages that exceed the retention period.
+- **Object lock can only be enabled when the bucket is created.** Adding it
+  to an existing bucket fails with `InvalidBucketState`. To put existing
+  data under WORM, create a compliance bucket and copy the data in.
+- **`COMPLIANCE` locks can't be lifted before retention ends,** not even by
+  the account root, so a bucket holding such versions can't be destroyed
+  until they expire. Choose it only when immutability is required.
+- **Destroying a bucket that holds locked versions needs them deleted
+  first;** with `GOVERNANCE`, delete them with the bypass header.
+- **Lifecycle rules other than MPU abort are intentionally excluded,** so
+  the module never expires versions. For post-retention cleanup, configure
+  `scality_bucket_lifecycle` directly with ages longer than the retention
+  period.

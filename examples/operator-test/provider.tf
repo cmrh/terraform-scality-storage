@@ -5,7 +5,7 @@ variable "account_name" {
 }
 
 terraform {
-  required_version = ">= 1.0"
+  required_version = ">= 1.5.0"
 
   required_providers {
     scality = {

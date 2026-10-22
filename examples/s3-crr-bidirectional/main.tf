@@ -1,9 +1,9 @@
 # Bidirectional (active-active) CRR example.
 #
 # Stands up the full feature on two Scality clusters with replication
-# in both directions. Versus the one-direction example, this differs
-# in a single line: `bidirectional = true` on the s3-crr module call.
-# The IAM roles and policies are symmetric, so nothing else changes.
+# in both directions. Versus the one-direction example: `bidirectional =
+# true` on the scality-s3-crr module call, a read-write verification user on
+# the destination, and a different name prefix.
 
 # ============================================================
 # Source cluster

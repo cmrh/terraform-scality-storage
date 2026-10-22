@@ -31,9 +31,7 @@ without UI access.
 | `true` (default) | `scality_console_account` | Yes — password output via `console_password` | UI-owned (rotatable from Console) | Yes — `scality_account_access_key` |
 | `false` | `scality_account` | No | Terraform-owned | No (the bootstrap key is used directly) |
 
-**Toggling the flag after apply is destructive** — the account is
-recreated, new credentials are issued, and the bucket is detached
-(it's owned by the old account). Plan accordingly.
+**Don't change `console_login` after apply.** See the caveat below.
 
 ## Usage
 
@@ -61,16 +59,30 @@ provider "scality" {}
 
 module "tf_state" {
   source  = "cmrh/storage/scality//modules/scality-terraform-state-bootstrap"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_email = "platform@example.com"
   bucket_name   = "platform-tf-state"
 }
 
-output "state_bucket"           { value = module.tf_state.bucket_name }
-output "state_access_key"       { value = module.tf_state.access_key, sensitive = true }
-output "state_secret_key"       { value = module.tf_state.secret_key, sensitive = true }
-output "state_console_password" { value = module.tf_state.console_password, sensitive = true }
+output "state_bucket" {
+  value = module.tf_state.bucket_name
+}
+
+output "state_access_key" {
+  value     = module.tf_state.access_key
+  sensitive = true
+}
+
+output "state_secret_key" {
+  value     = module.tf_state.secret_key
+  sensitive = true
+}
+
+output "state_console_password" {
+  value     = module.tf_state.console_password
+  sensitive = true
+}
 ```
 
 ```bash
@@ -88,7 +100,7 @@ after first login.
 ```hcl
 module "tf_state" {
   source  = "cmrh/storage/scality//modules/scality-terraform-state-bootstrap"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_email = "platform@example.com"
   bucket_name   = "platform-tf-state"
@@ -160,7 +172,7 @@ state file content for recovery in either case.
 | `bucket_name` | string | (required) | State bucket name (3-63 chars). | both |
 | `tags` | map(string) | `{ managed_by = "terraform", purpose = "state-file" }` | Tags on the state bucket. | both |
 | `sse_algorithm` | string | `"AES256"` | `AES256` or `aws:kms`. | both |
-| `kms_master_key_id` | string | `null` | KMS key ID. Required when `sse_algorithm = "aws:kms"`. | both |
+| `kms_master_key_id` | string | `null` | KMS key ID, used with `sse_algorithm = "aws:kms"`. | both |
 | `abort_incomplete_multipart_upload_days` | number | `7` | Days after which incomplete MPUs are aborted. | both |
 | `noncurrent_version_expiration_days` | number | `90` | Days after which superseded state versions expire. | both |
 
@@ -180,21 +192,15 @@ state file content for recovery in either case.
 
 ## Caveats
 
-- **Switching `console_login` is destructive.** The account is recreated;
-  the existing bucket detaches and downstream backends become unreachable
-  via the old credentials. Don't toggle this on a live state bucket
-  without a migration plan.
-- **`console_password` is one-time.** After the admin changes it in the
-  Console UI, the value in Terraform state is stale (the resource Read
-  does not query the API for the password). Treat it as a bootstrap
-  value, not a long-term reference.
-- **Empty the bucket before `terraform destroy`.** Scality accounts can
-  only be deleted when they own no resources — buckets, users, or
-  policies. Terraform tears down users and policies in the right order
-  if they're managed in the same configuration, but bucket *contents*
-  (S3 objects, all noncurrent versions, and delete markers) live outside
-  Terraform's lifecycle. Clear them manually first, otherwise the bucket
-  fails to delete and the account can't be torn down.
+- **Changing `console_login` after apply breaks the module.** The apply
+  fails with `access denied` on the state bucket, which still belongs to
+  the old account, after the old account's Terraform-owned key has already
+  been destroyed. Terraform can then no longer manage or destroy the
+  bucket. Pick the mode before the first apply.
+- **Empty the bucket before `terraform destroy`.** Bucket contents (objects,
+  noncurrent versions, delete markers) aren't managed by Terraform, and a
+  bucket that still holds any fails to delete, which also stops the
+  account from being deleted.
 - **Protect your state file.** It contains the dedicated account's
   credentials and (when `console_login = true`) the auto-generated
   Console password in plain text. Treat the state of *this* module

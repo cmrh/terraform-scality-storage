@@ -4,7 +4,7 @@
 # mgmt root     -> delegator user (sts:AssumeRole on the sub-account roles)
 # sub-acct root -> delegated-admin-role in each sub-account, trusting delegator
 #
-# The managed stage (../managed) then uses delegator's keys to assume each
+# The managed stage (../delegated-admin-managed) then uses delegator's keys to assume each
 # role. It must be a separate root config: a role has to exist before a
 # provider can be configured to assume it.
 

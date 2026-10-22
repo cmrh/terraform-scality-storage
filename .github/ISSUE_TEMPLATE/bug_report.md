@@ -42,6 +42,6 @@ account IDs and endpoints if needed.
 
 - Engine and version (`tofu version` / `terraform version`):
 - Does it also happen with the other engine? (yes / no / not tried):
-- `cmrh/scality` provider version:
+- `cmrh/scality` / `cmrh/artesca` provider version:
 - Scality cluster version (if known):
 - OS / architecture:

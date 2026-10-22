@@ -6,6 +6,8 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-22
+
 ### Added
 - `artesca-application-bucket`: `noncurrent_version_expiration_days`,
   `abort_incomplete_multipart_upload_days` and `expire_delete_markers`. (#48)
@@ -23,6 +25,19 @@ and the project follows [Semantic Versioning](https://semver.org/).
   cmrh/artesca 1.2. (#42)
 
 ### Changed
+- Docs reviewed against tested behaviour across all modules, examples and
+  repository docs:
+  - Usage snippets pin the module at `~> 1.2`; the root module also declares
+    `cmrh/artesca`, so the registry lists both providers.
+  - `docs/offline-install.md` covers both providers, and its filesystem
+    mirror, network mirror and lockfile steps were verified with both
+    engines.
+  - Corrected: role deletion outside Terraform in `scality-delegated-admin-role`
+    (the next plan recreates it), `console_login` changes in
+    `scality-terraform-state-bootstrap` (the apply fails; pick the mode before
+    the first apply) and `scality-account-management` (the account is
+    replaced), plus stale paths, names and snippets.
+  - CONTRIBUTING, SECURITY and the issue templates cover the ARTESCA provider.
 - `artesca-application-bucket` adds a cleanup rule by default: noncurrent
   versions are deleted after 90 days and incomplete multipart uploads aborted
   after 7, matching `scality-application-bucket`. It, `artesca-tiered-bucket`

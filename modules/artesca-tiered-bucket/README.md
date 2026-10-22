@@ -33,7 +33,7 @@ days: a RING bucket (warm) or a Versity tape archive (cold).
 ```hcl
 module "bucket" {
   source  = "cmrh/storage/scality//modules/artesca-tiered-bucket"
-  version = "~> 1.1"
+  version = "~> 1.2"
 
   account_name        = module.account.account_name
   bucket_name         = "app-data"

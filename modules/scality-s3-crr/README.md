@@ -24,10 +24,10 @@ one piece of the feature:
 | Module | Owns | Per cluster |
 |---|---|---|
 | `scality-account-management` | An account | One on each |
-| `account-operator` | Operator user + credentials on the account (used to call this module) | One on each |
-| `application-bucket` | The source / destination bucket, with versioning on | One on each |
+| `scality-account-operator` | Operator user + credentials on the account (used to call this module) | One on each |
+| `scality-application-bucket` | The source / destination bucket, with versioning on | One on each |
 | **`s3-crr`** (this module) | IAM roles, policies, attachments, and the replication configuration(s) | Both sides, in one call |
-| `application-identity` (optional) | Application users with scoped bucket access — e.g., a writer on source and a reader on dest for replication verification | As needed |
+| `scality-application-identity` (optional) | Application users with scoped bucket access — e.g., a writer on source and a reader on dest for replication verification | As needed |
 
 The "Full composition" example under [Usage](#usage) chains these in
 order. If you already have accounts, operator credentials, and
@@ -63,11 +63,11 @@ adds or removes the reverse `scality_bucket_replication`.
 **No user is created for CRR.** Replication is performed by the
 **backbeat service** on each cluster, which assumes the IAM role
 above (its trust policy grants `sts:AssumeRole` to
-`Principal.Service = "backbeat"`). The role's permissions are what
-backbeat uses to read locally and write to the counterpart bucket —
-no user-side credential is involved in CRR itself. For application
+`Principal.Service = "backbeat"`). Each side's role has permissions
+on its own bucket only; the role pair on `scality_bucket_replication`
+links the two sides. No user-side credential is involved in CRR itself. For application
 traffic or for verifying replication after apply, use
-`application-identity`.
+`scality-application-identity`.
 
 ## Two-provider configuration
 
@@ -98,7 +98,7 @@ provider "scality" {
 
 module "crr" {
   source  = "cmrh/storage/scality//modules/scality-s3-crr"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   providers = {
     scality.source = scality.src
@@ -113,7 +113,7 @@ module "crr" {
 
 Use **operator credentials** for both `source_account_access_key` /
 `source_account_secret_key` and the dest equivalents (the output of
-`account-operator` on each cluster). Reserve account-root credentials
+`scality-account-operator` on each cluster). Reserve account-root credentials
 for break-glass.
 
 ## Usage
@@ -125,7 +125,7 @@ for break-glass.
 
 module "source_account" {
   source    = "cmrh/storage/scality//modules/scality-account-management"
-  version   = "~> 1.0"
+  version   = "~> 1.2"
   providers = { scality = scality.src }
 
   account_name  = "crr-source"
@@ -134,7 +134,7 @@ module "source_account" {
 
 module "source_operator" {
   source    = "cmrh/storage/scality//modules/scality-account-operator"
-  version   = "~> 1.0"
+  version   = "~> 1.2"
   providers = { scality = scality.src }
 
   account_access_key = module.source_account.access_key
@@ -143,7 +143,7 @@ module "source_operator" {
 
 module "source_bucket" {
   source    = "cmrh/storage/scality//modules/scality-application-bucket"
-  version   = "~> 1.0"
+  version   = "~> 1.2"
   providers = { scality = scality.src }
 
   account_access_key = module.source_operator.access_key
@@ -155,7 +155,7 @@ module "source_bucket" {
 
 module "dest_account" {
   source    = "cmrh/storage/scality//modules/scality-account-management"
-  version   = "~> 1.0"
+  version   = "~> 1.2"
   providers = { scality = scality.dst }
 
   account_name  = "crr-dest"
@@ -164,7 +164,7 @@ module "dest_account" {
 
 module "dest_operator" {
   source    = "cmrh/storage/scality//modules/scality-account-operator"
-  version   = "~> 1.0"
+  version   = "~> 1.2"
   providers = { scality = scality.dst }
 
   account_access_key = module.dest_account.access_key
@@ -173,7 +173,7 @@ module "dest_operator" {
 
 module "dest_bucket" {
   source    = "cmrh/storage/scality//modules/scality-application-bucket"
-  version   = "~> 1.0"
+  version   = "~> 1.2"
   providers = { scality = scality.dst }
 
   account_access_key = module.dest_operator.access_key
@@ -185,7 +185,7 @@ module "dest_bucket" {
 
 module "crr" {
   source  = "cmrh/storage/scality//modules/scality-s3-crr"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   providers = {
     scality.source = scality.src
@@ -209,7 +209,7 @@ Add a single line:
 ```hcl
 module "crr" {
   source  = "cmrh/storage/scality//modules/scality-s3-crr"
-  version = "~> 1.0"
+  version = "~> 1.2"
   providers = { scality.source = scality.src, scality.dest = scality.dst }
 
   # ...all other inputs as above...
@@ -221,7 +221,7 @@ module "crr" {
 ## Granting application access and verifying replication
 
 Application access and manual verification of replication go through
-dedicated users created with the `application-identity` module — this
+dedicated users created with the `scality-application-identity` module — this
 module does not create any users itself. Backbeat performs the
 replication via the IAM role above; no user credential is part of the
 CRR wiring.
@@ -234,7 +234,7 @@ replication after `terraform apply`:
 # Source-side writer — for the application or for uploading test objects
 module "source_writer" {
   source    = "cmrh/storage/scality//modules/scality-application-identity"
-  version   = "~> 1.0"
+  version   = "~> 1.2"
   providers = { scality = scality.src }
 
   account_access_key = module.source_operator.access_key
@@ -248,7 +248,7 @@ module "source_writer" {
 # Destination-side reader — for confirming that replicated objects landed
 module "dest_reader" {
   source    = "cmrh/storage/scality//modules/scality-application-identity"
-  version   = "~> 1.0"
+  version   = "~> 1.2"
   providers = { scality = scality.dst }
 
   account_access_key = module.dest_operator.access_key
@@ -257,6 +257,17 @@ module "dest_reader" {
   username       = "crr-dest-reader"
   bucket_arns    = [module.crr.dest_bucket_arn]
   access_pattern = "read-only"
+}
+
+output "source_writer_access_key" { value = module.source_writer.access_key }
+output "source_writer_secret_key" {
+  value     = module.source_writer.secret_key
+  sensitive = true
+}
+output "dest_reader_access_key" { value = module.dest_reader.access_key }
+output "dest_reader_secret_key" {
+  value     = module.dest_reader.secret_key
+  sensitive = true
 }
 ```
 
@@ -303,11 +314,12 @@ AWS_ACCESS_KEY_ID=$DST_AK AWS_SECRET_ACCESS_KEY=$DST_SK \
 
 ## Caveats
 
-- **Both buckets must have versioning enabled.** `application-bucket`
-  defaults to `versioning = true`; if you create the bucket some other
-  way, ensure versioning is on before applying this module.
+- **Both buckets must have versioning enabled.** Otherwise the apply fails
+  with `Versioning must be 'Enabled' on the bucket to apply a replication
+  configuration`. `scality-application-bucket` defaults to
+  `versioning = true`.
 - **Lifecycle rules on replicated buckets need care.** The default
-  `application-bucket` `noncurrent_version_expiration_days = 90` is
+  `scality-application-bucket` `noncurrent_version_expiration_days = 90` is
   usually fine — replication completes well within that window. If you
   set very short lifecycle expirations (hours/days), noncurrent versions
   may expire before replication ships them.
@@ -318,10 +330,10 @@ AWS_ACCESS_KEY_ID=$DST_AK AWS_SECRET_ACCESS_KEY=$DST_SK \
 - **Toggling `bidirectional` only adds or removes the reverse replication.**
   The IAM roles and policies are symmetric, so the rest of the wiring
   stays in place.
-- **Use `application-identity` for application or verification access.**
+- **Use `scality-application-identity` for application or verification access.**
   Backbeat handles replication via the IAM role this module creates;
   no user-side credential is part of the CRR mechanics. For app
-  traffic or replication verification, layer `application-identity`
+  traffic or replication verification, layer `scality-application-identity`
   on each side.
 - **Protect your state file.** It contains the caller credentials
   passed in for each cluster.

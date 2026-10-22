@@ -17,9 +17,7 @@ the `console_login` flag:
 | `true` (default) | `scality_console_account` | Tenant accounts where customers/admins need to log into the Console | Yes — random password generated, exposed via `console_password` output | Bootstrap S3 key is **UI-owned** (the Console can rotate it). The module always layers an additional `scality_account_access_key` that Terraform owns exclusively, and that's the credential exposed by the `access_key`/`secret_key` outputs. |
 | `false` | `scality_account` | Headless / automation accounts | No | Bootstrap S3 key is already Terraform-owned, no layered key needed. Supports `account_attributes` and `external_account_id`. |
 
-**Toggling the flag after apply is destructive.** The existing account
-(and its child resources) is destroyed and a new account is created with
-new credentials.
+**Changing the flag after apply replaces the account** (see caveats).
 
 ## What it creates
 
@@ -38,7 +36,7 @@ When `console_login = false`:
 ```hcl
 module "tenant_acme" {
   source  = "cmrh/storage/scality//modules/scality-account-management"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_name  = "acme"
   account_email = "platform@acme.example.com"
@@ -61,7 +59,7 @@ terraform output -raw acme_console_password    # share with the tenant — they 
 ```hcl
 module "ci_account" {
   source  = "cmrh/storage/scality//modules/scality-account-management"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   account_name  = "ci-pipeline"
   account_email = "platform-ops@example.com"
@@ -84,7 +82,7 @@ resource (or wrapper module that takes per-account credentials):
 ```hcl
 module "tenant_acme" {
   source        = "cmrh/storage/scality//modules/scality-account-management"
-  version       = "~> 1.0"
+  version       = "~> 1.2"
   account_name  = "acme"
   account_email = "platform@acme.example.com"
 }
@@ -101,10 +99,10 @@ resource "scality_bucket" "acme_data" {
 
 | Name | Type | Default | Description | Effective when |
 |---|---|---|---|---|
-| `account_name` | string | (required) | Account name (1-128 chars, alphanumeric + hyphens). | both |
+| `account_name` | string | (required) | Account name (1-128 chars, alphanumeric + hyphens). Forces replacement. | both |
 | `account_email` | string | (required) | Account email. Forces replacement. | both |
 | `console_login` | bool | `true` | `true` → `scality_console_account`; `false` → `scality_account`. | both |
-| `account_quota` | number | `null` | Max bytes; `null` = server default; `0` = unlimited. | both |
+| `account_quota` | number | `null` | Max bytes; `null` leaves it unset; `0` sets no limit. Forces replacement. | both |
 | `external_account_id` | string | `null` | External integration ID. Forces replacement. | only `console_login = false` |
 | `account_attributes` | map(string) | `{}` | Custom key-value metadata. Max 10 entries. | only `console_login = false` |
 
@@ -127,21 +125,13 @@ resource "scality_bucket" "acme_data" {
 
 ## Caveats
 
-- **Switching `console_login` is destructive.** Toggling the flag after
-  apply destroys the existing account and creates a fresh one with new
-  credentials. All downstream resources tied to the previous credentials
-  must be reconfigured.
-- **Account deletion requires zero child resources.** Buckets, users, and
-  policies under this account must be destroyed first. Terraform handles
-  destroy ordering for resources managed in the same configuration.
-  Bucket *contents* (S3 objects, noncurrent versions, delete markers) live
-  outside Terraform's lifecycle and require manual cleanup before
-  `terraform destroy`.
-- **`console_password` becomes stale after the user changes it via UI.**
-  The Console resource's Read does not query the API for the password.
-  After the customer rotates it through the Console UI, the value in
-  Terraform state is no longer current. Treat `console_password` as a
-  one-time output for first-login bootstrapping, not a long-term source
-  of truth.
+- **Changing `console_login` after apply replaces the account.** The old
+  account is destroyed and a new one is created, with a new ID and new
+  keys. Creating the new account can take a second apply. Anything
+  using the old keys must be reconfigured.
+- **Account deletion fails while the account still owns resources**
+  created outside this configuration (buckets, users, groups, policies,
+  roles), with `DeleteConflict`. Bucket contents aren't managed by
+  Terraform; empty buckets before `terraform destroy`.
 - **Protect your state file.** It contains the account credentials in
   plain text.

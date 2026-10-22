@@ -19,7 +19,7 @@ An ARTESCA account and its S3 keys.
 ```hcl
 module "account" {
   source  = "cmrh/storage/scality//modules/artesca-account-management"
-  version = "~> 1.1"
+  version = "~> 1.2"
 
   account_name  = "team-a"
   account_email = "team-a@example.com"

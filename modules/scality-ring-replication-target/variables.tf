@@ -35,7 +35,7 @@ variable "role_name" {
 variable "username" {
   type        = string
   default     = "artesca-replication"
-  description = "IAM user whose key ARTESCA's location uses. It can only write to the bucket."
+  description = "IAM user whose key ARTESCA's location uses. Its permissions depend on purpose."
 }
 
 variable "policy_name" {
