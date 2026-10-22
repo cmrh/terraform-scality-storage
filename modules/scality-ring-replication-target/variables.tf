@@ -18,12 +18,18 @@ variable "bucket_name" {
 variable "purpose" {
   type        = string
   default     = "replication"
-  description = "How ARTESCA uses the bucket: \"replication\" (default; write-only key) or \"tiering\" (transitions; the key can also read and delete objects)."
+  description = "How ARTESCA uses the bucket: \"replication\" (default; write-only key), \"tiering\" (the key can also read and delete objects) or \"crr\" (the key can only assume a destination role that writes the replicas)."
 
   validation {
-    condition     = contains(["replication", "tiering"], var.purpose)
-    error_message = "purpose must be \"replication\" or \"tiering\"."
+    condition     = contains(["replication", "tiering", "crr"], var.purpose)
+    error_message = "purpose must be \"replication\", \"tiering\" or \"crr\"."
   }
+}
+
+variable "role_name" {
+  type        = string
+  default     = "artesca-crr"
+  description = "Destination role name, for purpose = \"crr\"."
 }
 
 variable "username" {

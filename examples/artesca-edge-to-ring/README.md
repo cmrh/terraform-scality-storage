@@ -32,6 +32,14 @@ terraform init
 terraform apply
 ```
 
+For CRR over STS (a destination role on RING instead of a write key), also
+set:
+
+```sh
+export TF_VAR_mode=crr
+export TF_VAR_ring_sts_endpoint=https://sts.ring.example.com   # as reached from ARTESCA
+```
+
 ## Destroy
 
 Both buckets hold objects. ARTESCA's are removed by `force_destroy`; the

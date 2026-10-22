@@ -15,6 +15,12 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - `artesca-compliance-bucket` module and `examples/artesca-compliance-bucket`:
   a bucket with object lock and a default retention. (#49)
 - `artesca-application-bucket`: `object_lock_enabled`. (#49)
+- `artesca-edge-replication`: `mode = "crr"` replicates over STS through a
+  destination role on RING, and `examples/artesca-edge-to-ring` can run in
+  either mode. `scality-ring-replication-target` gains `purpose = "crr"`: a
+  key that can only assume the role, and the role, which can only write
+  replicas to the bucket. `artesca-edge-replication` now requires
+  cmrh/artesca 1.2. (#42)
 
 ### Changed
 - `artesca-application-bucket` adds a cleanup rule by default: noncurrent

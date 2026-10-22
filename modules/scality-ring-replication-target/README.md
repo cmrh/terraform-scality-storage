@@ -2,7 +2,8 @@
 
 A versioned RING bucket that an ARTESCA RING location writes into, plus a user
 whose key the location uses. The key can only do what its `purpose` needs:
-replication (`artesca-edge-replication`), or tiering and RING-backed buckets.
+replication (`artesca-edge-replication`, either mode), or tiering and
+RING-backed buckets.
 
 > Compatible with both Terraform and OpenTofu. Examples below use
 > `terraform`; substitute `tofu` if you use OpenTofu.
@@ -21,6 +22,11 @@ replication (`artesca-edge-replication`), or tiering and RING-backed buckets.
     ARTESCA fail without the read actions. With the delete actions, a
     permanent delete through ARTESCA removes the object from RING; without
     them, the data stays there.
+  - `crr`: only `sts:AssumeRole` on a destination role, for
+    `artesca-edge-replication` with `mode = "crr"`
+- for `crr`: a destination role (`role_name`) that trusts only that user and
+  can `s3:ReplicateObject`, `s3:ReplicateDelete` and `s3:ReplicateTags` on
+  the bucket
 
 ## Prerequisites
 
@@ -49,7 +55,8 @@ Use one target bucket per ARTESCA source bucket.
 | `account_access_key` | string (sensitive) | (required) | Key of a principal in the RING account, typically the operator from `account-operator`. |
 | `account_secret_key` | string (sensitive) | (required) | Paired with `account_access_key`. |
 | `bucket_name` | string | (required) | Target bucket name. Forces replacement. |
-| `purpose` | string | `"replication"` | `replication` or `tiering`; sets the key's permissions. |
+| `purpose` | string | `"replication"` | `replication`, `tiering` or `crr`; sets the key's permissions. |
+| `role_name` | string | `"artesca-crr"` | Destination role name, for `crr`. |
 | `username` | string | `"artesca-replication"` | Replication user's name. |
 | `policy_name` | string | `"artesca-replication"` | Name of the user's inline policy. |
 | `tags` | map(string) | `{}` | Tags on the bucket. |
@@ -60,6 +67,7 @@ Use one target bucket per ARTESCA source bucket.
 |---|---|
 | `bucket_name` | Target bucket name. |
 | `bucket_arn` | Target bucket ARN. |
+| `role_arn` | Destination role ARN for `crr`, or null. |
 | `access_key` | Replication user's access key. |
 | `secret_key` | Replication user's secret key (sensitive). |
 

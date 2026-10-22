@@ -8,6 +8,11 @@ output "bucket_arn" {
   description = "Target bucket ARN."
 }
 
+output "role_arn" {
+  value       = try(scality_iam_role.crr[0].arn, null)
+  description = "Destination role ARN for purpose = \"crr\", or null."
+}
+
 output "access_key" {
   value       = module.replication_user.access_key
   description = "Replication user's access key, for ARTESCA's RING location."
