@@ -6,6 +6,16 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `artesca-application-bucket`: `noncurrent_version_expiration_days`,
+  `abort_incomplete_multipart_upload_days` and `expire_delete_markers`. (#48)
+
+### Changed
+- `artesca-application-bucket` adds a cleanup rule by default: noncurrent
+  versions are deleted after 90 days and incomplete multipart uploads aborted
+  after 7, matching `scality-application-bucket`. It, `artesca-tiered-bucket`
+  and `artesca-terraform-state-bootstrap` require cmrh/artesca 1.2. (#48)
+
 ## [1.1.0] - 2026-10-21
 
 ### Added

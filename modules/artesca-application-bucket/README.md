@@ -1,7 +1,7 @@
 # artesca-application-bucket
 
-An ARTESCA bucket with versioning, default encryption, optional tags and an
-optional expiration rule.
+An ARTESCA bucket with versioning, default encryption, lifecycle cleanup,
+optional tags and an optional expiration rule.
 
 > Compatible with both Terraform and OpenTofu. Examples below use
 > `terraform`; substitute `tofu` if you use OpenTofu.
@@ -11,18 +11,22 @@ optional expiration rule.
 - `artesca_bucket`: versioning enabled by default
 - `artesca_bucket_encryption`: `AES256` by default
 - `artesca_bucket_tagging`: when `tags` is set
-- `artesca_bucket_workflow_expiration`: when `expiration_days` is set
+- `artesca_bucket_workflow_expiration` (cleanup): deletes noncurrent versions
+  after 90 days and aborts incomplete multipart uploads after 7 days by
+  default; optionally removes leftover delete markers
+- `artesca_bucket_workflow_expiration` (expiration): when `expiration_days` is
+  set
 
 ## Prerequisites
 
-- cmrh/artesca provider 1.1 or later.
+- cmrh/artesca provider 1.2 or later.
 
 ## Usage
 
 ```hcl
 module "bucket" {
   source  = "cmrh/storage/scality//modules/artesca-application-bucket"
-  version = "~> 1.1"
+  version = "~> 1.2"
 
   account_name    = module.account.account_name
   bucket_name     = "app-data"
@@ -46,6 +50,9 @@ Grant access with `artesca-application-identity`, passing
 | `tags` | map(string) | `{}` | Bucket tags, up to 50. |
 | `expiration_days` | number | `null` | Expire current versions this many days after creation. |
 | `expiration_prefix` | string | `null` | Only expire keys with this prefix. |
+| `noncurrent_version_expiration_days` | number | `90` | Delete versions this many days after they become noncurrent. `null` disables. |
+| `abort_incomplete_multipart_upload_days` | number | `7` | Abort incomplete multipart uploads after this many days. `null` disables. |
+| `expire_delete_markers` | bool | `false` | Remove delete markers with no noncurrent versions left behind them. |
 | `force_destroy` | bool | `false` | Delete every object version on destroy. Apply before destroying. |
 
 ## Outputs
@@ -55,12 +62,14 @@ Grant access with `artesca-application-identity`, passing
 | `bucket_name` | Bucket name. |
 | `bucket_arn` | Bucket ARN. |
 | `versioning` | Whether versioning is enabled. |
+| `cleanup_rule_id` | Cleanup rule ID, or null. |
 | `expiration_rule_id` | Expiration rule ID, or null. |
 
 ## Caveats
 
-- **Expiration covers current versions only.** On a versioned bucket it adds
-  a delete marker and older versions remain. Rules for noncurrent versions
-  and incomplete multipart uploads aren't available.
+- **`expiration_days` adds a delete marker on a versioned bucket.** The
+  older version then becomes noncurrent and is deleted by the cleanup rule.
+- **Cleanup and expiration are separate rules.** ARTESCA rejects delete-marker
+  removal in a rule that also expires current versions.
 - **Destroy needs an empty bucket** unless `force_destroy = true` was applied
   first.

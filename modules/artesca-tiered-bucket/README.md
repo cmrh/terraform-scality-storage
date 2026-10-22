@@ -15,7 +15,7 @@ days: a RING bucket (warm) or a Versity tape archive (cold).
 
 ## Prerequisites
 
-- cmrh/artesca provider 1.1 or later.
+- cmrh/artesca provider 1.2 or later.
 - The target location, e.g. from `artesca-storage-location`.
 - **RING target:** after the move the data lives only on RING. The location's
   key needs `s3:GetObject` and `s3:GetObjectVersion`, or reads through ARTESCA

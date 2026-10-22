@@ -15,7 +15,7 @@ or OpenTofu state, and a user whose key can read and write that bucket only.
 
 ## Prerequisites
 
-- cmrh/artesca provider 1.1 or later.
+- cmrh/artesca provider 1.2 or later.
 
 ## Usage
 
