@@ -41,7 +41,7 @@ If the site can reach an internal Git server, mirror the repository there and
 point a Git source at that host:
 
 ```hcl
-source = "git::https://git.internal.example.com/mirror/terraform-scality-storage.git//modules/scality-terraform-state-bootstrap?ref=v1.2.0"
+source = "git::https://git.internal.example.com/mirror/terraform-scality-storage.git//modules/scality-terraform-state-bootstrap?ref=v1.3.0"
 ```
 
 ---
