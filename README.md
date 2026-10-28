@@ -82,7 +82,7 @@ module "tofu_state" {
 commit or branch, or without the registry, a Git source works too:
 
 ```hcl
-source = "git::https://github.com/cmrh/terraform-scality-storage.git//modules/scality-terraform-state-bootstrap?ref=v1.2.0"
+source = "git::https://github.com/cmrh/terraform-scality-storage.git//modules/scality-terraform-state-bootstrap?ref=v1.3.0"
 ```
 
 **Air-gapped or restricted networks** (no registry or GitHub access) need both

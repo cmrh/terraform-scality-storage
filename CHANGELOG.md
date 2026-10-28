@@ -6,6 +6,8 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-28
+
 ### Added
 - Documentation site on GitHub Pages, built from the module and example
   READMEs and `docs/`, deployed on each release tag. Adds pointer pages on
