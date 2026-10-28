@@ -5,6 +5,14 @@ resource "scality_bucket" "this" {
   object_lock_enabled = true
   versioning          = true
   tags                = var.tags
+
+  # Import leaves both null: object_lock_enabled would force a replacement, and
+  # setting versioning fails on an object-lock bucket (InvalidBucketState).
+  # Object lock can't be disabled and keeps versioning on, so ignoring them
+  # hides no drift.
+  lifecycle {
+    ignore_changes = [object_lock_enabled, versioning]
+  }
 }
 
 resource "scality_bucket_encryption" "this" {

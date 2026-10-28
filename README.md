@@ -89,6 +89,9 @@ source = "git::https://github.com/cmrh/terraform-scality-storage.git//modules/sc
 the modules and the provider served locally — see
 [docs/offline-install.md](docs/offline-install.md).
 
+**Buckets and users created by hand** can be adopted into the modules without
+recreating them — see [docs/adoption.md](docs/adoption.md).
+
 Each module's `README.md` documents its inputs, outputs, and any provider
 quirks relevant to that use case.
 
