@@ -25,6 +25,8 @@ When `console_login = true`:
 When `console_login = false`:
 - `scality_account` (with optional `custom_attributes` and
   `external_account_id`)
+- `scality_account_access_key`, only when `account_credentials` is set
+  (adopting an existing account)
 
 ## Usage
 
@@ -71,6 +73,14 @@ module "ci_account" {
 }
 ```
 
+### Adopting an existing account
+
+Import the account into `scality_account.this[0]` with `console_login = false`
+(also for an account created through the Console) and pass one of its existing
+keys in `account_credentials`. The module creates a Terraform-owned key from it
+for the `access_key` / `secret_key` outputs. Leave `external_account_id` unset.
+See [Adopting the account](../../docs/adoption.md#adopting-the-account).
+
 ### Composing with downstream resources
 
 The `access_key` / `secret_key` outputs feed any account-scoped Scality
@@ -102,6 +112,8 @@ resource "scality_bucket" "acme_data" {
 | `account_quota` | number | `null` | Max bytes; `null` leaves it unset; `0` sets no limit. Forces replacement. | both |
 | `external_account_id` | string | `null` | External integration ID. Forces replacement. | only `console_login = false` |
 | `account_attributes` | map(string) | `{}` | Custom key-value metadata. Max 10 entries. | only `console_login = false` |
+| `account_credentials` | object({ access_key, secret_key }) (sensitive) | `null` | Existing key of an adopted account. The module creates its own key from it; keep this key valid and the input set. | only `console_login = false` |
+
 ## Outputs
 
 | Name | Description | Sensitive | Available when |
@@ -109,7 +121,7 @@ resource "scality_bucket" "acme_data" {
 | `account_name` | Created account name. | No | both |
 | `account_id` | Account identifier. | No | both |
 | `created_at` | Creation timestamp (ISO 8601). | No | both |
-| `access_key` | Stable S3 access key (layered when `console_login = true`). | Yes | both |
+| `access_key` | Stable S3 access key (layered when `console_login = true` or `account_credentials` is set). | Yes | both |
 | `secret_key` | Stable S3 secret key. | Yes | both |
 | `console_password` | Auto-generated UI password. Customer should change it in Console after first login. | Yes | only `console_login = true` (null otherwise) |
 | `account_arn` | Account ARN. | No | only `console_login = false` (null otherwise) |

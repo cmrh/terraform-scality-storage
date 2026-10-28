@@ -31,3 +31,13 @@ variable "account_attributes" {
   default     = {}
   description = "Custom attributes (key-value metadata) for the account. Only effective when console_login = false (scality_console_account does not accept custom attributes). Max 10 attributes per account."
 }
+
+variable "account_credentials" {
+  type = object({
+    access_key = string
+    secret_key = string
+  })
+  default     = null
+  sensitive   = true
+  description = "An existing access key of the account, for adopting an account created outside this module (import it into scality_account.this[0]). Requires console_login = false. The module creates a Terraform-owned key from it and outputs that key. The key passed here must stay valid and set: the module uses it to manage the new key."
+}

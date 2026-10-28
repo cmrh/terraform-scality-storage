@@ -1,6 +1,6 @@
-# Adopting existing buckets and users
+# Adopting existing accounts, buckets and users
 
-Bring buckets and users created by hand under the modules without recreating
+Bring accounts, buckets and users created by hand under the modules without recreating
 them. `scripts/scality-adopt.sh` reads an account and writes module calls plus
 `import {}` blocks; you review, plan, and apply.
 
@@ -14,8 +14,9 @@ them. `scripts/scality-adopt.sh` reads an account and writes module calls plus
 
 Not covered, listed on stderr and left as they are: bucket policies, bucket
 logging, replication, roles, groups, users with no or several inline policies,
-and managed policy attachments. The account itself must already exist; it isn't
-adopted.
+and managed policy attachments. The script doesn't adopt the account itself;
+to bring the account under `scality-account-management` too, see
+[Adopting the account](#adopting-the-account).
 
 ## Before you start
 
@@ -131,3 +132,58 @@ A user can hold 4 access keys; the script flags users already at the limit.
 The `import {}` blocks have done their job and can be deleted. The state now
 holds the account credentials and the new user keys; see
 [secrets](pointers/secrets.md) for keeping them safe.
+
+## Adopting the account
+
+An existing account, created through the Console or through IAM, can be
+imported into `scality-account-management` or
+`scality-terraform-state-bootstrap`. Import can't read back the account's
+keys, so pass one of its existing keys in `account_credentials`; the module
+creates a Terraform-owned key from it and outputs that key to the modules
+chained after it.
+
+```hcl
+variable "account_credentials" {
+  type = object({
+    access_key = string
+    secret_key = string
+  })
+  sensitive = true
+}
+
+module "acme" {
+  source  = "cmrh/storage/scality//modules/scality-account-management"
+  version = "~> 1.3"
+
+  account_name        = "acme"
+  account_email       = "platform@acme.example.com"   # as registered
+  console_login       = false
+  account_credentials = var.account_credentials
+}
+
+import {
+  to = module.acme.scality_account.this[0]
+  id = "acme"
+}
+```
+
+```bash
+export TF_VAR_account_credentials='{"access_key":"...","secret_key":"..."}'
+terraform plan    # expect: the account imported, a new key added, 0 to destroy
+```
+
+For `scality-terraform-state-bootstrap`, the import address is
+`module.<name>.scality_account.state[0]`.
+
+- **Use `console_login = false`, even for an account created through the
+  Console.** Console login keeps working. Importing as `console_login = true`
+  would replace the account, because its settings can't be read back.
+- **Leave `external_account_id` unset.** Import doesn't record it, so setting it
+  forces a replacement. The account keeps its external ID.
+- **Keep the key you pass in valid, and keep `account_credentials` set.** The
+  module manages its own key with it; changing it replaces that key.
+- **Destroying an account created through the Console fails** while it still
+  holds the `FullAccessPolicy` and `ReadOnlyPolicy` IAM policies created with
+  it.
+
+Expect a one-off in-place `custom_attributes` change on the account.
