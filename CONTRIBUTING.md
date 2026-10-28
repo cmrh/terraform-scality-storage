@@ -30,7 +30,7 @@ You'll need:
 - A Scality cluster, for anything beyond static checks
 
 The modules use the published `cmrh/scality` and `cmrh/artesca` providers
-from the public registries. `init` resolves it normally, so no local overrides are needed.
+from the public registries.
 
 ## Checks
 
@@ -53,6 +53,7 @@ example under **both** engines. The individual targets:
 | `make validate-all` | Validate with both engines |
 | `make runner-guard` | Check that only `integration.yml` uses the self-hosted runner |
 | `make integration` | Apply, re-plan and destroy the integration configs against live clusters (needs credentials) |
+| `make docs` | Build the documentation site into `build/site` (needs `pip install -r .github/docs-requirements.txt`) |
 
 Modules that declare `configuration_aliases` (e.g. `scality-s3-crr`) are validated
 through their examples, because Terraform can't validate them standalone.

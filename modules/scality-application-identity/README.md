@@ -132,10 +132,8 @@ terraform output -raw acme_app_secret_key  # → AWS_SECRET_ACCESS_KEY
 | `policy_document` | string | `null` | Custom JSON policy. Overrides `access_pattern` + `bucket_arns` when set. |
 | `policy_name` | string | `null` | Inline policy name. Defaults to `<username>-policy`. |
 
-> When `policy_document` is set, `access_pattern` and `bucket_arns` are
-> ignored. Either provide `bucket_arns` (with a preset) or
-> `policy_document` — providing neither will fail at plan time with a
-> precondition error.
+> Either provide `bucket_arns` (with a preset) or `policy_document`;
+> providing neither fails at plan time.
 
 ## Outputs
 
@@ -152,8 +150,7 @@ terraform output -raw acme_app_secret_key  # → AWS_SECRET_ACCESS_KEY
 
 ## Caveats
 
-- **Most fields force replacement.** Username, policy name, and access
-  key changes destroy and recreate. `policy_document` updates apply
+- **Username, policy name and access key changes force replacement.** `policy_document` updates apply
   in-place; toggling between a preset and a custom document also applies
   in-place since only the policy content changes.
 - **Secret key is one-time.** The Scality IAM API does not return secret

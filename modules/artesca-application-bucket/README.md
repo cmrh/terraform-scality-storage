@@ -3,8 +3,7 @@
 An ARTESCA bucket with versioning, default encryption, lifecycle cleanup,
 optional tags and an optional expiration rule.
 
-> Compatible with both Terraform and OpenTofu. Examples below use
-> `terraform`; substitute `tofu` if you use OpenTofu.
+> Compatible with both Terraform and OpenTofu.
 
 ## What it creates
 
@@ -73,4 +72,4 @@ Grant access with `artesca-application-identity`, passing
   encryption and lifecycle rules, and the second apply recreates them.
   Setting it back to `false` leaves object lock on.
 - **Destroy fails on a bucket that still holds objects** (`Bucket not
-  empty`), unless `force_destroy = true` was applied first.
+  empty`); see `force_destroy`.

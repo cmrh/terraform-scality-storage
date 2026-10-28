@@ -2,8 +2,7 @@
 
 An ARTESCA account and its S3 keys.
 
-> Compatible with both Terraform and OpenTofu. Examples below use
-> `terraform`; substitute `tofu` if you use OpenTofu.
+> Compatible with both Terraform and OpenTofu.
 
 ## What it creates
 

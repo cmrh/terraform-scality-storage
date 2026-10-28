@@ -16,9 +16,6 @@ the `console_login` flag:
 |---|---|---|---|---|
 | `true` (default) | `scality_console_account` | Tenant accounts where customers/admins need to log into the Console | Yes — random password generated, exposed via `console_password` output | Bootstrap S3 key is **UI-owned** (the Console can rotate it). The module always layers an additional `scality_account_access_key` that Terraform owns exclusively, and that's the credential exposed by the `access_key`/`secret_key` outputs. |
 | `false` | `scality_account` | Headless / automation accounts | No | Bootstrap S3 key is already Terraform-owned, no layered key needed. Supports `account_attributes` and `external_account_id`. |
-
-**Changing the flag after apply replaces the account** (see caveats).
-
 ## What it creates
 
 When `console_login = true`:
@@ -105,11 +102,6 @@ resource "scality_bucket" "acme_data" {
 | `account_quota` | number | `null` | Max bytes; `null` leaves it unset; `0` sets no limit. Forces replacement. | both |
 | `external_account_id` | string | `null` | External integration ID. Forces replacement. | only `console_login = false` |
 | `account_attributes` | map(string) | `{}` | Custom key-value metadata. Max 10 entries. | only `console_login = false` |
-
-> When `console_login = true`, `external_account_id` and
-> `account_attributes` are silently ignored — `scality_console_account`
-> does not accept those fields.
-
 ## Outputs
 
 | Name | Description | Sensitive | Available when |

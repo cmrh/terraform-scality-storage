@@ -1,4 +1,4 @@
-# artesca / edge-replication
+# artesca-edge-replication
 
 An ARTESCA account with a versioned bucket on ARTESCA's default storage,
 replicated to a RING bucket, in one of two modes:
@@ -10,13 +10,7 @@ replicated to a RING bucket, in one of two modes:
 
 Optionally creates IAM users with keys that can read and write the bucket.
 
-Pair it with
-[`scality-ring-replication-target`](../scality-ring-replication-target),
-which creates the RING bucket, the key the location uses and, for `crr`,
-the destination role.
-
-> Compatible with both Terraform and OpenTofu. Examples below use
-> `terraform`; substitute `tofu` if you use OpenTofu.
+> Compatible with both Terraform and OpenTofu.
 
 ## What it creates
 
@@ -38,7 +32,8 @@ Objects keep their keys at the root of the RING bucket in both modes.
 - ARTESCA can reach the RING S3 endpoint. Prefer `https://`: the location's
   key and every replicated object pass through it.
 - A RING bucket and key that the location can use, from
-  `scality-ring-replication-target`: `purpose = "replication"` for `ring-s3`,
+  [`scality-ring-replication-target`](../scality-ring-replication-target):
+  `purpose = "replication"` for `ring-s3`,
   `purpose = "crr"` for `crr` (which also gives `role_arn`).
 
 ## Usage
@@ -61,8 +56,7 @@ module "edge" {
 }
 ```
 
-CRR over STS, with `scality-ring-replication-target` created with
-`purpose = "crr"`:
+CRR over STS:
 
 ```hcl
 module "edge" {
@@ -96,13 +90,13 @@ module "edge" {
 | `mode` | string | `"ring-s3"` | `ring-s3` or `crr`. Changing it replaces the location. |
 | `ring_sts_endpoint` | string | `null` | RING STS endpoint, as ARTESCA reaches it. Required for `crr`. |
 | `ring_role_arn` | string | `null` | Destination role on RING. Required for `crr`. |
-| `location_name` | string | (required) | RING location name. Locations are instance-wide, so make it unique. |
+| `location_name` | string | (required) | RING location name. Instance-wide. |
 | `ring_endpoint` | string | (required) | RING S3 endpoint URL. |
 | `ring_bucket_name` | string | (required) | RING target bucket (versioned). |
 | `ring_access_key` | string (sensitive) | (required) | RING key the location uses. |
 | `ring_secret_key` | string (sensitive) | (required) | Paired with `ring_access_key`. |
 | `replication_enabled` | bool | `true` | Whether the replication rule is active. |
-| `force_destroy` | bool | `false` | Lets destroy delete the bucket's objects and the users' policies. Set it and apply before destroying. |
+| `force_destroy` | bool | `false` | Delete every object version and the users' policies on destroy. Apply before destroying. |
 
 ## Outputs
 
@@ -118,5 +112,5 @@ module "edge" {
 ## Caveats
 
 - **Changing the RING key updates the location in place.**
-- **Destroy:** set `force_destroy = true` and apply first. The RING bucket
-  is managed separately and must be emptied before it can be deleted.
+- **The RING bucket is managed separately** and must be emptied before it
+  can be deleted.

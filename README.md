@@ -9,6 +9,10 @@ provider (ARTESCA).
 
 > Compatible with both Terraform and [OpenTofu](https://opentofu.org/). Examples use `terraform` or `tofu`; use whichever you run.
 
+Browse everything on the [documentation site](https://cmrh.github.io/terraform-scality-storage/),
+including pointers on [state locking](docs/pointers/state-locking.md) and
+[secrets](docs/pointers/secrets.md).
+
 ## Module catalog
 
 ### Scality (S3C / RING)
@@ -112,10 +116,6 @@ for the environment variables it reads. `init` installs only the providers
 the modules you call need: `scality-*` modules pull `cmrh/scality`,
 `artesca-*` modules pull `cmrh/artesca`, and only configurations that use
 both (like the hybrid examples) pull both.
-
-Air-gapped or dark-site deployments that can't reach the public registry at
-init time: see [docs/offline-install.md](docs/offline-install.md) for setting
-up a provider mirror.
 
 ## Contributing
 

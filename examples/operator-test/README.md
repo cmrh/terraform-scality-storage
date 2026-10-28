@@ -13,10 +13,6 @@ operator       ->  app user (read-write on bucket)
 Cluster-admin and account-root credentials are used only for the
 account and operator bootstrap. Everything past that is operator-driven.
 
-Both `apply` and `destroy` must succeed end-to-end. It checks the
-`scality-application-identity` output dependency graph: the operator's
-policy must outlive every resource that uses the operator's keys.
-
 ## Configure
 
 Provider credentials via environment:

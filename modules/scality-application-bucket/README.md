@@ -22,9 +22,9 @@ resource is created.
 
 ## Recommended caller pattern
 
-Same as the rest of this repo: pass operator credentials (output of
-`account-operator`) as `account_access_key` / `account_secret_key`.
-Reserve account-root credentials for break-glass scenarios.
+Pass operator credentials (output of `scality-account-operator`) as
+`account_access_key` / `account_secret_key`. Reserve account-root
+credentials for break-glass.
 
 ## Usage
 

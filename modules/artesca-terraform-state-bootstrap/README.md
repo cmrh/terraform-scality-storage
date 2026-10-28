@@ -3,8 +3,7 @@
 A dedicated ARTESCA account with a versioned, encrypted bucket for Terraform
 or OpenTofu state, and a user whose key can read and write that bucket only.
 
-> Compatible with both Terraform and OpenTofu. Examples below use
-> `terraform`; substitute `tofu` if you use OpenTofu.
+> Compatible with both Terraform and OpenTofu.
 
 ## What it creates
 
@@ -77,6 +76,7 @@ terraform {
 
 - **No state locking through the S3 backend.** ARTESCA ignores conditional
   writes (`If-None-Match`), so `use_lockfile` doesn't prevent concurrent
-  writes. If you need locking, use a backend that has it.
+  writes. See [State locking](../../docs/pointers/state-locking.md) for
+  whether you need locking and how to add it.
 - **Destroy needs an empty bucket.** The module has no `force_destroy` on
   purpose: delete the state objects (every version) first.

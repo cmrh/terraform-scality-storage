@@ -3,8 +3,7 @@
 An ARTESCA bucket whose objects move to another location after a number of
 days: a RING bucket (warm) or a Versity tape archive (cold).
 
-> Compatible with both Terraform and OpenTofu. Examples below use
-> `terraform`; substitute `tofu` if you use OpenTofu.
+> Compatible with both Terraform and OpenTofu.
 
 ## What it creates
 
@@ -24,9 +23,8 @@ days: a RING bucket (warm) or a Versity tape archive (cold).
   fail. Without delete rights, a permanent delete through ARTESCA leaves the
   data on RING. `scality-ring-replication-target` with `purpose = "tiering"`
   creates a key with both read and delete rights.
-- **Cold target (`versity-tape`):** the location's endpoint must use TLS
-  (`https://`). Setting up TLS is up to you: a certificate on the endpoint
-  that ARTESCA trusts, or ARTESCA configured not to verify it.
+- **Cold target (`versity-tape`):** see the `artesca-storage-location`
+  prerequisites.
 
 ## Usage
 
@@ -71,5 +69,3 @@ module "bucket" {
 - **Objects move on ARTESCA's lifecycle schedule, not at an exact time.**
   `transition_days` makes an object eligible; even `0` doesn't move it
   immediately.
-- **Only current versions move by default.** Set `noncurrent_transition_days`
-  to move noncurrent versions too.

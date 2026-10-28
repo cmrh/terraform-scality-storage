@@ -20,18 +20,12 @@ When `console_login = false`:
 - `scality_account` (no UI; supports `account_attributes`)
 - The same bucket + encryption + lifecycle as above
 
-The default mirrors `scality-account-management` for consistency. Set
-`console_login = false` if you want a strictly headless state account
-without UI access.
-
 ## Two modes — `console_login`
 
 | `console_login` | Account resource | UI access | Bootstrap key ownership | Layered stable key? |
 |---|---|---|---|---|
 | `true` (default) | `scality_console_account` | Yes — password output via `console_password` | UI-owned (rotatable from Console) | Yes — `scality_account_access_key` |
 | `false` | `scality_account` | No | Terraform-owned | No (the bootstrap key is used directly) |
-
-**Don't change `console_login` after apply.** See the caveat below.
 
 ## Usage
 
@@ -146,20 +140,11 @@ terraform init
 
 ## State Locking
 
-For state locking, configure your downstream projects with a
-Terraform/OpenTofu backend that has built-in locking:
-
-| Backend | Locking |
-|---|---|
-| [`pg`](https://opentofu.org/docs/language/settings/backends/pg/) | Postgres advisory lock |
-| [`http`](https://opentofu.org/docs/language/settings/backends/http/) with a lock-aware server | Server-side locks |
-| Terraform Cloud / Scalr / Spacelift / etc. | Built into the platform |
-
-These backends manage state on their own infrastructure rather than in
-S3. The state bucket created by this module is suitable for storing
-state in single-operator workflows or as a snapshot store alongside
-one of these backends. Object versioning on the bucket preserves prior
-state file content for recovery in either case.
+Scality storage ignores conditional writes (`If-None-Match`), so the S3
+backend's `use_lockfile` doesn't prevent concurrent writes. Whether you need
+locking, and how to add it, is covered in
+[State locking](../../docs/pointers/state-locking.md). Object versioning on
+the bucket keeps prior state versions for recovery.
 
 ## Inputs
 
@@ -175,10 +160,6 @@ state file content for recovery in either case.
 | `kms_master_key_id` | string | `null` | KMS key ID, used with `sse_algorithm = "aws:kms"`. | both |
 | `abort_incomplete_multipart_upload_days` | number | `7` | Days after which incomplete MPUs are aborted. | both |
 | `noncurrent_version_expiration_days` | number | `90` | Days after which superseded state versions expire. | both |
-
-> When `console_login = true`, `account_attributes` is silently ignored —
-> `scality_console_account` does not accept custom attributes.
-
 ## Outputs
 
 | Name | Description | Sensitive | Available when |

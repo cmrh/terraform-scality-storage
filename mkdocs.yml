@@ -1,0 +1,39 @@
+# Base configuration for the documentation site. Don't build from this file
+# directly: `make docs` assembles the pages and a generated nav under build/
+# and builds from build/mkdocs.yml, which inherits this one.
+site_name: Terraform modules for Scality storage
+site_url: https://cmrh.github.io/terraform-scality-storage/
+repo_url: https://github.com/cmrh/terraform-scality-storage
+repo_name: cmrh/terraform-scality-storage
+edit_uri: ""
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+validation:
+  links:
+    anchors: warn
