@@ -13,6 +13,10 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - `scripts/scality-adopt.sh` and `docs/adoption.md`: adopt buckets and users
   created by hand into the bucket and identity modules with `import {}`
   blocks, without recreating them. (#61)
+- `scality-account-management` and `scality-terraform-state-bootstrap`:
+  `account_credentials` input for adopting an existing account. The module
+  creates a Terraform-owned key from the given key, since import can't recover
+  the account's own. Documented in `docs/adoption.md`. (#62)
 
 ### Changed
 - `RELEASING.md`: a minor release may raise minimum provider versions and add

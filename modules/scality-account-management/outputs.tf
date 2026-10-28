@@ -24,14 +24,14 @@ output "canonical_id" {
 }
 
 output "access_key" {
-  description = "Stable S3 access key. When console_login = true, this is the layered scality_account_access_key (UI-independent). When false, this is the scality_account-generated bootstrap key (already Terraform-owned)."
-  value       = var.console_login ? scality_account_access_key.stable[0].access_key : scality_account.this[0].access_key
+  description = "Stable S3 access key. The layered scality_account_access_key when console_login = true or account_credentials is set; otherwise the scality_account-generated bootstrap key (already Terraform-owned)."
+  value       = var.console_login || local.adopted ? scality_account_access_key.stable[0].access_key : scality_account.this[0].access_key
   sensitive   = true
 }
 
 output "secret_key" {
   description = "Stable S3 secret key paired with access_key."
-  value       = var.console_login ? scality_account_access_key.stable[0].secret_key : scality_account.this[0].secret_key
+  value       = var.console_login || local.adopted ? scality_account_access_key.stable[0].secret_key : scality_account.this[0].secret_key
   sensitive   = true
 }
 

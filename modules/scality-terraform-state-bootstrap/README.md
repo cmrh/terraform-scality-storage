@@ -18,6 +18,8 @@ By default (`console_login = true`):
 
 When `console_login = false`:
 - `scality_account` (no UI; supports `account_attributes`)
+- `scality_account_access_key`, only when `account_credentials` is set
+  (adopting an existing account)
 - The same bucket + encryption + lifecycle as above
 
 ## Two modes — `console_login`
@@ -104,6 +106,14 @@ module "tf_state" {
 
 `console_password` is `null` in this mode.
 
+### Adopting an existing account
+
+Import the account into `scality_account.state[0]` with `console_login = false`
+and pass one of its existing keys in `account_credentials`. The module creates
+a Terraform-owned key from it and uses that key for the bucket and the
+`access_key` / `secret_key` outputs. See
+[Adopting the account](../../docs/adoption.md#adopting-the-account).
+
 ## Configuring downstream projects
 
 In every downstream project that should store state in this bucket:
@@ -160,6 +170,8 @@ the bucket keeps prior state versions for recovery.
 | `kms_master_key_id` | string | `null` | KMS key ID, used with `sse_algorithm = "aws:kms"`. | both |
 | `abort_incomplete_multipart_upload_days` | number | `7` | Days after which incomplete MPUs are aborted. | both |
 | `noncurrent_version_expiration_days` | number | `90` | Days after which superseded state versions expire. | both |
+| `account_credentials` | object({ access_key, secret_key }) (sensitive) | `null` | Existing key of an adopted account. The module creates its own key from it; keep this key valid and the input set. | only `console_login = false` |
+
 ## Outputs
 
 | Name | Description | Sensitive | Available when |

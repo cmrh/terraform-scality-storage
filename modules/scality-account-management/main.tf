@@ -17,11 +17,23 @@ resource "scality_account" "this" {
   custom_attributes   = var.account_attributes
 }
 
-# Layered stable key — Terraform-owned, independent of the UI lifecycle.
-# Only when using the Console resource (its bootstrap key belongs to the UI).
-resource "scality_account_access_key" "stable" {
-  count = var.console_login ? 1 : 0
+locals {
+  adopted = var.account_credentials != null
+}
 
-  account_access_key = scality_console_account.this[0].access_key
-  account_secret_key = scality_console_account.this[0].secret_key
+# Layered stable key — Terraform-owned. Created from the Console's bootstrap
+# key (which belongs to the UI), or from account_credentials when adopting an
+# existing account (import doesn't recover the account's own keys).
+resource "scality_account_access_key" "stable" {
+  count = var.console_login || local.adopted ? 1 : 0
+
+  account_access_key = local.adopted ? var.account_credentials.access_key : scality_console_account.this[0].access_key
+  account_secret_key = local.adopted ? var.account_credentials.secret_key : scality_console_account.this[0].secret_key
+
+  lifecycle {
+    precondition {
+      condition     = !(local.adopted && var.console_login)
+      error_message = "account_credentials requires console_login = false."
+    }
+  }
 }

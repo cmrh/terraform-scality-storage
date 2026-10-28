@@ -66,3 +66,13 @@ variable "noncurrent_version_expiration_days" {
   description = "Days after which superseded state versions are permanently deleted. Set high enough to comfortably roll back from accidental corruption."
   default     = 90
 }
+
+variable "account_credentials" {
+  type = object({
+    access_key = string
+    secret_key = string
+  })
+  default     = null
+  sensitive   = true
+  description = "An existing access key of the account, for adopting an account created outside this module (import it into scality_account.state[0]). Requires console_login = false. The module creates a Terraform-owned key from it and uses that key. The key passed here must stay valid and set: the module uses it to manage the new key."
+}
