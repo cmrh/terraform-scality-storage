@@ -182,8 +182,10 @@ For `scality-terraform-state-bootstrap`, the import address is
   forces a replacement. The account keeps its external ID.
 - **Keep the key you pass in valid, and keep `account_credentials` set.** The
   module manages its own key with it; changing it replaces that key.
-- **Destroying an account created through the Console fails** while it still
-  holds the `FullAccessPolicy` and `ReadOnlyPolicy` IAM policies created with
-  it.
+- **Destroy deletes the account only once its IAM content is gone** (groups,
+  policies, users). An adopted account may already hold some, such as
+  `FullAccessGroup` / `FullAccessPolicy` and `ReadOnlyGroup` /
+  `ReadOnlyPolicy`. Before destroying, detach the policies from the groups,
+  then delete the groups, then the policies.
 
 Expect a one-off in-place `custom_attributes` change on the account.
