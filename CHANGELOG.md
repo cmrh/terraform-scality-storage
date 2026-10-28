@@ -6,10 +6,18 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Documentation site on GitHub Pages, built from the module and example
+  READMEs and `docs/`, deployed on each release tag. Adds pointer pages on
+  state locking and secrets, including OpenTofu state encryption.
+
 ### Changed
 - `RELEASING.md`: a minor release may raise minimum provider versions and add
   default resources, listed in the CHANGELOG; a major release is for removed
   or renamed inputs, outputs or module paths, and replacements on upgrade.
+- Docs: removed repeated text across module and example READMEs. The
+  `s3-crr-*` examples follow the same layout as the others, and the PR
+  template's breaking-change definition matches `RELEASING.md`.
 
 ## [1.2.0] - 2026-10-22
 

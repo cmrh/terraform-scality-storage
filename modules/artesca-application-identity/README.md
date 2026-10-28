@@ -3,8 +3,7 @@
 An IAM user in an ARTESCA account, with an access key and an inline policy
 scoped to specific buckets.
 
-> Compatible with both Terraform and OpenTofu. Examples below use
-> `terraform`; substitute `tofu` if you use OpenTofu.
+> Compatible with both Terraform and OpenTofu.
 
 ## What it creates
 
@@ -21,9 +20,6 @@ Each preset covers only the buckets in `bucket_arns`.
 | `read-only` | `s3:GetObject`, `s3:GetObjectVersion` | `s3:ListBucket`, `s3:GetBucketLocation`, `s3:ListBucketVersions` |
 | `read-write` (default) | `s3:GetObject`, `s3:GetObjectVersion`, `s3:PutObject`, `s3:DeleteObject`, `s3:DeleteObjectVersion` | `s3:ListBucket`, `s3:GetBucketLocation`, `s3:ListBucketVersions` |
 | `bucket-admin` | `s3:*` | `s3:*` |
-
-None of the presets grants access to any other bucket.
-
 ## Prerequisites
 
 - cmrh/artesca provider 1.1 or later.

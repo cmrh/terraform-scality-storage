@@ -3,8 +3,7 @@
 An ARTESCA storage location backed by a Scality RING bucket or a Versity tape
 archive, with an optional S3 endpoint that serves it.
 
-> Compatible with both Terraform and OpenTofu. Examples below use
-> `terraform`; substitute `tofu` if you use OpenTofu.
+> Compatible with both Terraform and OpenTofu.
 
 ## What it creates
 
@@ -24,10 +23,9 @@ as a replication destination.
   deletes them there.
 - ARTESCA can reach the endpoint. It checks the bucket when it creates the
   location.
-- Prefer an `https://` endpoint for every type: the location's key and the
-  data pass through it.
-- `versity-tape`: an `https://` endpoint. Setting up TLS is up to you: a
-  certificate that ARTESCA trusts, or ARTESCA configured not to verify it.
+- An `https://` endpoint (required for `versity-tape`): the location's key
+  and the data pass through it. Setting up TLS is up to you: a certificate
+  that ARTESCA trusts, or ARTESCA configured not to verify it.
 
 ## Usage
 

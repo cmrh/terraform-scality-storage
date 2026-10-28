@@ -40,7 +40,6 @@ Pre-releases use a suffix (`v1.3.0-rc1`).
 - **Tags are immutable.** Never move or delete a released tag. Registries and
   consumers treat a published version as fixed. To fix a bad release, cut a
   new patch release.
-- **Only tag commits on `main`** that passed CI.
 
 ## Registry publishing
 

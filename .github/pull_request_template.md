@@ -12,7 +12,7 @@ Closes #
 - [ ] Example
 - [ ] Documentation
 - [ ] CI / repository tooling
-- [ ] Breaking change (removed/renamed inputs or outputs, changed defaults, raised minimum versions)
+- [ ] Breaking change (removed/renamed inputs, outputs or module paths; forced replacement on upgrade)
 
 ## Test plan
 

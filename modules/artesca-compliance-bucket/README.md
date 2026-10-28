@@ -3,8 +3,7 @@
 An ARTESCA bucket with object lock and a default retention, for records that
 must not be deleted or changed for a set period.
 
-> Compatible with both Terraform and OpenTofu. Examples below use
-> `terraform`; substitute `tofu` if you use OpenTofu.
+> Compatible with both Terraform and OpenTofu.
 
 ## What it creates
 

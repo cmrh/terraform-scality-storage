@@ -1,48 +1,32 @@
 # Example: one-direction CRR
 
-End-to-end runnable example wiring source → destination cross-region
-replication between two Scality clusters. Stands up everything the
-feature needs in a single `tofu apply`:
+Creates one-direction cross-region replication between two Scality clusters:
 
 - An account on each cluster (`scality-account-management`)
-- A full-access operator user on each account (`account-operator`)
-- A versioned bucket on each cluster (`application-bucket`)
-- IAM roles, policies, and the replication configuration (`s3-crr`)
+- A full-access operator user on each account (`scality-account-operator`)
+- A versioned bucket on each cluster (`scality-application-bucket`)
+- IAM roles, policies, and the replication configuration (`scality-s3-crr`)
 - A writer user on source and a reader user on dest, for verification
-  (`application-identity`)
+  (`scality-application-identity`)
 
+The operator keys are outputs too (`source_operator_access_key` and so on).
 For active-active replication, see [`s3-crr-bidirectional`](../s3-crr-bidirectional/).
 
-## Prerequisites
+## Run
 
-- Two reachable Scality clusters
-- Cluster-admin credentials for each (one set per cluster)
-- `tofu` (or `terraform`) installed
-- `aws` CLI for verification
-
-## Credentials
-
-The source cluster is configured by the provider's standard
-environment variables; the destination is configured by Terraform
-input variables.
+The source cluster is configured by the provider's environment variables, the
+destination by input variables. Both need cluster-admin credentials.
 
 ```bash
-# Source cluster — read natively by the scality provider
 export SCALITY_ENDPOINT=https://s3.source.example.com
 export SCALITY_ACCESS_KEY=...
 export SCALITY_SECRET_KEY=...
 
-# Destination cluster — Terraform-level inputs
 export TF_VAR_dest_endpoint=https://s3.dest.example.com
 export TF_VAR_dest_access_key=...
 export TF_VAR_dest_secret_key=...
-```
 
-## Apply
-
-```bash
 tofu init
-tofu plan
 tofu apply
 ```
 
@@ -62,7 +46,7 @@ AWS_ACCESS_KEY_ID=$SRC_AK AWS_SECRET_ACCESS_KEY=$SRC_SK \
   aws --endpoint-url "$SCALITY_ENDPOINT" \
   s3 cp /tmp/test.txt "s3://$SRC_BUCKET/"
 
-# List on dest — CRR is asynchronous; allow a few seconds
+# List on dest — CRR is asynchronous; allow 30 seconds or more
 AWS_ACCESS_KEY_ID=$DST_AK AWS_SECRET_ACCESS_KEY=$DST_SK \
   aws --endpoint-url "$TF_VAR_dest_endpoint" \
   s3 ls "s3://$DST_BUCKET/"
@@ -71,22 +55,11 @@ AWS_ACCESS_KEY_ID=$DST_AK AWS_SECRET_ACCESS_KEY=$DST_SK \
 Add `--no-verify-ssl` to the `aws` commands if your clusters use
 self-signed TLS certificates.
 
-## Day-to-day administration
+## Destroy
 
-The operator credentials (full S3 + IAM on each account) are also
-output, so you can use them directly with the AWS CLI for ongoing
-admin tasks:
-
-```bash
-tofu output -raw source_operator_access_key
-tofu output -raw source_operator_secret_key
-```
-
-## Teardown
+A bucket must be empty before it can be deleted. If you uploaded test
+objects, delete every object version in both buckets first.
 
 ```bash
 tofu destroy
 ```
-
-Removes the buckets, accounts, users, and replication configuration
-in dependency order. No orphans.

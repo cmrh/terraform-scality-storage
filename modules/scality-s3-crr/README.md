@@ -6,13 +6,6 @@ configuration that backbeat acts on. Supports one-direction
 (source → dest) and bidirectional (active-active) topologies via a
 single variable.
 
-CRR end-to-end is a **composed feature** — see "Where this module
-fits" below. This module's contract is narrow on purpose: give it
-pre-existing bucket names and operator credentials on each cluster,
-and it makes replication work between them. It does not create
-accounts, buckets, or application users — those are owned by their
-respective modules.
-
 > Compatible with both Terraform and OpenTofu. Examples below use
 > `terraform`; substitute `tofu` if you use OpenTofu.
 
@@ -52,22 +45,15 @@ Replication wiring:
 - A second `scality_bucket_replication` on the destination bucket
   pointing back at the source bucket (only when `bidirectional = true`)
 
-Each side's IAM policy is identical in shape and action set but
-**scoped to its local bucket only** — backbeat on each cluster only
-holds permissions on its own bucket. The role-pair wired into
-`scality_bucket_replication.role` (`source_role_arn,dest_role_arn`)
-handles cross-cluster routing. The same configuration supports
-one-direction or bidirectional setups; toggling `bidirectional` only
-adds or removes the reverse `scality_bucket_replication`.
-
 **No user is created for CRR.** Replication is performed by the
 **backbeat service** on each cluster, which assumes the IAM role
 above (its trust policy grants `sts:AssumeRole` to
-`Principal.Service = "backbeat"`). Each side's role has permissions
-on its own bucket only; the role pair on `scality_bucket_replication`
-links the two sides. No user-side credential is involved in CRR itself. For application
-traffic or for verifying replication after apply, use
-`scality-application-identity`.
+`Principal.Service = "backbeat"`). Each side's policy is **scoped to its
+local bucket only**; the role pair on `scality_bucket_replication.role`
+(`source_role_arn,dest_role_arn`) links the two sides. Toggling
+`bidirectional` only adds or removes the reverse
+`scality_bucket_replication`. For application traffic or for verifying
+replication after apply, use `scality-application-identity`.
 
 ## Two-provider configuration
 
@@ -220,12 +206,6 @@ module "crr" {
 
 ## Granting application access and verifying replication
 
-Application access and manual verification of replication go through
-dedicated users created with the `scality-application-identity` module — this
-module does not create any users itself. Backbeat performs the
-replication via the IAM role above; no user credential is part of the
-CRR wiring.
-
 Example: a writer on the source side and a reader on the destination
 side, useful both for application traffic and for confirming
 replication after `terraform apply`:
@@ -283,7 +263,7 @@ DST_SK=$(terraform output -raw dest_reader_secret_key)
 AWS_ACCESS_KEY_ID=$SRC_AK AWS_SECRET_ACCESS_KEY=$SRC_SK \
   aws --endpoint-url "$SOURCE_ENDPOINT" s3 cp /etc/hostname "s3://crr-source-data/test"
 
-# List on destination — replication is asynchronous; allow a few seconds
+# List on destination — replication is asynchronous; allow 30 seconds or more
 AWS_ACCESS_KEY_ID=$DST_AK AWS_SECRET_ACCESS_KEY=$DST_SK \
   aws --endpoint-url "$DEST_ENDPOINT" s3 ls "s3://crr-dest-data/"
 ```
@@ -318,22 +298,8 @@ AWS_ACCESS_KEY_ID=$DST_AK AWS_SECRET_ACCESS_KEY=$DST_SK \
   with `Versioning must be 'Enabled' on the bucket to apply a replication
   configuration`. `scality-application-bucket` defaults to
   `versioning = true`.
-- **Lifecycle rules on replicated buckets need care.** The default
-  `scality-application-bucket` `noncurrent_version_expiration_days = 90` is
-  usually fine — replication completes well within that window. If you
-  set very short lifecycle expirations (hours/days), noncurrent versions
-  may expire before replication ships them.
-- **CRR is asynchronous.** There's no synchronous guarantee that an
-  object written to the source is immediately visible on the
-  destination. Allow seconds-to-minutes depending on cluster size and
-  network.
-- **Toggling `bidirectional` only adds or removes the reverse replication.**
-  The IAM roles and policies are symmetric, so the rest of the wiring
-  stays in place.
-- **Use `scality-application-identity` for application or verification access.**
-  Backbeat handles replication via the IAM role this module creates;
-  no user-side credential is part of the CRR mechanics. For app
-  traffic or replication verification, layer `scality-application-identity`
-  on each side.
+- **CRR is asynchronous.** Backbeat checks for new writes every 30
+  seconds, and most objects replicate within minutes. Large objects and
+  slow links between the clusters take longer.
 - **Protect your state file.** It contains the caller credentials
   passed in for each cluster.

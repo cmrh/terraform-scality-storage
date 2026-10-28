@@ -30,3 +30,6 @@ terraform.rc
 
 # Local-only test spikes (state holds live credentials) — not committed
 tests/
+
+# Documentation site build output
+build/

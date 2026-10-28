@@ -4,9 +4,7 @@ Consuming these modules on a dark site — an air-gapped cluster, or any network
 with no egress to the public registries or `github.com` — means `init` has to
 resolve **two independent things locally**: the **modules** themselves, and the
 **providers** they require: `cmrh/scality` for the `scality-*` modules and
-`cmrh/artesca` for the `artesca-*` modules. Vendoring the modules is not enough on
-its own; the provider still has to come from somewhere `init` can reach. This
-document covers both.
+`cmrh/artesca` for the `artesca-*` modules.
 
 > Commands below show `tofu`; `terraform` works identically — same
 > subcommands, same CLI-config blocks, only the binary name differs. Use
@@ -54,7 +52,7 @@ The modules declare the
 [`cmrh/scality`](https://registry.opentofu.org/providers/cmrh/scality) and
 [`cmrh/artesca`](https://registry.opentofu.org/providers/cmrh/artesca)
 providers.
-A normal `init` pulls it from the registry over the internet; a dark site can't.
+A normal `init` pulls them from the registry over the internet; a dark site can't.
 Instead of carrying the binaries around by hand, use a **provider mirror**: a registry-protocol-compatible copy that
 `init` resolves locally. A lockfile committed from an online `init` pins the
 versions and checksums, and an offline `init` accepts it unchanged.
@@ -154,9 +152,6 @@ export TF_CLI_CONFIG_FILE=/path/to/offline.tfrc
 tofu init
 ```
 
-The served directory is exactly what `tofu providers mirror` produces above —
-generate once, host once, every consumer inits against it.
-
 ### Pinning and the lockfile
 
 Commit `.terraform.lock.hcl` so the dark site installs the *same* version and
@@ -171,5 +166,4 @@ tofu providers lock \
 ```
 
 When the provider releases a new version, re-run the `providers mirror` step on
-the connected machine, refresh the mirror, and update the lockfile — there's no
-other moving part to maintain.
+the connected machine, refresh the mirror, and update the lockfile.

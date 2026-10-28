@@ -34,8 +34,7 @@ This module is a thin wrapper over `application-identity`:
   loaded from `policy.json` inside the module
 
 If you want to replicate this manually, use `application-identity` with
-your own `policy_document`. This module just gives the canonical pattern
-a named place in the catalog.
+your own `policy_document`.
 
 ## Usage
 

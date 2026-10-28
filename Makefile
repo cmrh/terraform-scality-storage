@@ -8,7 +8,7 @@ SHELL       := bash
 # example must pass under both — `make validate-all` runs each in turn.
 ENGINE ?= tofu
 
-.PHONY: check fmt fmt-check validate validate-all lint actionlint runner-guard integration
+.PHONY: check fmt fmt-check validate validate-all lint actionlint runner-guard integration docs
 
 # Run the same checks CI runs.
 check: fmt-check lint actionlint runner-guard validate-all
@@ -69,3 +69,10 @@ runner-guard:
 # credentials in the environment; see .github/scripts/integration.sh.
 integration:
 	.github/scripts/integration.sh
+
+# Documentation site, built into build/site. Needs MkDocs:
+# pip install -r .github/docs-requirements.txt
+DOCS_REF ?= main
+docs:
+	DOCS_REF=$(DOCS_REF) python3 .github/scripts/docs-build.py
+	mkdocs build --strict -f build/mkdocs.yml
