@@ -10,6 +10,9 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - Documentation site on GitHub Pages, built from the module and example
   READMEs and `docs/`, deployed on each release tag. Adds pointer pages on
   state locking and secrets, including OpenTofu state encryption.
+- `scripts/scality-adopt.sh` and `docs/adoption.md`: adopt buckets and users
+  created by hand into the bucket and identity modules with `import {}`
+  blocks, without recreating them. (#61)
 
 ### Changed
 - `RELEASING.md`: a minor release may raise minimum provider versions and add
@@ -18,6 +21,12 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - Docs: removed repeated text across module and example READMEs. The
   `s3-crr-*` examples follow the same layout as the others, and the PR
   template's breaking-change definition matches `RELEASING.md`.
+
+### Fixed
+- `scality-compliance-bucket` no longer plans a replacement of an imported
+  bucket, or fails to apply with `InvalidBucketState`. It ignores changes to
+  `object_lock_enabled` and `versioning`, which import leaves unset and which
+  object lock keeps on. (#61)
 
 ## [1.2.0] - 2026-10-22
 
