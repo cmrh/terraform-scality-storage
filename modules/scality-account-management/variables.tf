@@ -23,7 +23,7 @@ variable "account_quota" {
 variable "external_account_id" {
   type        = string
   default     = null
-  description = "External integration ID for the account. Only effective when console_login = false (scality_console_account does not accept this field). Forces replacement if changed."
+  description = "Account ID to use instead of a generated one, as a 12-digit number. Only effective when console_login = false (scality_console_account does not accept this field). Forces replacement if changed."
 }
 
 variable "account_attributes" {
