@@ -69,7 +69,7 @@ module "ci_account" {
     owner   = "platform-team"
   }
 
-  external_account_id = "platform-ci-001"
+  external_account_id = "100000000001"   # becomes the account ID: 12 digits
 }
 ```
 
@@ -110,7 +110,7 @@ resource "scality_bucket" "acme_data" {
 | `account_email` | string | (required) | Account email. Forces replacement. | both |
 | `console_login` | bool | `true` | `true` → `scality_console_account`; `false` → `scality_account`. | both |
 | `account_quota` | number | `null` | Max bytes; `null` leaves it unset; `0` sets no limit. Forces replacement. | both |
-| `external_account_id` | string | `null` | External integration ID. Forces replacement. | only `console_login = false` |
+| `external_account_id` | string | `null` | Account ID to use instead of a generated one, as a 12-digit number. Forces replacement. | only `console_login = false` |
 | `account_attributes` | map(string) | `{}` | Custom key-value metadata. Max 10 entries. | only `console_login = false` |
 | `account_credentials` | object({ access_key, secret_key }) (sensitive) | `null` | Existing key of an adopted account. The module creates its own key from it; keep this key valid and the input set. | only `console_login = false` |
 
