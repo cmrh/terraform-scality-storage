@@ -55,7 +55,7 @@ provider "scality" {}
 
 module "tf_state" {
   source  = "cmrh/storage/scality//modules/scality-terraform-state-bootstrap"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_email = "platform@example.com"
   bucket_name   = "platform-tf-state"
@@ -96,7 +96,7 @@ after first login.
 ```hcl
 module "tf_state" {
   source  = "cmrh/storage/scality//modules/scality-terraform-state-bootstrap"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_email = "platform@example.com"
   bucket_name   = "platform-tf-state"

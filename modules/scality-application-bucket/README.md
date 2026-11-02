@@ -33,7 +33,7 @@ credentials for break-glass.
 ```hcl
 module "acme_data" {
   source  = "cmrh/storage/scality//modules/scality-application-bucket"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -51,7 +51,7 @@ module "acme_data" {
 ```hcl
 module "acme_logs" {
   source  = "cmrh/storage/scality//modules/scality-application-bucket"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -66,7 +66,7 @@ module "acme_logs" {
 ```hcl
 module "acme_data" {
   source  = "cmrh/storage/scality//modules/scality-application-bucket"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -76,7 +76,7 @@ module "acme_data" {
 
 module "acme_app" {
   source  = "cmrh/storage/scality//modules/scality-application-identity"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -92,7 +92,7 @@ module "acme_app" {
 ```hcl
 module "acme_archive" {
   source  = "cmrh/storage/scality//modules/scality-application-bucket"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key

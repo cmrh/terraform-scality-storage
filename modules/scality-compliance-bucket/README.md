@@ -46,7 +46,7 @@ credentials for break-glass.
 ```hcl
 module "audit_logs" {
   source  = "cmrh/storage/scality//modules/scality-compliance-bucket"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -67,7 +67,7 @@ module "audit_logs" {
 ```hcl
 module "compliance_staging" {
   source  = "cmrh/storage/scality//modules/scality-compliance-bucket"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -83,7 +83,7 @@ module "compliance_staging" {
 ```hcl
 module "audit_logs" {
   source  = "cmrh/storage/scality//modules/scality-compliance-bucket"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key
@@ -96,7 +96,7 @@ module "audit_logs" {
 # Audit writer — can write; locked versions stay until retention ends.
 module "audit_writer" {
   source  = "cmrh/storage/scality//modules/scality-application-identity"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key

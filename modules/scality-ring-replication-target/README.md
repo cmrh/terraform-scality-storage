@@ -37,7 +37,7 @@ mode, `crr` for its `crr` mode), or tiering and RING-backed buckets.
 ```hcl
 module "ring_target" {
   source  = "cmrh/storage/scality//modules/scality-ring-replication-target"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_access_key = module.operator.access_key
   account_secret_key = module.operator.secret_key

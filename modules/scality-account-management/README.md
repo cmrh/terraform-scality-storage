@@ -35,7 +35,7 @@ When `console_login = false`:
 ```hcl
 module "tenant_acme" {
   source  = "cmrh/storage/scality//modules/scality-account-management"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_name  = "acme"
   account_email = "platform@acme.example.com"
@@ -58,7 +58,7 @@ terraform output -raw acme_console_password    # share with the tenant — they 
 ```hcl
 module "ci_account" {
   source  = "cmrh/storage/scality//modules/scality-account-management"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_name  = "ci-pipeline"
   account_email = "platform-ops@example.com"
@@ -89,7 +89,7 @@ resource (or wrapper module that takes per-account credentials):
 ```hcl
 module "tenant_acme" {
   source        = "cmrh/storage/scality//modules/scality-account-management"
-  version       = "~> 1.2"
+  version       = "~> 1.4"
   account_name  = "acme"
   account_email = "platform@acme.example.com"
 }
