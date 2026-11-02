@@ -6,6 +6,13 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Removed
+- The integration suite (`integration.yml`, `make integration`) and the
+  self-hosted runner guard (`make runner-guard`). The provider acceptance
+  suites already test each resource against live clusters before every
+  provider release; module behaviour is lab-tested when a module changes.
+  (#76)
+
 ## [1.4.0] - 2026-11-02
 
 ### Added

@@ -8,10 +8,10 @@ SHELL       := bash
 # example must pass under both — `make validate-all` runs each in turn.
 ENGINE ?= tofu
 
-.PHONY: check fmt fmt-check validate validate-all lint actionlint runner-guard integration docs
+.PHONY: check fmt fmt-check validate validate-all lint actionlint docs
 
 # Run the same checks CI runs.
-check: fmt-check lint actionlint runner-guard validate-all
+check: fmt-check lint actionlint validate-all
 
 # Format every .tf file in place.
 fmt:
@@ -59,16 +59,6 @@ lint:
 # shell-checks run: scripts when shellcheck is installed.
 actionlint:
 	actionlint
-
-# Only integration.yml may use the self-hosted runner, and only from
-# manual, scheduled, release or repository_dispatch triggers.
-runner-guard:
-	.github/scripts/runner-guard.sh
-
-# Live-cluster suite (data paths + teardown), terraform by default. Needs cluster
-# credentials in the environment; see .github/scripts/integration.sh.
-integration:
-	.github/scripts/integration.sh
 
 # Documentation site, built into build/site. Needs MkDocs:
 # pip install -r .github/docs-requirements.txt
