@@ -61,3 +61,9 @@ variable "expiration_days" {
   default     = null
   description = "Days after which current objects expire (delete). Default null = retain indefinitely. Common values: 30 for short-lived logs, 365 for retention-driven workloads."
 }
+
+variable "bucket_policy" {
+  type        = string
+  default     = null
+  description = "Bucket policy as a JSON document; construct it with jsonencode(...) or file(...). null (default) leaves the bucket policy unmanaged; changing a document to null deletes the policy."
+}

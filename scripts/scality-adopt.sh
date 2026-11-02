@@ -5,8 +5,8 @@
 # var.account_access_key / var.account_secret_key (set them via TF_VAR_*).
 #
 # Mapping:
-#   bucket with object lock      -> scality-compliance-bucket
-#   other bucket                 -> scality-application-bucket
+#   bucket with object lock      -> scality-compliance-bucket (with its policy)
+#   other bucket                 -> scality-application-bucket (with its policy)
 #   user with one inline policy  -> scality-application-identity
 #   group                        -> scality-group-access, with its managed
 #                                   policies and members
@@ -14,8 +14,8 @@
 # creates a new key per adopted user. A group owns the account policies
 # attached only to it; other policies are attached by ARN and left unmanaged.
 # Settings a module can't express are marked "# REVIEW:" in the output and
-# listed on stderr; the plan shows the resulting change. Bucket policies,
-# logging, replication and roles are listed on stderr and left unmanaged.
+# listed on stderr; the plan shows the resulting change. Bucket logging,
+# replication and roles are listed on stderr and left unmanaged.
 #
 # Environment:
 #   SCALITY_ACCOUNT_ACCESS_KEY, SCALITY_ACCOUNT_SECRET_KEY   account credentials
@@ -81,6 +81,12 @@ src() {
 hcl_tags() { jq -r '(.TagSet // []) | if length == 0 then "{}" else
   "{\n" + (map("    \(.Key | tojson) = \(.Value | tojson)") | join("\n")) + "\n  }" end'; }
 hcl_days() { jq -r --arg k "$1" '.[$k] // "null"' <<<"$lc"; }
+# The bucket's policy as a bucket_policy argument, when it has one.
+hcl_policy() {
+  [[ -n $policy ]] || return 0
+  echo
+  echo '  bucket_policy = jsonencode('"$(sed '2,$s/^/  /' <<<"$policy")"')'
+}
 hcl_str() { jq -Rn --arg v "$1" '$v'; }
 imp() { printf 'import {\n  to = module.%s.%s\n  id = %s\n}\n\n' "$1" "$2" "$(jq -Rn --arg v "$3" '$v')"; }
 
@@ -115,7 +121,10 @@ for bucket in $(jq -r '.Buckets[].Name' <<<"$buckets"); do
   tags=$(s3_or_empty get-bucket-tagging --bucket "$bucket" | hcl_tags)
   rules=$(s3_or_empty get-bucket-lifecycle-configuration --bucket "$bucket" | jq -c '.Rules // []')
 
-  for check in get-bucket-policy get-bucket-logging get-bucket-replication; do
+  policy=$(s3_or_empty get-bucket-policy --bucket "$bucket" |
+    jq 'if .Policy then .Policy | fromjson else empty end')
+
+  for check in get-bucket-logging get-bucket-replication; do
     if [[ $(s3_or_empty "$check" --bucket "$bucket") != '{}' ]]; then
       note "bucket $bucket: ${check#get-bucket-} configured; not adopted (left unmanaged)"
     fi
@@ -181,9 +190,11 @@ for bucket in $(jq -r '.Buckets[].Name' <<<"$buckets"); do
         echo '  # REVIEW: lifecycle rules other than MPU abort are replaced by the module.'
         note "bucket $bucket: lifecycle rules beyond MPU abort would be replaced (REVIEW)"
       fi
+      hcl_policy
       echo '}'
       echo
       imp "$name" scality_bucket.this "$bucket"
+      [[ -n $policy ]] && imp "$name" 'scality_bucket_policy.this[0]' "$bucket"
       [[ -n $sse ]] && imp "$name" scality_bucket_encryption.this "$bucket"
       [[ -n $mode ]] && imp "$name" scality_bucket_object_lock.this "$bucket"
       [[ $has_lc == yes && $abort != null ]] && imp "$name" 'scality_bucket_lifecycle.this[0]' "$bucket"
@@ -224,9 +235,11 @@ for bucket in $(jq -r '.Buckets[].Name' <<<"$buckets"); do
       echo "  # REVIEW: lifecycle rules the module can't express are replaced: $unmapped"
       note "bucket $bucket: lifecycle rules not expressible by the module: $unmapped (REVIEW)"
     fi
+    hcl_policy
     echo '}'
     echo
     imp "$name" scality_bucket.this "$bucket"
+    [[ -n $policy ]] && imp "$name" 'scality_bucket_policy.this[0]' "$bucket"
     [[ -n $sse ]] && imp "$name" scality_bucket_encryption.this "$bucket"
     if [[ $has_lc == yes && "$abort$noncurrent$expiration" != nullnullnull ]]; then
       imp "$name" 'scality_bucket_lifecycle.this[0]' "$bucket"

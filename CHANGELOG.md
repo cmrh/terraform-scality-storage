@@ -10,6 +10,9 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - `scripts/scality-adopt.sh` adopts groups into `scality-group-access`, with
   their members and managed policies. A group owns the account policies
   attached only to it; others are attached by ARN. (#74)
+- `scality-application-bucket` and `scality-compliance-bucket`: optional
+  `bucket_policy` input. `scripts/scality-adopt.sh` adopts each bucket's
+  policy into it. (#77)
 
 ### Changed
 - Usage snippets and the module pin `scripts/scality-adopt.sh` writes use

@@ -65,3 +65,9 @@ variable "abort_incomplete_multipart_upload_days" {
   default     = 7
   description = "Days after which incomplete multipart uploads are aborted (frees orphaned MPU parts). Set null to disable this rule."
 }
+
+variable "bucket_policy" {
+  type        = string
+  default     = null
+  description = "Bucket policy as a JSON document; construct it with jsonencode(...) or file(...). null (default) leaves the bucket policy unmanaged; changing a document to null deletes the policy."
+}
