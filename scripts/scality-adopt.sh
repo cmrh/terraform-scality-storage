@@ -8,11 +8,14 @@
 #   bucket with object lock      -> scality-compliance-bucket
 #   other bucket                 -> scality-application-bucket
 #   user with one inline policy  -> scality-application-identity
+#   group                        -> scality-group-access, with its managed
+#                                   policies and members
 # Access keys are not imported (their secrets can't be recovered); apply
-# creates a new key per adopted user. Settings a module can't express are
-# marked "# REVIEW:" in the output and listed on stderr; the plan shows the
-# resulting change. Bucket policies, logging, replication, roles and groups
-# are listed on stderr and left unmanaged.
+# creates a new key per adopted user. A group owns the account policies
+# attached only to it; other policies are attached by ARN and left unmanaged.
+# Settings a module can't express are marked "# REVIEW:" in the output and
+# listed on stderr; the plan shows the resulting change. Bucket policies,
+# logging, replication and roles are listed on stderr and left unmanaged.
 #
 # Environment:
 #   SCALITY_ACCOUNT_ACCESS_KEY, SCALITY_ACCOUNT_SECRET_KEY   account credentials
@@ -78,6 +81,7 @@ src() {
 hcl_tags() { jq -r '(.TagSet // []) | if length == 0 then "{}" else
   "{\n" + (map("    \(.Key | tojson) = \(.Value | tojson)") | join("\n")) + "\n  }" end'; }
 hcl_days() { jq -r --arg k "$1" '.[$k] // "null"' <<<"$lc"; }
+hcl_str() { jq -Rn --arg v "$1" '$v'; }
 imp() { printf 'import {\n  to = module.%s.%s\n  id = %s\n}\n\n' "$1" "$2" "$(jq -Rn --arg v "$3" '$v')"; }
 
 buckets=$(s3 list-buckets) || { echo "list-buckets failed: check endpoint and credentials" >&2; exit 1; }
@@ -236,7 +240,6 @@ done
 for user in $(jq -r '.Users[].UserName' <<<"$users"); do
   policies=$(iam list-user-policies --user-name "$user" | jq -r '.PolicyNames[]')
   attached=$(iam list-attached-user-policies --user-name "$user" | jq -r '.AttachedPolicies | length')
-  groups=$(iam list-groups-for-user --user-name "$user" | jq -r '.Groups | length')
   keys=$(iam list-access-keys --user-name "$user" | jq -r '.AccessKeyMetadata | length')
   count=$(grep -c . <<<"$policies" || true)
 
@@ -245,7 +248,6 @@ for user in $(jq -r '.Users[].UserName' <<<"$users"); do
     continue
   fi
   ((attached > 0)) && note "user $user: $attached managed policies attached; left unmanaged"
-  ((groups > 0)) && note "user $user: member of $groups groups; left unmanaged"
   ((keys >= 4)) && note "user $user: at the 4-key limit; delete an unused key before apply (REVIEW)"
 
   doc=$(iam get-user-policy --user-name "$user" --policy-name "$policies" |
@@ -272,11 +274,82 @@ for user in $(jq -r '.Users[].UserName' <<<"$users"); do
   } >>"$tmp"
 done
 
-for check in list-roles list-groups; do
-  # Skip service roles the platform creates itself (path /scality-internal/).
-  n=$(iam "$check" | jq -r '(.Roles // .Groups // []) | map(select(.Path != "/scality-internal/")) | length')
-  ((n > 0)) && note "account: $n ${check#list-} found; not adopted (left unmanaged)"
+# --- Groups ----------------------------------------------------------------
+# Skip groups and roles the platform creates itself (path /scality-internal/).
+groups=$(iam list-groups) || { echo "iam list-groups failed" >&2; exit 1; }
+local_arns=$(iam list-policies --scope Local | jq -c '[.Policies[].Arn]') ||
+  { echo "iam list-policies failed" >&2; exit 1; }
+declare -A noted=()
+for group in $(jq -r '.Groups[] | select(.Path != "/scality-internal/") | .GroupName' <<<"$groups"); do
+  name=$(label group "$group")
+  members=$(iam get-group --group-name "$group" | jq -r '[.Users[].UserName] | sort | map(tojson) | join(", ")')
+  attached=$(iam list-attached-group-policies --group-name "$group" | jq -c '.AttachedPolicies')
+  inline=$(iam list-group-policies --group-name "$group" | jq -r '.PolicyNames | length')
+  ((inline > 0)) &&
+    note "group $group: $inline inline policies; left unmanaged, and destroy fails until they're deleted (REVIEW)"
+
+  owned=() shared=()
+  while IFS=$'\t' read -r pname parn; do
+    [[ -n $pname ]] || continue
+    if [[ $(jq --arg a "$parn" 'index($a) != null' <<<"$local_arns") == true ]]; then
+      count=$(iam get-policy --policy-arn "$parn" | jq -r '.Policy.AttachmentCount')
+      if ((count == 1)); then
+        owned+=("$pname"$'\t'"$parn")
+        continue
+      fi
+      [[ -n ${noted[$parn]:-} ]] ||
+        note "policy $pname: attached to $count groups, users or roles; attached by ARN, left unmanaged"
+      noted[$parn]=1
+    fi
+    shared+=("$pname"$'\t'"$parn")
+  done < <(jq -r '.[] | [.PolicyName, .PolicyArn] | @tsv' <<<"$attached")
+
+  {
+    echo "module \"$name\" {"
+    src scality-group-access
+    echo
+    echo '  account_access_key = var.account_access_key'
+    echo '  account_secret_key = var.account_secret_key'
+    echo
+    echo "  group_name = $(hcl_str "$group")"
+    echo "  members    = [$members]"
+    if ((${#owned[@]})); then
+      echo
+      echo '  policies = {'
+      for p in "${owned[@]}"; do
+        pname=${p%%$'\t'*} parn=${p#*$'\t'}
+        ver=$(iam get-policy --policy-arn "$parn" | jq -r '.Policy.DefaultVersionId')
+        doc=$(iam get-policy-version --policy-arn "$parn" --version-id "$ver" |
+          jq '.PolicyVersion.Document | if type == "string" then fromjson else . end')
+        echo "    $(hcl_str "$pname") = jsonencode($(sed '2,$s/^/    /' <<<"$doc"))"
+      done
+      echo '  }'
+    fi
+    if ((${#shared[@]})); then
+      echo
+      echo '  policy_arns = {'
+      for p in "${shared[@]}"; do
+        echo "    $(hcl_str "${p%%$'\t'*}") = $(hcl_str "${p#*$'\t'}")"
+      done
+      echo '  }'
+    fi
+    echo '}'
+    echo
+    imp "$name" scality_group.this "$group"
+    for p in "${owned[@]}"; do
+      pname=${p%%$'\t'*} parn=${p#*$'\t'}
+      imp "$name" "scality_iam_policy.this[$(hcl_str "$pname")]" "$parn"
+      imp "$name" "scality_iam_group_policy_attachment.created[$(hcl_str "$pname")]" "$group:$parn"
+    done
+    for p in "${shared[@]}"; do
+      imp "$name" "scality_iam_group_policy_attachment.existing[$(hcl_str "${p%%$'\t'*}")]" "$group:${p#*$'\t'}"
+    done
+    imp "$name" 'scality_group_membership.this[0]' "$group"
+  } >>"$tmp"
 done
+
+n=$(iam list-roles | jq -r '(.Roles // []) | map(select(.Path != "/scality-internal/")) | length')
+((n > 0)) && note "account: $n roles found; not adopted (left unmanaged)"
 
 mv "$tmp" "$out"
 trap - EXIT
