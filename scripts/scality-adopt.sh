@@ -5,6 +5,8 @@
 # var.account_access_key / var.account_secret_key (set them via TF_VAR_*).
 #
 # Mapping:
+#   bucket receiving access logs -> scality-access-log-bucket, with the logging
+#                                   configuration of the buckets logging to it
 #   bucket with object lock      -> scality-compliance-bucket (with its policy)
 #   other bucket                 -> scality-application-bucket (with its policy)
 #   user with one inline policy  -> scality-application-identity
@@ -14,8 +16,8 @@
 # creates a new key per adopted user. A group owns the account policies
 # attached only to it; other policies are attached by ARN and left unmanaged.
 # Settings a module can't express are marked "# REVIEW:" in the output and
-# listed on stderr; the plan shows the resulting change. Bucket logging,
-# replication and roles are listed on stderr and left unmanaged.
+# listed on stderr; the plan shows the resulting change. Replication and
+# roles are listed on stderr and left unmanaged.
 #
 # Environment:
 #   SCALITY_ACCOUNT_ACCESS_KEY, SCALITY_ACCOUNT_SECRET_KEY   account credentials
@@ -87,6 +89,77 @@ hcl_policy() {
   echo
   echo '  bucket_policy = jsonencode('"$(sed '2,$s/^/  /' <<<"$policy")"')'
 }
+# A log target as a scality-access-log-bucket call. Reads the bucket loop's
+# variables: bucket, name, tags, versioning, rules, lc, unmapped, sse, kms, policy.
+emit_log_bucket() {
+  local retention principal sources source_bucket
+  retention=$(jq -r 'if .expiration != null and .abort == null and .noncurrent == null
+    then .expiration else empty end' <<<"$lc")
+  [[ -n $unmapped ]] && retention=
+  # The delivery principal: the Allow s3:PutObject statement's AWS principal.
+  principal=$(jq -r '[.Statement[]? | select(.Effect == "Allow")
+    | select([.Action] | flatten | index("s3:PutObject"))
+    | .Principal.AWS? | select(. != null) | if type == "array" then .[] else . end
+    | select(test("access-logging"))] | first // empty' <<<"${policy:-{\}}")
+  sources=()
+  for source_bucket in "${!log_target[@]}"; do
+    [[ ${log_target[$source_bucket]} == "$bucket" ]] && sources+=("$source_bucket")
+  done
+  mapfile -t sources < <(printf '%s\n' "${sources[@]}" | sort)
+
+  echo "module \"$name\" {"
+  src scality-access-log-bucket
+  echo
+  echo '  account_access_key = var.account_access_key'
+  echo '  account_secret_key = var.account_secret_key'
+  echo
+  echo "  bucket_name = $(hcl_str "$bucket")"
+  echo "  tags        = $tags"
+  if [[ -n $retention ]]; then
+    echo "  retention_days = $retention"
+  else
+    echo '  # REVIEW: the module deletes log objects after 90 days and replaces any other lifecycle rules.'
+    echo '  retention_days = 90'
+    note "bucket $bucket: log target; module sets a 90-day expiry in place of its lifecycle (REVIEW)"
+  fi
+  if [[ $versioning == Enabled ]]; then
+    echo '  # REVIEW: versioning is on; the module suspends it.'
+    note "bucket $bucket: log target is versioned; module suspends versioning (REVIEW)"
+  fi
+  if [[ -z $policy ]]; then
+    echo '  # REVIEW: no bucket policy; the module adds the log delivery grant.'
+    note "bucket $bucket: log target has no policy; module adds the log delivery grant (REVIEW)"
+  elif [[ -z $principal ]]; then
+    echo '  # REVIEW: the module replaces the bucket policy with the log delivery grant alone.'
+    note "bucket $bucket: log target policy has no log delivery grant; module replaces the policy (REVIEW)"
+  elif [[ $(jq '.Statement | length' <<<"$policy") != 1 ]]; then
+    echo '  # REVIEW: the module replaces the bucket policy with the log delivery grant alone.'
+    note "bucket $bucket: log target policy has other statements; module replaces the policy (REVIEW)"
+  fi
+  [[ -n $principal && $principal != "$default_log_principal" ]] &&
+    echo "  log_delivery_principal = $(hcl_str "$principal")"
+  if [[ -n $sse ]]; then
+    echo "  sse_algorithm = \"$sse\""
+    [[ -n $kms ]] && echo "  kms_master_key_id = $(hcl_str "$kms")"
+  else
+    echo '  sse_algorithm = null'
+  fi
+  echo
+  echo '  logged_buckets = {'
+  for source_bucket in "${sources[@]}"; do
+    echo "    $(hcl_str "$source_bucket") = $(hcl_str "${log_prefix[$source_bucket]}")"
+  done
+  echo '  }'
+  echo '}'
+  echo
+  imp "$name" scality_bucket.this "$bucket"
+  [[ -n $policy ]] && imp "$name" scality_bucket_policy.this "$bucket"
+  [[ -n $sse ]] && imp "$name" 'scality_bucket_encryption.this[0]' "$bucket"
+  [[ $rules != '[]' ]] && imp "$name" scality_bucket_lifecycle.this "$bucket"
+  for source_bucket in "${sources[@]}"; do
+    imp "$name" "scality_bucket_logging.this[$(hcl_str "$source_bucket")]" "$source_bucket"
+  done
+}
 hcl_str() { jq -Rn --arg v "$1" '$v'; }
 imp() { printf 'import {\n  to = module.%s.%s\n  id = %s\n}\n\n' "$1" "$2" "$(jq -Rn --arg v "$3" '$v')"; }
 
@@ -111,8 +184,31 @@ trap 'rm -f "$tmp"' EXIT
   echo
 } >"$tmp"
 
+# --- Log targets -----------------------------------------------------------
+# A bucket that receives server access logs becomes a scality-access-log-bucket
+# call, which also owns the logging configuration of its source buckets.
+default_log_principal=arn:aws:iam::000000000000:user/scality-internal/service-access-logging-user
+bucket_names=$(jq -r '.Buckets[].Name' <<<"$buckets")
+declare -A log_target=() log_prefix=() targets=()
+for b in $bucket_names; do
+  l=$(s3_or_empty get-bucket-logging --bucket "$b" |
+    jq -r '.LoggingEnabled // empty | [.TargetBucket, (.TargetPrefix // "")] | @tsv')
+  [[ -n $l ]] || continue
+  IFS=$'\t' read -r t p <<<"$l"
+  if [[ $t == "$b" ]]; then
+    note "bucket $b: logs into itself; logging left unmanaged"
+  elif ! grep -qxF -- "$t" <<<"$bucket_names"; then
+    note "bucket $b: logs to $t, which isn't in this account; logging left unmanaged"
+  elif [[ $(s3_or_empty get-object-lock-configuration --bucket "$t" |
+    jq -r '.ObjectLockConfiguration.ObjectLockEnabled // empty') == Enabled ]]; then
+    note "bucket $b: logs to $t, which has object lock; logging left unmanaged"
+  else
+    log_target[$b]=$t log_prefix[$b]=$p targets[$t]=1
+  fi
+done
+
 # --- Buckets ---------------------------------------------------------------
-for bucket in $(jq -r '.Buckets[].Name' <<<"$buckets"); do
+for bucket in $bucket_names; do
   name=$(label bucket "$bucket")
   versioning=$(s3_or_empty get-bucket-versioning --bucket "$bucket" | jq -r '.Status // "Unversioned"')
   lock=$(s3_or_empty get-object-lock-configuration --bucket "$bucket")
@@ -124,11 +220,9 @@ for bucket in $(jq -r '.Buckets[].Name' <<<"$buckets"); do
   policy=$(s3_or_empty get-bucket-policy --bucket "$bucket" |
     jq 'if .Policy then .Policy | fromjson else empty end')
 
-  for check in get-bucket-logging get-bucket-replication; do
-    if [[ $(s3_or_empty "$check" --bucket "$bucket") != '{}' ]]; then
-      note "bucket $bucket: ${check#get-bucket-} configured; not adopted (left unmanaged)"
-    fi
-  done
+  if [[ $(s3_or_empty get-bucket-replication --bucket "$bucket") != '{}' ]]; then
+    note "bucket $bucket: replication configured; not adopted (left unmanaged)"
+  fi
 
   # Map lifecycle rules onto the module's three baseline rules: whole-bucket
   # (empty prefix, no tag filter), enabled, one action each.
@@ -153,6 +247,11 @@ for bucket in $(jq -r '.Buckets[].Name' <<<"$buckets"); do
 
   sse=$(jq -r '.SSEAlgorithm // empty' <<<"$enc")
   kms=$(jq -r '.KMSMasterKeyID // empty' <<<"$enc")
+
+  if [[ -n ${targets[$bucket]:-} ]]; then
+    emit_log_bucket >>"$tmp"
+    continue
+  fi
 
   if [[ $(jq -r '.ObjectLockConfiguration.ObjectLockEnabled // empty' <<<"$lock") == Enabled ]]; then
     mode=$(jq -r '.ObjectLockConfiguration.Rule.DefaultRetention.Mode // empty' <<<"$lock")

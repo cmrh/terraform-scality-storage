@@ -13,6 +13,9 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - `scality-application-bucket` and `scality-compliance-bucket`: optional
   `bucket_policy` input. `scripts/scality-adopt.sh` adopts each bucket's
   policy into it. (#77)
+- `scripts/scality-adopt.sh` adopts each bucket that receives server access
+  logs into `scality-access-log-bucket`, with the logging configuration of
+  the buckets that log to it. (#78)
 
 ### Changed
 - Usage snippets and the module pin `scripts/scality-adopt.sh` writes use
