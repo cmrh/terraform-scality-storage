@@ -45,3 +45,12 @@ resource "scality_bucket_lifecycle" "this" {
     abort_incomplete_multipart_upload_days = var.abort_incomplete_multipart_upload_days
   }
 }
+
+resource "scality_bucket_policy" "this" {
+  count = var.bucket_policy == null ? 0 : 1
+
+  account_access_key = var.account_access_key
+  account_secret_key = var.account_secret_key
+  bucket             = scality_bucket.this.bucket
+  policy             = var.bucket_policy
+}

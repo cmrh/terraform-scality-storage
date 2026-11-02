@@ -15,6 +15,7 @@ backups, and other WORM workloads.
 - `scality_bucket_object_lock` — default retention mode and period
 - `scality_bucket_lifecycle` — abort incomplete multipart uploads (set
   `abort_incomplete_multipart_upload_days = null` to disable)
+- `scality_bucket_policy` — only when `bucket_policy` is set
 
 ## Retention modes
 
@@ -136,6 +137,7 @@ module "audit_writer" {
 | `retention_days` | number | `null` | Retention in days. Set this OR `retention_years` (exactly one). |
 | `retention_years` | number | `null` | Retention in years. Set this OR `retention_days`. |
 | `abort_incomplete_multipart_upload_days` | number | `7` | Days to retain incomplete MPUs. `null` disables this rule. |
+| `bucket_policy` | string | `null` | Bucket policy JSON. `null` leaves the policy unmanaged; changing a document to `null` deletes it. |
 
 ## Outputs
 

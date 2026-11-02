@@ -16,6 +16,7 @@ up orphaned multipart uploads and superseded object versions.
   - Abort incomplete multipart uploads after `abort_incomplete_multipart_upload_days` (default 7)
   - Expire noncurrent versions after `noncurrent_version_expiration_days` (default 90)
   - Expire current objects after `expiration_days` (default null = retain forever)
+- `scality_bucket_policy` — only when `bucket_policy` is set
 
 If all three lifecycle variables are null, no `scality_bucket_lifecycle`
 resource is created.
@@ -118,6 +119,7 @@ module "acme_archive" {
 | `abort_incomplete_multipart_upload_days` | number | `7` | Days to retain incomplete MPUs. `null` disables this rule. |
 | `noncurrent_version_expiration_days` | number | `90` | Days to retain superseded versions. `null` disables this rule. |
 | `expiration_days` | number | `null` | Current object expiration. `null` retains indefinitely. |
+| `bucket_policy` | string | `null` | Bucket policy JSON. `null` leaves the policy unmanaged; changing a document to `null` deletes it. |
 
 ## Outputs
 
@@ -130,11 +132,10 @@ module "acme_archive" {
 
 ## Caveats
 
-- **Access control is via IAM policies.** This module doesn't create a
-  `scality_bucket_policy`. Grant access by attaching policies to users
-  via `application-identity`. For bucket-level policies (e.g.,
-  cross-account scenarios), use the `scality_bucket_policy` resource
-  directly alongside this module.
+- **Prefer IAM policies for access control.** Grant access by attaching
+  policies to users via `application-identity`. Set `bucket_policy` for
+  bucket-level grants, such as cross-account access, or to keep the policy
+  of an adopted bucket.
 - **Empty the bucket before `terraform destroy`.** Bucket contents
   (current objects, all noncurrent versions, and delete markers) are
   outside Terraform's lifecycle and need to be cleared manually.

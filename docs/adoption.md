@@ -8,8 +8,8 @@ them. `scripts/scality-adopt.sh` reads an account and writes module calls plus
 
 | Found in the account | Becomes |
 |---|---|
-| Bucket with object lock | `scality-compliance-bucket` |
-| Any other bucket | `scality-application-bucket` |
+| Bucket with object lock | `scality-compliance-bucket`, with its bucket policy |
+| Any other bucket | `scality-application-bucket`, with its bucket policy |
 | User with exactly one inline policy | `scality-application-identity`, keeping the policy name and document |
 | Group | `scality-group-access`, with its members and managed policies |
 
@@ -17,8 +17,8 @@ A group's module call owns the account policies attached only to that group,
 keeping their names and documents. Other policies, such as one attached to
 several groups or to a user, are attached by ARN and left unmanaged.
 
-Not covered, listed on stderr and left as they are: bucket policies, bucket
-logging, replication, roles, users with no or several inline policies,
+Not covered, listed on stderr and left as they are: bucket logging,
+replication, roles, users with no or several inline policies,
 managed policies attached to users, and inline group policies. A group with
 inline policies can't be destroyed until they're deleted.
 The script doesn't adopt the account itself;
@@ -99,8 +99,8 @@ terraform plan
 
 Expect:
 
-- **to import:** every bucket, user, inline policy and group, with the
-  group's policies, attachments and membership.
+- **to import:** every bucket and its policy, user, inline policy and group,
+  with the group's policies, attachments and membership.
 - **to add:** a new access key per user, plus encryption where a `# REVIEW`
   line said so.
 - **to change:** `versioning = false` and `tags = {}` on buckets that have
