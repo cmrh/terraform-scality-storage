@@ -6,6 +6,8 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-02
+
 ### Added
 - `scality-group-access`: an IAM group with managed policies attached, from
   JSON documents or existing ARNs, and optionally its members. Includes
@@ -24,6 +26,11 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - `docs/adoption.md`: `external_account_id` can be set when adopting an
   account, and existing groups can be imported into `scality-group-access`
   so destroy removes them. (#71)
+
+### Fixed
+- `scality-account-management`: the `external_account_id` example used a
+  value that is rejected. The value becomes the account ID, as a 12-digit
+  number; the example and input description say so. (#69)
 
 ## [1.3.0] - 2026-10-28
 
