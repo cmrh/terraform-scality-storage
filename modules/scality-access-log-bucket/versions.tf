@@ -5,7 +5,7 @@ terraform {
     scality = {
       source = "cmrh/scality"
       # Earlier 1.1.x have bugs this module hits.
-      version = "~> 1.1, >= 1.1.6"
+      version = "~> 1.2"
     }
   }
 }

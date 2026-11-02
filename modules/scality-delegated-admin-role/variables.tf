@@ -1,13 +1,13 @@
 variable "account_access_key" {
   type        = string
   sensitive   = true
-  description = "Access key of the sub-account the role is created in — typically its account-root key from scality-account-management. Used only at bootstrap; afterwards the management account manages the sub-account through the role. Forces replacement."
+  description = "Access key of the sub-account the role is created in — typically its account-root key from scality-account-management. Used only at bootstrap; afterwards the management account manages the sub-account through the role."
 }
 
 variable "account_secret_key" {
   type        = string
   sensitive   = true
-  description = "Secret key paired with account_access_key. Forces replacement."
+  description = "Secret key paired with account_access_key."
 }
 
 variable "trusted_user_arn" {

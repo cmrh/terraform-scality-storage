@@ -150,7 +150,7 @@ terraform output -raw acme_app_secret_key  # → AWS_SECRET_ACCESS_KEY
 
 ## Caveats
 
-- **Username, policy name and access key changes force replacement.** `policy_document` updates apply
+- **Username and policy name changes force replacement.** `policy_document` updates apply
   in-place; toggling between a preset and a custom document also applies
   in-place since only the policy content changes.
 - **Secret key is one-time.** The Scality IAM API does not return secret

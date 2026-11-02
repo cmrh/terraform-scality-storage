@@ -1,13 +1,13 @@
 variable "source_account_access_key" {
   type        = string
   sensitive   = true
-  description = "Access key of the source-cluster account principal authorized to manage the source bucket and IAM resources — typically the operator user from account-operator on the source cluster. Forces replacement."
+  description = "Access key of the source-cluster account principal authorized to manage the source bucket and IAM resources — typically the operator user from account-operator on the source cluster."
 }
 
 variable "source_account_secret_key" {
   type        = string
   sensitive   = true
-  description = "Secret key paired with source_account_access_key. Forces replacement."
+  description = "Secret key paired with source_account_access_key."
 }
 
 variable "source_bucket_name" {
@@ -18,13 +18,13 @@ variable "source_bucket_name" {
 variable "dest_account_access_key" {
   type        = string
   sensitive   = true
-  description = "Access key of the destination-cluster account principal authorized to manage the destination bucket and IAM resources — typically the operator user from account-operator on the destination cluster. Forces replacement."
+  description = "Access key of the destination-cluster account principal authorized to manage the destination bucket and IAM resources — typically the operator user from account-operator on the destination cluster."
 }
 
 variable "dest_account_secret_key" {
   type        = string
   sensitive   = true
-  description = "Secret key paired with dest_account_access_key. Forces replacement."
+  description = "Secret key paired with dest_account_access_key."
 }
 
 variable "dest_bucket_name" {

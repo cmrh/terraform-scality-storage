@@ -78,7 +78,7 @@ module "ci_account" {
 Import the account into `scality_account.this[0]` with `console_login = false`
 (also for an account created through the Console) and pass one of its existing
 keys in `account_credentials`. The module creates a Terraform-owned key from it
-for the `access_key` / `secret_key` outputs. Leave `external_account_id` unset.
+for the `access_key` / `secret_key` outputs.
 See [Adopting the account](../../docs/adoption.md#adopting-the-account).
 
 ### Composing with downstream resources

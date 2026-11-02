@@ -1,13 +1,13 @@
 variable "account_access_key" {
   type        = string
   sensitive   = true
-  description = "Account-root access key (typically the output of scality-account-management). Used only to bootstrap the operator user — after this module applies, switch downstream wrapper modules to consume the operator's credentials and reserve the account-root keys for break-glass scenarios. Forces replacement."
+  description = "Account-root access key (typically the output of scality-account-management). Used only to bootstrap the operator user — after this module applies, switch downstream wrapper modules to consume the operator's credentials and reserve the account-root keys for break-glass scenarios."
 }
 
 variable "account_secret_key" {
   type        = string
   sensitive   = true
-  description = "Account-root secret key paired with account_access_key. Forces replacement."
+  description = "Account-root secret key paired with account_access_key."
 }
 
 variable "operator_username" {

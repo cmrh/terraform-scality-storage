@@ -12,6 +12,19 @@ and the project follows [Semantic Versioning](https://semver.org/).
   `examples/group-access` and import IDs for adopting an existing group.
   Requires cmrh/scality 1.2. (#67)
 
+### Changed
+- Every scality module and example requires cmrh/scality 1.2, which records
+  versioning, tags, object lock and `external_account_id` on import, ignores
+  formatting-only policy differences, and updates resources in place when
+  their account credentials change to another key of the same account. (#71)
+- `scality-compliance-bucket` no longer ignores changes to
+  `object_lock_enabled` and `versioning`. A bucket imported with an earlier
+  release plans a one-off in-place `versioning = true` on the first apply.
+  (#71)
+- `docs/adoption.md`: `external_account_id` can be set when adopting an
+  account, and existing groups can be imported into `scality-group-access`
+  so destroy removes them. (#71)
+
 ## [1.3.0] - 2026-10-28
 
 ### Added
