@@ -8,6 +8,7 @@ them. `scripts/scality-adopt.sh` reads an account and writes module calls plus
 
 | Found in the account | Becomes |
 |---|---|
+| Bucket that receives server access logs | `scality-access-log-bucket`, with the logging configuration of the buckets that log to it |
 | Bucket with object lock | `scality-compliance-bucket`, with its bucket policy |
 | Any other bucket | `scality-application-bucket`, with its bucket policy |
 | User with exactly one inline policy | `scality-application-identity`, keeping the policy name and document |
@@ -17,8 +18,8 @@ A group's module call owns the account policies attached only to that group,
 keeping their names and documents. Other policies, such as one attached to
 several groups or to a user, are attached by ARN and left unmanaged.
 
-Not covered, listed on stderr and left as they are: bucket logging,
-replication, roles, users with no or several inline policies,
+Not covered, listed on stderr and left as they are: logging into the same
+bucket, into another account or into a bucket with object lock, replication, roles, users with no or several inline policies,
 managed policies attached to users, and inline group policies. A group with
 inline policies can't be destroyed until they're deleted.
 The script doesn't adopt the account itself;
@@ -66,6 +67,10 @@ setting the module can't express as it is today, so apply will change it:
   rules cover abort-incomplete-MPU, noncurrent expiry and current expiry for
   the whole bucket. The generated values mirror what the bucket has today.
 - **Object lock without a default retention:** the module requires one.
+- **A log bucket** whose lifecycle isn't a single whole-bucket expiry gets
+  the module's expiry instead, 90 days unless the script found one. A
+  versioned log bucket is suspended. A policy with anything besides the log
+  delivery grant is replaced by that grant alone.
 
 If a change isn't acceptable, keep that bucket or user out: delete its module
 call and import blocks.
@@ -99,12 +104,16 @@ terraform plan
 
 Expect:
 
-- **to import:** every bucket and its policy, user, inline policy and group,
-  with the group's policies, attachments and membership.
-- **to add:** a new access key per user, plus encryption where a `# REVIEW`
-  line said so.
+- **to import:** every bucket and its policy, logging configuration, user,
+  inline policy and group, with the group's policies, attachments and
+  membership.
+- **to add:** a new access key per user, plus encryption, and a log
+  bucket's policy or lifecycle, where a `# REVIEW` line said so.
 - **to change:** `versioning = false` and `tags = {}` on buckets that have
-  neither, and the lifecycle changes from your review.
+  neither, and the lifecycle changes from your review. An imported
+  lifecycle rule for the whole bucket can show an in-place update with no
+  attribute marked: its empty prefix is recorded once, without changing the
+  rule.
 - **to destroy: 0.** If anything says `must be replaced`, stop and don't apply.
 
 ## 4. Apply
