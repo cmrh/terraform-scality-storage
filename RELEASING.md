@@ -20,8 +20,7 @@ Pre-releases use a suffix (`v1.3.0-rc1`).
 ## Release flow
 
 1. **Check `main` is green**: every required check, including both engines
-   (`validate (tofu)`, `validate (terraform)`). The integration workflow is
-   not a release gate.
+   (`validate (tofu)`, `validate (terraform)`).
 2. **Update `CHANGELOG.md`:** move `[Unreleased]` into a new
    `## [X.Y.Z] - YYYY-MM-DD` section, through a normal PR.
 3. **Tag the merge commit** on `main` and push the tag:

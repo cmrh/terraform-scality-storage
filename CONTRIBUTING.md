@@ -40,7 +40,7 @@ Run the same checks CI runs:
 make check
 ```
 
-That's formatting, tflint, actionlint, runner-guard, then `validate` for every module and
+That's formatting, tflint, actionlint, then `validate` for every module and
 example under **both** engines. The individual targets:
 
 | Target | What it does |
@@ -51,8 +51,6 @@ example under **both** engines. The individual targets:
 | `make actionlint` | Lint GitHub Actions workflows |
 | `make validate ENGINE=tofu` | Validate with one engine |
 | `make validate-all` | Validate with both engines |
-| `make runner-guard` | Check that only `integration.yml` uses the self-hosted runner |
-| `make integration` | Apply, re-plan and destroy the integration configs against live clusters (needs credentials) |
 | `make docs` | Build the documentation site into `build/site` (needs `pip install -r .github/docs-requirements.txt`) |
 
 Modules that declare `configuration_aliases` (e.g. `scality-s3-crr`) are validated
