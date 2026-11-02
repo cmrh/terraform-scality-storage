@@ -14,7 +14,10 @@ them. `scripts/scality-adopt.sh` reads an account and writes module calls plus
 
 Not covered, listed on stderr and left as they are: bucket policies, bucket
 logging, replication, roles, groups, users with no or several inline policies,
-and managed policy attachments. The script doesn't adopt the account itself;
+and managed policy attachments. Groups, with their managed policies and
+members, can be imported into `scality-group-access` by hand; see
+[its README](../modules/scality-group-access/README.md#adopting-an-existing-group).
+The script doesn't adopt the account itself;
 to bring the account under `scality-account-management` too, see
 [Adopting the account](#adopting-the-account).
 

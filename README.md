@@ -22,6 +22,7 @@ including pointers on [state locking](docs/pointers/state-locking.md) and
 | [`scality-terraform-state-bootstrap`](modules/scality-terraform-state-bootstrap) | Available | Dedicated account + bucket for OpenTofu/Terraform state |
 | [`scality-account-management`](modules/scality-account-management) | Available | Tenant account (Console-UI or headless) + stable access key |
 | [`scality-application-identity`](modules/scality-application-identity) | Available | IAM user + access key + canned policy preset (read-only / read-write / bucket-admin) or custom JSON |
+| [`scality-group-access`](modules/scality-group-access) | Available | IAM group + managed policies + members |
 | [`scality-account-operator`](modules/scality-account-operator) | Available | Operator user (`iam:* + s3:*`) — recommended caller for downstream wrapper modules |
 | [`scality-delegated-admin-role`](modules/scality-delegated-admin-role) | Available | Sub-account role a single management-account user assumes (provider `assume_role`) to manage the sub-account's buckets and IAM |
 | [`scality-application-bucket`](modules/scality-application-bucket) | Available | Bucket + encryption + versioning + lifecycle hygiene |
