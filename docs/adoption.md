@@ -47,7 +47,8 @@ on stderr. `adopt.tf` holds no credentials: the module calls take
 
 Options: `--out FILE`, `--iam-endpoint URL` (when IAM isn't on the S3
 endpoint), `--module-source` and `--module-version` (to point at a `git::` or
-local copy instead of the registry). Set `SCALITY_INSECURE_SKIP_VERIFY=true`
+local copy instead of the registry; pass `--module-version ""` with a local
+path, which takes no version). Set `SCALITY_INSECURE_SKIP_VERIFY=true`
 for a self-signed endpoint.
 
 ## 2. Review
@@ -74,7 +75,7 @@ terraform {
   required_providers {
     scality = {
       source  = "cmrh/scality"
-      version = "~> 1.1, >= 1.1.6"
+      version = "~> 1.2"
     }
   }
 }
@@ -97,9 +98,8 @@ Expect:
 - **to import:** every bucket, user and inline policy.
 - **to add:** a new access key per user, plus encryption where a `# REVIEW`
   line said so.
-- **to change:** `versioning` and `tags` set to the values the bucket already
-  has (the provider doesn't record them on import), a one-off policy
-  whitespace update, and the lifecycle changes from your review.
+- **to change:** `versioning = false` and `tags = {}` on buckets that have
+  neither, and the lifecycle changes from your review.
 - **to destroy: 0.** If anything says `must be replaced`, stop and don't apply.
 
 ## 4. Apply
@@ -181,14 +181,15 @@ For `scality-terraform-state-bootstrap`, the import address is
 - **Use `console_login = false`, even for an account created through the
   Console.** Console login keeps working. Importing as `console_login = true`
   would replace the account, because its settings can't be read back.
-- **Leave `external_account_id` unset.** Import doesn't record it, so setting it
-  forces a replacement. The account keeps its external ID.
 - **Keep the key you pass in valid, and keep `account_credentials` set.** The
-  module manages its own key with it; changing it replaces that key.
+  module manages its own key with it. Switching to another key of the same
+  account keeps that key.
 - **Destroy deletes the account only once its IAM content is gone** (groups,
   policies, users). An adopted account may already hold some, such as
   `FullAccessGroup` / `FullAccessPolicy` and `ReadOnlyGroup` /
-  `ReadOnlyPolicy`. Before destroying, detach the policies from the groups,
-  then delete the groups, then the policies.
+  `ReadOnlyPolicy`. Import them into
+  [`scality-group-access`](../modules/scality-group-access/README.md#adopting-an-existing-group)
+  so destroy removes them too, or before destroying, detach the policies from
+  the groups, then delete the groups, then the policies.
 
 Expect a one-off in-place `custom_attributes` change on the account.

@@ -1,13 +1,13 @@
 variable "account_access_key" {
   type        = string
   sensitive   = true
-  description = "Access key of an account principal authorized to manage IAM users — typically the operator user from the account-operator module. Forces replacement."
+  description = "Access key of an account principal authorized to manage IAM users — typically the operator user from the account-operator module."
 }
 
 variable "account_secret_key" {
   type        = string
   sensitive   = true
-  description = "Secret key paired with account_access_key. Forces replacement."
+  description = "Secret key paired with account_access_key."
 }
 
 variable "username" {

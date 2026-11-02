@@ -30,7 +30,7 @@ mode, `crr` for its `crr` mode), or tiering and RING-backed buckets.
 
 ## Prerequisites
 
-- cmrh/scality provider 1.1.6 or later.
+- cmrh/scality provider 1.2 or later.
 
 ## Usage
 
