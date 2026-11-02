@@ -111,8 +111,8 @@ import {
 An attachment of a policy passed in `policy_arns` imports to
 `scality_iam_group_policy_attachment.existing["<key>"]`. Fetch a policy's
 document with `aws iam get-policy-version`; formatting differences don't
-show as changes. See [adoption](../../docs/adoption.md) for adopting the
-account and its buckets and users.
+show as changes. `scripts/scality-adopt.sh` generates these blocks for every
+group in an account; see [adoption](../../docs/adoption.md).
 
 ## Inputs
 

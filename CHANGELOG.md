@@ -6,6 +6,11 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `scripts/scality-adopt.sh` adopts groups into `scality-group-access`, with
+  their members and managed policies. A group owns the account policies
+  attached only to it; others are attached by ARN. (#74)
+
 ### Removed
 - The integration suite (`integration.yml`, `make integration`) and the
   self-hosted runner guard (`make runner-guard`). The provider acceptance

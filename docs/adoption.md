@@ -11,12 +11,16 @@ them. `scripts/scality-adopt.sh` reads an account and writes module calls plus
 | Bucket with object lock | `scality-compliance-bucket` |
 | Any other bucket | `scality-application-bucket` |
 | User with exactly one inline policy | `scality-application-identity`, keeping the policy name and document |
+| Group | `scality-group-access`, with its members and managed policies |
+
+A group's module call owns the account policies attached only to that group,
+keeping their names and documents. Other policies, such as one attached to
+several groups or to a user, are attached by ARN and left unmanaged.
 
 Not covered, listed on stderr and left as they are: bucket policies, bucket
-logging, replication, roles, groups, users with no or several inline policies,
-and managed policy attachments. Groups, with their managed policies and
-members, can be imported into `scality-group-access` by hand; see
-[its README](../modules/scality-group-access/README.md#adopting-an-existing-group).
+logging, replication, roles, users with no or several inline policies,
+managed policies attached to users, and inline group policies. A group with
+inline policies can't be destroyed until they're deleted.
 The script doesn't adopt the account itself;
 to bring the account under `scality-account-management` too, see
 [Adopting the account](#adopting-the-account).
@@ -95,7 +99,8 @@ terraform plan
 
 Expect:
 
-- **to import:** every bucket, user and inline policy.
+- **to import:** every bucket, user, inline policy and group, with the
+  group's policies, attachments and membership.
 - **to add:** a new access key per user, plus encryption where a `# REVIEW`
   line said so.
 - **to change:** `versioning = false` and `tags = {}` on buckets that have
@@ -187,9 +192,8 @@ For `scality-terraform-state-bootstrap`, the import address is
 - **Destroy deletes the account only once its IAM content is gone** (groups,
   policies, users). An adopted account may already hold some, such as
   `FullAccessGroup` / `FullAccessPolicy` and `ReadOnlyGroup` /
-  `ReadOnlyPolicy`. Import them into
-  [`scality-group-access`](../modules/scality-group-access/README.md#adopting-an-existing-group)
-  so destroy removes them too, or before destroying, detach the policies from
-  the groups, then delete the groups, then the policies.
+  `ReadOnlyPolicy`. The script adopts them into `scality-group-access`, so
+  destroy removes them too. Otherwise, before destroying, detach the policies
+  from the groups, then delete the groups, then the policies.
 
 Expect a one-off in-place `custom_attributes` change on the account.
