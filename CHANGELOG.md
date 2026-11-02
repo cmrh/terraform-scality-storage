@@ -10,8 +10,7 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - `scality-group-access`: an IAM group with managed policies attached, from
   JSON documents or existing ARNs, and optionally its members. Includes
   `examples/group-access` and import IDs for adopting an existing group.
-  Requires the provider release that adds
-  `scality_iam_group_policy_attachment`. (#67)
+  Requires cmrh/scality 1.2. (#67)
 
 ## [1.3.0] - 2026-10-28
 
