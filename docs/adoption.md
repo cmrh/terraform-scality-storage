@@ -161,7 +161,7 @@ variable "account_credentials" {
 
 module "acme" {
   source  = "cmrh/storage/scality//modules/scality-account-management"
-  version = "~> 1.3"
+  version = "~> 1.4"
 
   account_name        = "acme"
   account_email       = "platform@acme.example.com"   # as registered

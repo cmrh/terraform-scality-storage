@@ -11,6 +11,10 @@ and the project follows [Semantic Versioning](https://semver.org/).
   their members and managed policies. A group owns the account policies
   attached only to it; others are attached by ARN. (#74)
 
+### Changed
+- Usage snippets and the module pin `scripts/scality-adopt.sh` writes use
+  `~> 1.4`, the first release on cmrh/scality 1.2. (#75)
+
 ### Removed
 - The integration suite (`integration.yml`, `make integration`) and the
   self-hosted runner guard (`make runner-guard`). The provider acceptance

@@ -22,7 +22,7 @@ must not be deleted or changed for a set period.
 ```hcl
 module "records" {
   source  = "cmrh/storage/scality//modules/artesca-compliance-bucket"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_name   = module.account.account_name
   bucket_name    = "records"

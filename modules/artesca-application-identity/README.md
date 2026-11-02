@@ -29,7 +29,7 @@ Each preset covers only the buckets in `bucket_arns`.
 ```hcl
 module "app" {
   source  = "cmrh/storage/scality//modules/artesca-application-identity"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_name   = module.account.account_name
   username       = "app"
@@ -43,7 +43,7 @@ With a custom policy:
 ```hcl
 module "reporter" {
   source  = "cmrh/storage/scality//modules/artesca-application-identity"
-  version = "~> 1.2"
+  version = "~> 1.4"
 
   account_name = module.account.account_name
   username     = "reporter"
