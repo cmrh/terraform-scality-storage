@@ -53,8 +53,10 @@ on stderr. `adopt.tf` holds no credentials: the module calls take
 Options: `--out FILE`, `--iam-endpoint URL` (when IAM isn't on the S3
 endpoint), `--module-source` and `--module-version` (to point at a `git::` or
 local copy instead of the registry; pass `--module-version ""` with a local
-path, which takes no version). Set `SCALITY_INSECURE_SKIP_VERIFY=true`
-for a self-signed endpoint.
+path, which takes no version), and `--account-module NAME` (when the account
+is adopted in the same configuration; see
+[Adopting the account](#adopting-the-account)). Set
+`SCALITY_INSECURE_SKIP_VERIFY=true` for a self-signed endpoint.
 
 ## 2. Review
 
@@ -188,6 +190,12 @@ terraform plan    # expect: the account imported, a new key added, 0 to destroy
 
 For `scality-terraform-state-bootstrap`, the import address is
 `module.<name>.scality_account.state[0]`.
+
+If the account and its buckets, users and groups are adopted in the same
+configuration, generate with `--account-module <name>`, for example
+`--account-module acme`. Each generated call then depends on the account
+module, so destroy deletes them before the account. Without it, destroy can
+delete the account first, and fails because the account still holds them.
 
 - **Use `console_login = false`, even for an account created through the
   Console.** Console login keeps working. Importing as `console_login = true`

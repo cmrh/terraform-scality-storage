@@ -30,6 +30,10 @@ resource "scality_account_access_key" "stable" {
   account_access_key = local.adopted ? var.account_credentials.access_key : scality_console_account.this[0].access_key
   account_secret_key = local.adopted ? var.account_credentials.secret_key : scality_console_account.this[0].secret_key
 
+  # When adopting, nothing above references the account, so destroy would
+  # delete the account and this key in parallel and fail.
+  depends_on = [scality_account.this]
+
   lifecycle {
     precondition {
       condition     = !(local.adopted && var.console_login)

@@ -27,6 +27,11 @@
 #
 # Usage: scality-adopt.sh [--endpoint URL] [--iam-endpoint URL] [--out FILE]
 #                         [--module-source BASE] [--module-version CONSTRAINT]
+#                         [--account-module NAME]
+#
+# --account-module NAME: the account is adopted in the same configuration as
+# module "NAME"; each generated call depends on it, so destroy deletes the
+# buckets, users and groups before the account.
 set -euo pipefail
 
 endpoint=${SCALITY_ENDPOINT:-}
@@ -34,6 +39,7 @@ iam_endpoint=
 out=adopt.tf
 module_source=cmrh/storage/scality//modules
 module_version="~> 1.4"
+account_module=
 
 usage() { sed -n '/^# Usage:/,/^set /p' "$0" | sed '$d; s/^# \{0,1\}//' >&2; exit "${1:-2}"; }
 while (($#)); do
@@ -43,6 +49,7 @@ while (($#)); do
     --out) out=$2; shift 2 ;;
     --module-source) module_source=$2; shift 2 ;;
     --module-version) module_version=$2; shift 2 ;;
+    --account-module) account_module=$2; shift 2 ;;
     -h | --help) usage 0 ;;
     *) echo "unknown argument: $1" >&2; usage ;;
   esac
@@ -150,6 +157,7 @@ emit_log_bucket() {
     echo "    $(hcl_str "$source_bucket") = $(hcl_str "${log_prefix[$source_bucket]}")"
   done
   echo '  }'
+  hcl_dep
   echo '}'
   echo
   imp "$name" scality_bucket.this "$bucket"
@@ -159,6 +167,12 @@ emit_log_bucket() {
   for source_bucket in "${sources[@]}"; do
     imp "$name" "scality_bucket_logging.this[$(hcl_str "$source_bucket")]" "$source_bucket"
   done
+}
+# depends_on the account module, when --account-module is set.
+hcl_dep() {
+  [[ -n $account_module ]] || return 0
+  echo
+  echo "  depends_on = [module.$account_module]"
 }
 hcl_str() { jq -Rn --arg v "$1" '$v'; }
 imp() { printf 'import {\n  to = module.%s.%s\n  id = %s\n}\n\n' "$1" "$2" "$(jq -Rn --arg v "$3" '$v')"; }
@@ -290,6 +304,7 @@ for bucket in $bucket_names; do
         note "bucket $bucket: lifecycle rules beyond MPU abort would be replaced (REVIEW)"
       fi
       hcl_policy
+      hcl_dep
       echo '}'
       echo
       imp "$name" scality_bucket.this "$bucket"
@@ -335,6 +350,7 @@ for bucket in $bucket_names; do
       note "bucket $bucket: lifecycle rules not expressible by the module: $unmapped (REVIEW)"
     fi
     hcl_policy
+    hcl_dep
     echo '}'
     echo
     imp "$name" scality_bucket.this "$bucket"
@@ -375,6 +391,7 @@ for user in $(jq -r '.Users[].UserName' <<<"$users"); do
     echo "  username        = $(jq -Rn --arg v "$user" '$v')"
     echo "  policy_name     = $(jq -Rn --arg v "$policies" '$v')"
     echo '  policy_document = jsonencode('"$(jq '.' <<<"$doc" | sed '2,$s/^/  /')"')'
+    hcl_dep
     echo '}'
     echo
     echo "# Access keys are not imported; apply creates a new key for $user."
@@ -445,6 +462,7 @@ for group in $(jq -r '.Groups[] | select(.Path != "/scality-internal/") | .Group
       done
       echo '  }'
     fi
+    hcl_dep
     echo '}'
     echo
     imp "$name" scality_group.this "$group"

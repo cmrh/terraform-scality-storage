@@ -34,6 +34,14 @@ and the project follows [Semantic Versioning](https://semver.org/).
   provider release; module behaviour is lab-tested when a module changes.
   (#76)
 
+### Fixed
+- `scality-account-management` and `scality-terraform-state-bootstrap`: with
+  `account_credentials`, destroy could delete the account before the key
+  created from it, and fail. The key now depends on the account. (#80)
+- `scripts/scality-adopt.sh`: `--account-module NAME` makes each generated
+  call depend on the account module adopted in the same configuration, so
+  destroy deletes the buckets, users and groups before the account. (#80)
+
 ## [1.4.0] - 2026-11-02
 
 ### Added
