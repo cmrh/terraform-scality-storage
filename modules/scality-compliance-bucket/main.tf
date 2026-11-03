@@ -41,7 +41,6 @@ resource "scality_bucket_lifecycle" "this" {
   rule {
     id                                     = "abort-incomplete-multipart-uploads"
     status                                 = "Enabled"
-    prefix                                 = ""
     abort_incomplete_multipart_upload_days = var.abort_incomplete_multipart_upload_days
   }
 }

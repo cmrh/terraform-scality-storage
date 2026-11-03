@@ -110,10 +110,7 @@ Expect:
 - **to add:** a new access key per user, plus encryption, and a log
   bucket's policy or lifecycle, where a `# REVIEW` line said so.
 - **to change:** `versioning = false` and `tags = {}` on buckets that have
-  neither, and the lifecycle changes from your review. An imported
-  lifecycle rule for the whole bucket can show an in-place update with no
-  attribute marked: its empty prefix is recorded once, without changing the
-  rule.
+  neither, and the lifecycle changes from your review.
 - **to destroy: 0.** If anything says `must be replaced`, stop and don't apply.
 
 ## 4. Apply

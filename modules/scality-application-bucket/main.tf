@@ -9,7 +9,7 @@ locals {
         rule = {
           id                                     = "abort-incomplete-multipart-uploads"
           status                                 = "Enabled"
-          prefix                                 = ""
+          prefix                                 = null
           expiration_days                        = null
           noncurrent_version_expiration_days     = null
           abort_incomplete_multipart_upload_days = var.abort_incomplete_multipart_upload_days
@@ -20,7 +20,7 @@ locals {
         rule = {
           id                                     = "expire-noncurrent-versions"
           status                                 = "Enabled"
-          prefix                                 = ""
+          prefix                                 = null
           expiration_days                        = null
           noncurrent_version_expiration_days     = var.noncurrent_version_expiration_days
           abort_incomplete_multipart_upload_days = null
@@ -31,7 +31,7 @@ locals {
         rule = {
           id                                     = "expire-current-objects"
           status                                 = "Enabled"
-          prefix                                 = ""
+          prefix                                 = null
           expiration_days                        = var.expiration_days
           noncurrent_version_expiration_days     = null
           abort_incomplete_multipart_upload_days = null
