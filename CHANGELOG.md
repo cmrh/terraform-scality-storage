@@ -21,6 +21,12 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - Usage snippets and the module pin `scripts/scality-adopt.sh` writes use
   `~> 1.4`, the first release on cmrh/scality 1.2. (#75)
 
+- `scality-application-bucket`, `scality-compliance-bucket`,
+  `scality-access-log-bucket` and `scality-terraform-state-bootstrap` leave
+  the lifecycle rule prefix unset instead of `""`, so an imported lifecycle
+  plans no change. Existing deployments plan a one-off in-place update of
+  the lifecycle that leaves the rules unchanged. (#78)
+
 ### Removed
 - The integration suite (`integration.yml`, `make integration`) and the
   self-hosted runner guard (`make runner-guard`). The provider acceptance

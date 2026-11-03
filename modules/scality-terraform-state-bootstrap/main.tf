@@ -66,14 +66,12 @@ resource "scality_bucket_lifecycle" "state" {
   rule {
     id                                     = "abort-incomplete-multipart-uploads"
     status                                 = "Enabled"
-    prefix                                 = ""
     abort_incomplete_multipart_upload_days = var.abort_incomplete_multipart_upload_days
   }
 
   rule {
     id                                 = "expire-noncurrent-state-versions"
     status                             = "Enabled"
-    prefix                             = ""
     noncurrent_version_expiration_days = var.noncurrent_version_expiration_days
   }
 }

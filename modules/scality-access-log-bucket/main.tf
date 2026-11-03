@@ -51,7 +51,6 @@ resource "scality_bucket_lifecycle" "this" {
   rule {
     id              = "expire-access-logs"
     status          = "Enabled"
-    prefix          = ""
     expiration_days = var.retention_days
   }
 }
