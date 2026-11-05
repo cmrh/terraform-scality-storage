@@ -14,6 +14,14 @@ resource "scality_account" "state" {
   custom_attributes = var.account_attributes
 }
 
+# scality_console_account's id is the account name; read the ID from the account.
+data "scality_account" "console" {
+  count = var.console_login ? 1 : 0
+
+  name       = scality_console_account.state[0].account_name
+  depends_on = [scality_console_account.state]
+}
+
 locals {
   adopted = var.account_credentials != null
   stable  = var.console_login || local.adopted

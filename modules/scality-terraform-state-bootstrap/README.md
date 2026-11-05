@@ -178,7 +178,7 @@ the bucket keeps prior state versions for recovery.
 |---|---|---|---|
 | `bucket_name` | State bucket name. | No | both |
 | `account_name` | Dedicated state account name. | No | both |
-| `account_id` | Scality account identifier. | No | both |
+| `account_id` | Account ID, the 12-digit number in the account's ARNs. | No | both |
 | `access_key` | Stable access key for backend config. | Yes | both |
 | `secret_key` | Stable secret key for backend config. | Yes | both |
 | `console_password` | Auto-generated Console password. | Yes | only `console_login = true` (null otherwise) |
