@@ -46,6 +46,12 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - `scripts/scality-adopt.sh`: `--account-module NAME` makes each generated
   call depend on the account module adopted in the same configuration, so
   destroy deletes the buckets, users and groups before the account. (#80)
+- `scality-account-management` and `scality-terraform-state-bootstrap`: with
+  `console_login = true` (the default), `account_id` returned the account
+  name. It now returns the account ID in both modes. In
+  `scality-account-management`, `account_arn` and `canonical_id` are now set
+  in both modes, where they used to be null with `console_login = true`.
+  (#93)
 - `scripts/scality-adopt.sh` formats `adopt.tf` with `tofu fmt` or
   `terraform fmt`, so it no longer needs a separate `fmt` run. It now
   requires OpenTofu or Terraform on the path. (#79)

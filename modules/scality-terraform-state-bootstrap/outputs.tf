@@ -9,8 +9,8 @@ output "account_name" {
 }
 
 output "account_id" {
-  description = "Scality account ID."
-  value       = var.console_login ? scality_console_account.state[0].id : scality_account.state[0].id
+  description = "Account ID, the 12-digit number in the account's ARNs."
+  value       = var.console_login ? data.scality_account.console[0].id : scality_account.state[0].id
 }
 
 output "access_key" {

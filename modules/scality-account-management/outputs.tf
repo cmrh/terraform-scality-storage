@@ -4,8 +4,8 @@ output "account_name" {
 }
 
 output "account_id" {
-  description = "Account identifier."
-  value       = var.console_login ? scality_console_account.this[0].id : scality_account.this[0].id
+  description = "Account ID, the 12-digit number in the account's ARNs."
+  value       = var.console_login ? data.scality_account.console[0].id : scality_account.this[0].id
 }
 
 output "created_at" {
@@ -14,13 +14,13 @@ output "created_at" {
 }
 
 output "account_arn" {
-  description = "Account ARN. Available only when console_login = false; null otherwise (scality_console_account does not return an ARN)."
-  value       = var.console_login ? null : scality_account.this[0].arn
+  description = "Account ARN."
+  value       = var.console_login ? data.scality_account.console[0].arn : scality_account.this[0].arn
 }
 
 output "canonical_id" {
-  description = "Canonical ID, used in S3 bucket policies. Available only when console_login = false; null otherwise."
-  value       = var.console_login ? null : scality_account.this[0].canonical_id
+  description = "Canonical ID, used in S3 bucket policies."
+  value       = var.console_login ? data.scality_account.console[0].canonical_id : scality_account.this[0].canonical_id
 }
 
 output "access_key" {

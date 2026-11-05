@@ -21,6 +21,15 @@ locals {
   adopted = var.account_credentials != null
 }
 
+# scality_console_account's id is the account name, and it has no ARN or
+# canonical ID; read them from the account.
+data "scality_account" "console" {
+  count = var.console_login ? 1 : 0
+
+  name       = scality_console_account.this[0].account_name
+  depends_on = [scality_console_account.this]
+}
+
 # Layered stable key — Terraform-owned. Created from the Console's bootstrap
 # key (which belongs to the UI), or from account_credentials when adopting an
 # existing account (import doesn't recover the account's own keys).

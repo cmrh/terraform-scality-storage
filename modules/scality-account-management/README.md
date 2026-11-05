@@ -119,13 +119,13 @@ resource "scality_bucket" "acme_data" {
 | Name | Description | Sensitive | Available when |
 |---|---|---|---|
 | `account_name` | Created account name. | No | both |
-| `account_id` | Account identifier. | No | both |
+| `account_id` | Account ID, the 12-digit number in the account's ARNs. | No | both |
 | `created_at` | Creation timestamp (ISO 8601). | No | both |
 | `access_key` | Stable S3 access key (layered when `console_login = true` or `account_credentials` is set). | Yes | both |
 | `secret_key` | Stable S3 secret key. | Yes | both |
 | `console_password` | Auto-generated UI password. Customer should change it in Console after first login. | Yes | only `console_login = true` (null otherwise) |
-| `account_arn` | Account ARN. | No | only `console_login = false` (null otherwise) |
-| `canonical_id` | Canonical ID, used in bucket policies. | No | only `console_login = false` (null otherwise) |
+| `account_arn` | Account ARN. | No | both |
+| `canonical_id` | Canonical ID, used in bucket policies. | No | both |
 
 ## Caveats
 
