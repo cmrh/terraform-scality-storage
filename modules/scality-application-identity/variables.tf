@@ -43,3 +43,9 @@ variable "policy_name" {
   default     = null
   description = "Name of the inline policy. Defaults to \"<username>-policy\" when null."
 }
+
+variable "policies" {
+  type        = map(string)
+  default     = {}
+  description = "Further inline policies: policy name => JSON document, alongside the preset or policy_document policy. Construct documents with jsonencode(...) or file(...). With no bucket_arns, policy_document or policies, the user has no policy."
+}

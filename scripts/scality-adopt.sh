@@ -9,7 +9,8 @@
 #                                   configuration of the buckets logging to it
 #   bucket with object lock      -> scality-compliance-bucket (with its policy)
 #   other bucket                 -> scality-application-bucket (with its policy)
-#   user with one inline policy  -> scality-application-identity
+#   user                         -> scality-application-identity, with its
+#                                   inline policies
 #   group                        -> scality-group-access, with its managed
 #                                   policies and members
 # Access keys are not imported (their secrets can't be recovered); apply
@@ -365,21 +366,20 @@ for bucket in $bucket_names; do
 done
 
 # --- Users -----------------------------------------------------------------
+# One inline policy goes in policy_name / policy_document, several in policies.
+user_doc() {
+  iam get-user-policy --user-name "$1" --policy-name "$2" |
+    jq '.PolicyDocument | if type == "string" then fromjson else . end'
+}
 for user in $(jq -r '.Users[].UserName' <<<"$users"); do
   policies=$(iam list-user-policies --user-name "$user" | jq -r '.PolicyNames[]')
   attached=$(iam list-attached-user-policies --user-name "$user" | jq -r '.AttachedPolicies | length')
   keys=$(iam list-access-keys --user-name "$user" | jq -r '.AccessKeyMetadata | length')
   count=$(grep -c . <<<"$policies" || true)
 
-  if ((count != 1)); then
-    note "user $user: $count inline policies; module takes exactly one (skipped)"
-    continue
-  fi
   ((attached > 0)) && note "user $user: $attached managed policies attached; left unmanaged"
   ((keys >= 4)) && note "user $user: at the 4-key limit; delete an unused key before apply (REVIEW)"
 
-  doc=$(iam get-user-policy --user-name "$user" --policy-name "$policies" |
-    jq '.PolicyDocument | if type == "string" then fromjson else . end')
   name=$(label user "$user")
   {
     echo "module \"$name\" {"
@@ -388,9 +388,21 @@ for user in $(jq -r '.Users[].UserName' <<<"$users"); do
     echo '  account_access_key = var.account_access_key'
     echo '  account_secret_key = var.account_secret_key'
     echo
-    echo "  username        = $(jq -Rn --arg v "$user" '$v')"
-    echo "  policy_name     = $(jq -Rn --arg v "$policies" '$v')"
-    echo '  policy_document = jsonencode('"$(jq '.' <<<"$doc" | sed '2,$s/^/  /')"')'
+    if ((count == 1)); then
+      echo "  username        = $(hcl_str "$user")"
+      echo "  policy_name     = $(hcl_str "$policies")"
+      echo '  policy_document = jsonencode('"$(user_doc "$user" "$policies" | sed '2,$s/^/  /')"')'
+    else
+      echo "  username = $(hcl_str "$user")"
+    fi
+    if ((count > 1)); then
+      echo
+      echo '  policies = {'
+      for p in $policies; do
+        echo "    $(hcl_str "$p") = jsonencode($(user_doc "$user" "$p" | sed '2,$s/^/    /'))"
+      done
+      echo '  }'
+    fi
     hcl_dep
     echo '}'
     echo
@@ -399,7 +411,13 @@ for user in $(jq -r '.Users[].UserName' <<<"$users"); do
     printf 'output "%s_access_key" {\n  value     = module.%s.access_key\n  sensitive = true\n}\n\n' "$name" "$name"
     printf 'output "%s_secret_key" {\n  value     = module.%s.secret_key\n  sensitive = true\n}\n\n' "$name" "$name"
     imp "$name" scality_user.this "$user"
-    imp "$name" scality_user_policy.this "$user:$policies"
+    if ((count == 1)); then
+      imp "$name" 'scality_user_policy.this[0]' "$user:$policies"
+    else
+      for p in $policies; do
+        imp "$name" "scality_user_policy.policies[$(hcl_str "$p")]" "$user:$p"
+      done
+    fi
   } >>"$tmp"
 done
 

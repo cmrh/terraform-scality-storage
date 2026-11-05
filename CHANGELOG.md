@@ -16,6 +16,11 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - `scripts/scality-adopt.sh` adopts each bucket that receives server access
   logs into `scality-access-log-bucket`, with the logging configuration of
   the buckets that log to it. (#78)
+- `scality-application-identity`: `policies` input, for further inline
+  policies by name. A user can also have no policy: with no `bucket_arns`,
+  `policy_document` or `policies`, none is created, where plan used to fail.
+  New `policy_names` output. `scripts/scality-adopt.sh` adopts users with any
+  number of inline policies. (#79)
 
 ### Changed
 - Usage snippets and the module pin `scripts/scality-adopt.sh` writes use

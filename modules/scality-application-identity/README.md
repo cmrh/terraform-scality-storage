@@ -11,7 +11,8 @@ user per application or service, scoped to specific buckets.
 
 - `scality_user` — the IAM user
 - `scality_user_access_key` — S3 access key for the user
-- `scality_user_policy` — inline IAM policy attached to the user
+- `scality_user_policy` — the inline policy from the preset or
+  `policy_document`, plus one per entry in `policies`
 
 ## Access patterns (presets)
 
@@ -131,9 +132,10 @@ terraform output -raw acme_app_secret_key  # → AWS_SECRET_ACCESS_KEY
 | `bucket_arns` | list(string) | `[]` | ARNs of buckets the user gets access to. Required when using a preset. |
 | `policy_document` | string | `null` | Custom JSON policy. Overrides `access_pattern` + `bucket_arns` when set. |
 | `policy_name` | string | `null` | Inline policy name. Defaults to `<username>-policy`. |
+| `policies` | map(string) | `{}` | Further inline policies: name => JSON document. Names can't repeat `policy_name`. |
 
-> Either provide `bucket_arns` (with a preset) or `policy_document`;
-> providing neither fails at plan time.
+> With no `bucket_arns`, `policy_document` or `policies`, the user has no
+> policy.
 
 ## Outputs
 
@@ -145,8 +147,9 @@ terraform output -raw acme_app_secret_key  # → AWS_SECRET_ACCESS_KEY
 | `user_path` | IAM path. | No |
 | `access_key` | User's S3 access key. | Yes |
 | `secret_key` | User's S3 secret key. | Yes |
-| `policy_name` | Inline policy name. | No |
-| `effective_policy` | Rendered JSON policy actually applied (preset or custom). Useful for debugging/auditing. | No |
+| `policy_name` | Name of the preset or `policy_document` policy; `null` when there is none. | No |
+| `policy_names` | Names of every inline policy on the user. | No |
+| `effective_policy` | Rendered JSON of the preset or `policy_document` policy; `null` when there is none. | No |
 
 ## Caveats
 
