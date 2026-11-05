@@ -46,6 +46,9 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - `scripts/scality-adopt.sh`: `--account-module NAME` makes each generated
   call depend on the account module adopted in the same configuration, so
   destroy deletes the buckets, users and groups before the account. (#80)
+- `scripts/scality-adopt.sh` formats `adopt.tf` with `tofu fmt` or
+  `terraform fmt`, so it no longer needs a separate `fmt` run. It now
+  requires OpenTofu or Terraform on the path. (#79)
 
 ## [1.4.0] - 2026-11-02
 

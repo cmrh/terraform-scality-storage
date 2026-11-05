@@ -43,7 +43,6 @@ export SCALITY_ACCOUNT_ACCESS_KEY="account-access-key"
 export SCALITY_ACCOUNT_SECRET_KEY="account-secret-key"
 
 /path/to/terraform-scality-storage/scripts/scality-adopt.sh
-terraform fmt
 ```
 
 The script only reads from the cluster. It writes `adopt.tf` and prints notes
