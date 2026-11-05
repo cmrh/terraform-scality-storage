@@ -9,7 +9,9 @@ scoped to specific buckets.
 
 - `artesca_user`
 - `artesca_user_access_key`
-- `artesca_user_policy`: a preset over `bucket_arns`, or `policy_document`
+- `artesca_user_policy`: a preset over `bucket_arns`, or `policy_document`,
+  plus one per `policies` entry
+- `artesca_user_policy_attachment`: one per `policy_arns` entry
 
 ## Access patterns (presets)
 
@@ -68,7 +70,12 @@ module "reporter" {
 | `bucket_arns` | list(string) | `[]` | Buckets the preset covers. Required with a preset. |
 | `policy_document` | string | `null` | Custom JSON policy; overrides the preset. |
 | `policy_name` | string | `null` | Inline policy name. Defaults to `<username>-policy`. |
+| `policies` | map(string) | `{}` | Further inline policies: name => JSON document. Names can't repeat `policy_name`. |
+| `policy_arns` | map(string) | `{}` | Managed policies to attach: static key => policy ARN. Reference the policy (`artesca_policy.x.arn`) so destroy detaches it first. |
 | `force_destroy` | bool | `false` | Detach policies and group memberships not managed here on destroy. Apply before destroying. |
+
+> With no `bucket_arns`, `policy_document`, `policies` or `policy_arns`, the
+> user has no policy.
 
 ## Outputs
 
@@ -79,5 +86,7 @@ module "reporter" {
 | `user_arn` | User ARN. |
 | `access_key` | S3 access key (sensitive). |
 | `secret_key` | S3 secret key (sensitive). |
-| `policy_name` | Inline policy name. |
-| `effective_policy` | Policy applied (preset or custom). |
+| `policy_name` | Name of the preset or `policy_document` policy; null when there is none. |
+| `policy_names` | Names of every inline policy. |
+| `policy_arns` | ARNs of the attached managed policies. |
+| `effective_policy` | The preset or `policy_document` policy; null when there is none. |

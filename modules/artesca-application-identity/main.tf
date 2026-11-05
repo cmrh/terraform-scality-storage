@@ -60,7 +60,9 @@ locals {
     })
   }
 
-  effective_policy = var.policy_document != null ? var.policy_document : local.preset_policies[var.access_pattern]
+  # The preset or policy_document policy, created only when one is given.
+  single_policy    = var.policy_document != null || length(var.bucket_arns) > 0
+  effective_policy = !local.single_policy ? null : var.policy_document != null ? var.policy_document : local.preset_policies[var.access_pattern]
 }
 
 resource "artesca_user" "this" {
@@ -75,6 +77,8 @@ resource "artesca_user_access_key" "this" {
 }
 
 resource "artesca_user_policy" "this" {
+  count = local.single_policy ? 1 : 0
+
   account_name    = var.account_name
   username        = artesca_user.this.username
   policy_name     = local.policy_name
@@ -82,8 +86,33 @@ resource "artesca_user_policy" "this" {
 
   lifecycle {
     precondition {
-      condition     = var.policy_document != null || length(var.bucket_arns) > 0
-      error_message = "Provide either bucket_arns (with the chosen access_pattern preset) or a custom policy_document."
+      condition     = !contains(keys(var.policies), local.policy_name)
+      error_message = "policies can't contain the name of the preset or policy_document policy (policy_name, default \"<username>-policy\")."
     }
   }
+}
+
+# Releases before the count was added managed the policy as a single instance.
+moved {
+  from = artesca_user_policy.this
+  to   = artesca_user_policy.this[0]
+}
+
+resource "artesca_user_policy" "policies" {
+  for_each = var.policies
+
+  account_name    = var.account_name
+  username        = artesca_user.this.username
+  policy_name     = each.key
+  policy_document = each.value
+}
+
+# Managed policies, attached by ARN. Reference the policy (for example
+# artesca_policy.x.arn) so destroy detaches it before deleting the policy.
+resource "artesca_user_policy_attachment" "this" {
+  for_each = var.policy_arns
+
+  account_name = var.account_name
+  username     = artesca_user.this.username
+  policy_arn   = each.value
 }

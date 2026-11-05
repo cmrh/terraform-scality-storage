@@ -10,6 +10,7 @@ optional tags and an optional expiration rule.
 - `artesca_bucket`: versioning enabled by default
 - `artesca_bucket_encryption`: `AES256` by default
 - `artesca_bucket_tagging`: when `tags` is set
+- `artesca_bucket_policy`: when `bucket_policy` is set
 - `artesca_bucket_workflow_expiration` (cleanup): deletes noncurrent versions
   after 90 days and aborts incomplete multipart uploads after 7 days by
   default; optionally removes leftover delete markers
@@ -53,6 +54,7 @@ Grant access with `artesca-application-identity`, passing
 | `noncurrent_version_expiration_days` | number | `90` | Delete versions this many days after they become noncurrent. `null` disables. |
 | `abort_incomplete_multipart_upload_days` | number | `7` | Abort incomplete multipart uploads after this many days. `null` disables. |
 | `expire_delete_markers` | bool | `false` | Remove delete markers with no noncurrent versions left behind them. |
+| `bucket_policy` | string | `null` | Bucket policy JSON. `null` leaves the policy unmanaged; changing a document to `null` deletes it. |
 | `force_destroy` | bool | `false` | Delete every object version on destroy. Apply before destroying. |
 
 ## Outputs

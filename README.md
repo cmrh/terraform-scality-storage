@@ -38,6 +38,7 @@ including pointers on [state locking](docs/pointers/state-locking.md) and
 | [`artesca-edge-replication`](modules/artesca-edge-replication) | Available | Account + users + bucket replicated to RING, through a RING S3 location or CRR over STS (pair with `scality-ring-replication-target`; see [`examples/artesca-edge-to-ring`](examples/artesca-edge-to-ring)) |
 | [`artesca-account-management`](modules/artesca-account-management) | Available | Account + S3 keys |
 | [`artesca-application-identity`](modules/artesca-application-identity) | Available | IAM user + access key + policy preset (read-only / read-write / bucket-admin) or custom JSON |
+| [`artesca-group-access`](modules/artesca-group-access) | Available | IAM group + managed policies + members |
 | [`artesca-storage-location`](modules/artesca-storage-location) | Available | RING or Versity tape location + optional endpoint |
 | [`artesca-application-bucket`](modules/artesca-application-bucket) | Available | Bucket + versioning + encryption + lifecycle cleanup + optional expiration and object lock |
 | [`artesca-tiered-bucket`](modules/artesca-tiered-bucket) | Available | Bucket whose objects move to a RING (warm) or Versity tape (cold) location |
