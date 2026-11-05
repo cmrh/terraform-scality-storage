@@ -29,7 +29,7 @@ output "access_key" {
   # Terraform may destroy the policy in parallel with dependents,
   # leaving the user without permissions mid-destroy and failing
   # subsequent IAM calls.
-  depends_on = [scality_user_policy.this, scality_user_policy.policies]
+  depends_on = [scality_user_policy.this, scality_user_policy.policies, scality_iam_user_policy_attachment.this]
 }
 
 output "secret_key" {
@@ -37,7 +37,7 @@ output "secret_key" {
   value       = scality_user_access_key.this.secret_access_key
   sensitive   = true
 
-  depends_on = [scality_user_policy.this, scality_user_policy.policies]
+  depends_on = [scality_user_policy.this, scality_user_policy.policies, scality_iam_user_policy_attachment.this]
 }
 
 output "policy_name" {
@@ -53,4 +53,9 @@ output "policy_names" {
 output "effective_policy" {
   description = "Rendered JSON of the preset or policy_document policy; null when there is none. Useful for debugging or auditing what was granted."
   value       = local.effective_policy
+}
+
+output "policy_arns" {
+  description = "ARNs of the managed policies attached to the user."
+  value       = [for a in scality_iam_user_policy_attachment.this : a.policy_arn]
 }

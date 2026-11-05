@@ -21,6 +21,10 @@ and the project follows [Semantic Versioning](https://semver.org/).
   `policy_document` or `policies`, none is created, where plan used to fail.
   New `policy_names` output. `scripts/scality-adopt.sh` adopts users with any
   number of inline policies. (#79)
+- `scality-application-identity`: `policy_arns` input, attaching managed
+  policies to the user, and a `policy_arns` output.
+  `scripts/scality-adopt.sh` adopts the managed policies attached to users.
+  (#81)
 - `artesca-application-identity`: `policies` input for further inline
   policies by name, and `policy_arns` for managed policies. A user can have
   no policy: with no `bucket_arns`, `policy_document`, `policies` or

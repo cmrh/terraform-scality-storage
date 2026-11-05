@@ -10,7 +10,7 @@
 #   bucket with object lock      -> scality-compliance-bucket (with its policy)
 #   other bucket                 -> scality-application-bucket (with its policy)
 #   user                         -> scality-application-identity, with its
-#                                   inline policies
+#                                   inline and attached managed policies
 #   group                        -> scality-group-access, with its managed
 #                                   policies and members
 # Access keys are not imported (their secrets can't be recovered); apply
@@ -376,11 +376,10 @@ user_doc() {
 }
 for user in $(jq -r '.Users[].UserName' <<<"$users"); do
   policies=$(iam list-user-policies --user-name "$user" | jq -r '.PolicyNames[]')
-  attached=$(iam list-attached-user-policies --user-name "$user" | jq -r '.AttachedPolicies | length')
+  attached=$(iam list-attached-user-policies --user-name "$user" | jq -r '.AttachedPolicies[] | [.PolicyName, .PolicyArn] | @tsv')
   keys=$(iam list-access-keys --user-name "$user" | jq -r '.AccessKeyMetadata | length')
   count=$(grep -c . <<<"$policies" || true)
 
-  ((attached > 0)) && note "user $user: $attached managed policies attached; left unmanaged"
   ((keys >= 4)) && note "user $user: at the 4-key limit; delete an unused key before apply (REVIEW)"
 
   name=$(label user "$user")
@@ -406,6 +405,14 @@ for user in $(jq -r '.Users[].UserName' <<<"$users"); do
       done
       echo '  }'
     fi
+    if [[ -n $attached ]]; then
+      echo
+      echo '  policy_arns = {'
+      while IFS=$'\t' read -r pname parn; do
+        echo "    $(hcl_str "$pname") = $(hcl_str "$parn")"
+      done <<<"$attached"
+      echo '  }'
+    fi
     hcl_dep
     echo '}'
     echo
@@ -420,6 +427,11 @@ for user in $(jq -r '.Users[].UserName' <<<"$users"); do
       for p in $policies; do
         imp "$name" "scality_user_policy.policies[$(hcl_str "$p")]" "$user:$p"
       done
+    fi
+    if [[ -n $attached ]]; then
+      while IFS=$'\t' read -r pname parn; do
+        imp "$name" "scality_iam_user_policy_attachment.this[$(hcl_str "$pname")]" "$user:$parn"
+      done <<<"$attached"
     fi
   } >>"$tmp"
 done
