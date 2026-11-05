@@ -60,6 +60,9 @@ iam_endpoint=${iam_endpoint:-$endpoint}
 for bin in aws jq; do
   command -v "$bin" >/dev/null || { echo "missing dependency: $bin" >&2; exit 1; }
 done
+# Formats the output.
+engine=$(command -v tofu || command -v terraform) ||
+  { echo "missing dependency: tofu or terraform" >&2; exit 1; }
 [[ -n $endpoint ]] || { echo "set SCALITY_ENDPOINT or pass --endpoint" >&2; exit 1; }
 [[ -n ${SCALITY_ACCOUNT_ACCESS_KEY:-} && -n ${SCALITY_ACCOUNT_SECRET_KEY:-} ]] ||
   { echo "set SCALITY_ACCOUNT_ACCESS_KEY and SCALITY_ACCOUNT_SECRET_KEY" >&2; exit 1; }
@@ -499,6 +502,6 @@ done
 n=$(iam list-roles | jq -r '(.Roles // []) | map(select(.Path != "/scality-internal/")) | length')
 ((n > 0)) && note "account: $n roles found; not adopted (left unmanaged)"
 
-mv "$tmp" "$out"
-trap - EXIT
+formatted=$("$engine" fmt - <"$tmp") || { echo "fmt failed on the generated configuration" >&2; exit 1; }
+printf '%s\n' "$formatted" >"$out"
 note "wrote $out"
