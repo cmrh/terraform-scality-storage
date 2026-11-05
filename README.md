@@ -92,7 +92,8 @@ the modules and the provider served locally — see
 [docs/offline-install.md](docs/offline-install.md).
 
 **Accounts, buckets and users created by hand** can be adopted into the modules without
-recreating them — see [docs/adoption.md](docs/adoption.md).
+recreating them — see [docs/adoption.md](docs/adoption.md), or
+[docs/artesca-adoption.md](docs/artesca-adoption.md) for ARTESCA.
 
 Each module's `README.md` documents its inputs, outputs, and any provider
 quirks relevant to that use case.

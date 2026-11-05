@@ -2,7 +2,8 @@
 
 Bring accounts, buckets and users created by hand under the modules without recreating
 them. `scripts/scality-adopt.sh` reads an account and writes module calls plus
-`import {}` blocks; you review, plan, and apply.
+`import {}` blocks; you review, plan, and apply. For ARTESCA, see
+[ARTESCA adoption](artesca-adoption.md).
 
 ## What it covers
 

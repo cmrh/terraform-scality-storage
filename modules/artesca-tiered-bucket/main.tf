@@ -5,9 +5,12 @@ module "bucket" {
   bucket_name   = var.bucket_name
   sse_algorithm = var.sse_algorithm
 
-  noncurrent_version_expiration_days = var.noncurrent_version_expiration_days
-  tags                               = var.tags
-  force_destroy                      = var.force_destroy
+  noncurrent_version_expiration_days     = var.noncurrent_version_expiration_days
+  abort_incomplete_multipart_upload_days = var.abort_incomplete_multipart_upload_days
+  expire_delete_markers                  = var.expire_delete_markers
+  bucket_policy                          = var.bucket_policy
+  tags                                   = var.tags
+  force_destroy                          = var.force_destroy
 }
 
 resource "artesca_bucket_workflow_transition" "this" {

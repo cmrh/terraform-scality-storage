@@ -32,6 +32,12 @@ and the project follows [Semantic Versioning](https://semver.org/).
   group with managed policies attached, from JSON documents or existing
   ARNs, and its members. Includes import IDs for adopting an existing group.
   (#96)
+- `scripts/artesca-adopt.sh` and `docs/artesca-adoption.md`: adopt the
+  buckets, users and groups of an existing ARTESCA account into the artesca
+  modules with `import {}` blocks, without recreating them. The script signs
+  in with the artesca provider's settings. (#82)
+- `artesca-tiered-bucket`: `abort_incomplete_multipart_upload_days`,
+  `expire_delete_markers` and `bucket_policy`, passed to its bucket. (#82)
 
 ### Changed
 - Usage snippets and the module pin `scripts/scality-adopt.sh` writes use
