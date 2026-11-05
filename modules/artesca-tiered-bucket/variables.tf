@@ -58,6 +58,24 @@ variable "tags" {
   description = "Bucket tags, up to 50."
 }
 
+variable "abort_incomplete_multipart_upload_days" {
+  type        = number
+  default     = 7
+  description = "Abort incomplete multipart uploads this many days after they start. Null leaves them."
+}
+
+variable "expire_delete_markers" {
+  type        = bool
+  default     = false
+  description = "Remove delete markers left with no versions behind them."
+}
+
+variable "bucket_policy" {
+  type        = string
+  default     = null
+  description = "Bucket policy as a JSON document; construct it with jsonencode(...) or file(...). null (default) leaves the bucket policy unmanaged; changing a document to null deletes the policy."
+}
+
 variable "force_destroy" {
   type        = bool
   default     = false

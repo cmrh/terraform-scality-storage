@@ -53,6 +53,9 @@ module "bucket" {
 | `noncurrent_version_expiration_days` | number | `90` | Delete noncurrent versions after this many days. `null` keeps them. |
 | `sse_algorithm` | string | `"AES256"` | `"AES256"`, or `null` for no default encryption. |
 | `tags` | map(string) | `{}` | Bucket tags, up to 50. |
+| `abort_incomplete_multipart_upload_days` | number | `7` | Abort incomplete multipart uploads after this many days. `null` leaves them. |
+| `expire_delete_markers` | bool | `false` | Remove delete markers with no versions behind them. |
+| `bucket_policy` | string | `null` | Bucket policy JSON. `null` leaves the policy unmanaged; changing a document to `null` deletes it. |
 | `force_destroy` | bool | `false` | Delete every object version on destroy. Apply before destroying. |
 
 ## Outputs
