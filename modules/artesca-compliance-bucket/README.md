@@ -9,7 +9,8 @@ must not be deleted or changed for a set period.
 
 - the bucket, through `artesca-application-bucket`: object lock (which keeps
   versioning on), `AES256` by default, incomplete multipart uploads aborted
-  after 7 days. Noncurrent versions aren't expired.
+  after 7 days. Noncurrent versions aren't expired. Its bucket policy, when
+  `bucket_policy` is set.
 - `artesca_bucket_object_lock`: the default retention applied to new object
   versions
 
@@ -43,6 +44,7 @@ module "records" {
 | `sse_algorithm` | string | `"AES256"` | `"AES256"`, or `null` for no default encryption. |
 | `tags` | map(string) | `{}` | Bucket tags, up to 50. |
 | `abort_incomplete_multipart_upload_days` | number | `7` | Abort incomplete multipart uploads after this many days. `null` disables. |
+| `bucket_policy` | string | `null` | Bucket policy JSON. `null` leaves the policy unmanaged; changing a document to `null` deletes it. |
 | `force_destroy` | bool | `false` | Delete every version on destroy where retention allows. Apply before destroying. |
 
 ## Outputs

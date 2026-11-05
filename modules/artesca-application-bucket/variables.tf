@@ -93,6 +93,12 @@ variable "expire_delete_markers" {
   description = "Remove delete markers that have no noncurrent versions left behind them."
 }
 
+variable "bucket_policy" {
+  type        = string
+  default     = null
+  description = "Bucket policy as a JSON document; construct it with jsonencode(...) or file(...). null (default) leaves the bucket policy unmanaged; changing a document to null deletes the policy."
+}
+
 variable "force_destroy" {
   type        = bool
   default     = false

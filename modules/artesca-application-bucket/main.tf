@@ -32,6 +32,14 @@ resource "artesca_bucket_tagging" "this" {
   tags         = var.tags
 }
 
+resource "artesca_bucket_policy" "this" {
+  count = var.bucket_policy == null ? 0 : 1
+
+  account_name = var.account_name
+  bucket_name  = artesca_bucket.this.name
+  policy       = var.bucket_policy
+}
+
 # Bucket-wide cleanup: noncurrent versions, incomplete multipart uploads and
 # delete markers. Kept apart from current-version expiration because ARTESCA
 # rejects delete-marker removal in a rule that also expires current versions.

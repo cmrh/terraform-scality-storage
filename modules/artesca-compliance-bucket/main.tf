@@ -7,6 +7,7 @@ module "bucket" {
   sse_algorithm       = var.sse_algorithm
   tags                = var.tags
   force_destroy       = var.force_destroy
+  bucket_policy       = var.bucket_policy
 
   # Locked versions are kept for their retention; don't expire them.
   noncurrent_version_expiration_days     = null

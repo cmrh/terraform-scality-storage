@@ -21,6 +21,17 @@ and the project follows [Semantic Versioning](https://semver.org/).
   `policy_document` or `policies`, none is created, where plan used to fail.
   New `policy_names` output. `scripts/scality-adopt.sh` adopts users with any
   number of inline policies. (#79)
+- `artesca-application-identity`: `policies` input for further inline
+  policies by name, and `policy_arns` for managed policies. A user can have
+  no policy: with no `bucket_arns`, `policy_document`, `policies` or
+  `policy_arns`, none is created, where plan used to fail. New
+  `policy_names` and `policy_arns` outputs. (#91)
+- `artesca-application-bucket` and `artesca-compliance-bucket`: optional
+  `bucket_policy` input. (#91)
+- `artesca-group-access` module and `examples/artesca-group-access`: an IAM
+  group with managed policies attached, from JSON documents or existing
+  ARNs, and its members. Includes import IDs for adopting an existing group.
+  (#96)
 
 ### Changed
 - Usage snippets and the module pin `scripts/scality-adopt.sh` writes use
