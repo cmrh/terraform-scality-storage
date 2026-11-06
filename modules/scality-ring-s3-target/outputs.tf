@@ -15,7 +15,7 @@ output "role_arn" {
 
 output "access_key" {
   value       = module.replication_user.access_key
-  description = "Replication user's access key, for ARTESCA's RING location."
+  description = "Replication user's access key, for ARTESCA's RING S3 location."
 }
 
 output "secret_key" {

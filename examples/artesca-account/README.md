@@ -1,4 +1,4 @@
-# ARTESCA account example
+# artesca-account example
 
 Creates an ARTESCA account and outputs its S3 keys.
 

@@ -47,5 +47,11 @@ variable "policy_name" {
 variable "policies" {
   type        = map(string)
   default     = {}
-  description = "Further inline policies: policy name => JSON document, alongside the preset or policy_document policy. Construct documents with jsonencode(...) or file(...). With no bucket_arns, policy_document or policies, the user has no policy."
+  description = "Further inline policies: policy name => JSON document, alongside the preset or policy_document policy. Construct documents with jsonencode(...) or file(...). With no bucket_arns, policy_document, policies or policy_arns, the user has no policy."
+}
+
+variable "policy_arns" {
+  type        = map(string)
+  default     = {}
+  description = "Managed policies to attach to the user: any static key => policy ARN. A map rather than a list so an ARN created in the same apply still works (for_each keys must be known at plan time)."
 }

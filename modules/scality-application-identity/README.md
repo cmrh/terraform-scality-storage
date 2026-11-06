@@ -1,4 +1,4 @@
-# scality / application-identity
+# scality-application-identity
 
 Creates a Scality IAM user with a stable access key and an inline policy
 — the standard primitive for **per-application workload identity**. One
@@ -13,6 +13,7 @@ user per application or service, scoped to specific buckets.
 - `scality_user_access_key` — S3 access key for the user
 - `scality_user_policy` — the inline policy from the preset or
   `policy_document`, plus one per entry in `policies`
+- `scality_iam_user_policy_attachment` — one per entry in `policy_arns`
 
 ## Access patterns (presets)
 
@@ -133,9 +134,10 @@ terraform output -raw acme_app_secret_key  # → AWS_SECRET_ACCESS_KEY
 | `policy_document` | string | `null` | Custom JSON policy. Overrides `access_pattern` + `bucket_arns` when set. |
 | `policy_name` | string | `null` | Inline policy name. Defaults to `<username>-policy`. |
 | `policies` | map(string) | `{}` | Further inline policies: name => JSON document. Names can't repeat `policy_name`. |
+| `policy_arns` | map(string) | `{}` | Managed policies to attach: static key => policy ARN. Reference the policy (`scality_iam_policy.x.arn`) so destroy detaches it first. |
 
-> With no `bucket_arns`, `policy_document` or `policies`, the user has no
-> policy.
+> With no `bucket_arns`, `policy_document`, `policies` or `policy_arns`, the
+> user has no policy.
 
 ## Outputs
 
@@ -149,6 +151,7 @@ terraform output -raw acme_app_secret_key  # → AWS_SECRET_ACCESS_KEY
 | `secret_key` | User's S3 secret key. | Yes |
 | `policy_name` | Name of the preset or `policy_document` policy; `null` when there is none. | No |
 | `policy_names` | Names of every inline policy on the user. | No |
+| `policy_arns` | ARNs of the managed policies attached to the user. | No |
 | `effective_policy` | Rendered JSON of the preset or `policy_document` policy; `null` when there is none. | No |
 
 ## Caveats

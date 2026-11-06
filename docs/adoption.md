@@ -12,7 +12,7 @@ them. `scripts/scality-adopt.sh` reads an account and writes module calls plus
 | Bucket that receives server access logs | `scality-access-log-bucket`, with the logging configuration of the buckets that log to it |
 | Bucket with object lock | `scality-compliance-bucket`, with its bucket policy |
 | Any other bucket | `scality-application-bucket`, with its bucket policy |
-| User | `scality-application-identity`, keeping the names and documents of its inline policies |
+| User | `scality-application-identity`, keeping the names and documents of its inline policies, and its attached managed policies |
 | Group | `scality-group-access`, with its members and managed policies |
 
 A group's module call owns the account policies attached only to that group,
@@ -21,8 +21,8 @@ several groups or to a user, are attached by ARN and left unmanaged.
 
 Not covered, listed on stderr and left as they are: logging into the same
 bucket, into another account or into a bucket with object lock, replication,
-roles, managed policies attached to users, and inline group policies. A
-group with inline policies can't be destroyed until they're deleted.
+roles, and inline group policies. A group with inline policies can't be
+destroyed until they're deleted.
 The script doesn't adopt the account itself;
 to bring the account under `scality-account-management` too, see
 [Adopting the account](#adopting-the-account).

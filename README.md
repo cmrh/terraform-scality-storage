@@ -3,7 +3,7 @@
 Composite Terraform/OpenTofu modules for production deployments on Scality
 storage. Built on the
 [`scality`](https://github.com/cmrh/terraform-provider-scality) provider
-(S3C / RING) and the
+(Scality S3) and the
 [`artesca`](https://github.com/cmrh/terraform-provider-artesca)
 provider (ARTESCA).
 
@@ -15,48 +15,75 @@ including pointers on [state locking](docs/pointers/state-locking.md) and
 
 ## Module catalog
 
-### Scality (S3C / RING)
+### Scality S3
 
-| Module | Status | Purpose |
-|---|---|---|
-| [`scality-terraform-state-bootstrap`](modules/scality-terraform-state-bootstrap) | Available | Dedicated account + bucket for OpenTofu/Terraform state |
-| [`scality-account-management`](modules/scality-account-management) | Available | Tenant account (Console-UI or headless) + stable access key |
-| [`scality-application-identity`](modules/scality-application-identity) | Available | IAM user + access key + canned policy preset (read-only / read-write / bucket-admin) or custom JSON |
-| [`scality-group-access`](modules/scality-group-access) | Available | IAM group + managed policies + members |
-| [`scality-account-operator`](modules/scality-account-operator) | Available | Operator user (`iam:* + s3:*`) — recommended caller for downstream wrapper modules |
-| [`scality-delegated-admin-role`](modules/scality-delegated-admin-role) | Available | Sub-account role a single management-account user assumes (provider `assume_role`) to manage the sub-account's buckets and IAM |
-| [`scality-application-bucket`](modules/scality-application-bucket) | Available | Bucket + encryption + versioning + lifecycle hygiene |
-| [`scality-access-log-bucket`](modules/scality-access-log-bucket) | Available | Log bucket + delivery policy + retention, and access logging on source buckets |
-| [`scality-compliance-bucket`](modules/scality-compliance-bucket) | Available | Bucket + object lock (GOVERNANCE / COMPLIANCE) + retention period |
-| [`scality-s3-crr`](modules/scality-s3-crr) | Available | Cross-region replication (one-direction or bidirectional) between two clusters |
-| [`scality-ring-replication-target`](modules/scality-ring-replication-target) | Available | Versioned bucket + least-privilege key for an ARTESCA RING location (replication, tiering or CRR over STS) |
+| Module | Purpose |
+|---|---|
+| [`scality-terraform-state-bootstrap`](modules/scality-terraform-state-bootstrap) | Dedicated account + bucket for OpenTofu/Terraform state |
+| [`scality-account-management`](modules/scality-account-management) | Tenant account (Console-UI or headless) + stable access key |
+| [`scality-application-identity`](modules/scality-application-identity) | IAM user + access key + canned policy preset (read-only / read-write / bucket-admin) or custom JSON |
+| [`scality-group-access`](modules/scality-group-access) | IAM group + managed policies + members |
+| [`scality-account-operator`](modules/scality-account-operator) | Operator user (`iam:* + s3:*`) — recommended caller for downstream wrapper modules |
+| [`scality-delegated-admin-role`](modules/scality-delegated-admin-role) | Sub-account role a single management-account user assumes (provider `assume_role`) to manage the sub-account's buckets and IAM |
+| [`scality-application-bucket`](modules/scality-application-bucket) | Bucket + encryption + versioning + lifecycle hygiene |
+| [`scality-access-log-bucket`](modules/scality-access-log-bucket) | Log bucket + delivery policy + retention, and access logging on source buckets |
+| [`scality-compliance-bucket`](modules/scality-compliance-bucket) | Bucket + object lock (GOVERNANCE / COMPLIANCE) + retention period |
+| [`scality-s3-crr`](modules/scality-s3-crr) | Cross-region replication (one-direction or bidirectional) between two clusters |
+| [`scality-ring-s3-target`](modules/scality-ring-s3-target) | Versioned bucket + least-privilege key for an ARTESCA location backed by Scality S3 (replication, tiering or CRR over STS) |
 
 ### ARTESCA
 
-| Module | Status | Purpose |
-|---|---|---|
-| [`artesca-edge-replication`](modules/artesca-edge-replication) | Available | Account + users + bucket replicated to RING, through a RING S3 location or CRR over STS (pair with `scality-ring-replication-target`; see [`examples/artesca-edge-to-ring`](examples/artesca-edge-to-ring)) |
-| [`artesca-account-management`](modules/artesca-account-management) | Available | Account + S3 keys |
-| [`artesca-application-identity`](modules/artesca-application-identity) | Available | IAM user + access key + policy preset (read-only / read-write / bucket-admin) or custom JSON |
-| [`artesca-group-access`](modules/artesca-group-access) | Available | IAM group + managed policies + members |
-| [`artesca-storage-location`](modules/artesca-storage-location) | Available | RING or Versity tape location + optional endpoint |
-| [`artesca-application-bucket`](modules/artesca-application-bucket) | Available | Bucket + versioning + encryption + lifecycle cleanup + optional expiration and object lock |
-| [`artesca-tiered-bucket`](modules/artesca-tiered-bucket) | Available | Bucket whose objects move to a RING (warm) or Versity tape (cold) location |
-| `replication-stream` | Planned | Overlay/location-based replication |
-| [`artesca-compliance-bucket`](modules/artesca-compliance-bucket) | Available | Bucket + object lock + default retention (GOVERNANCE / COMPLIANCE) |
-| [`artesca-terraform-state-bootstrap`](modules/artesca-terraform-state-bootstrap) | Available | Dedicated account + versioned state bucket + state user |
+| Module | Purpose |
+|---|---|
+| [`artesca-terraform-state-bootstrap`](modules/artesca-terraform-state-bootstrap) | Dedicated account + versioned state bucket + state user |
+| [`artesca-account-management`](modules/artesca-account-management) | Account + S3 keys |
+| [`artesca-application-identity`](modules/artesca-application-identity) | IAM user + access key + policy preset (read-only / read-write / bucket-admin) or custom JSON |
+| [`artesca-group-access`](modules/artesca-group-access) | IAM group + managed policies + members |
+| [`artesca-application-bucket`](modules/artesca-application-bucket) | Bucket + versioning + encryption + lifecycle cleanup + optional expiration and object lock |
+| [`artesca-compliance-bucket`](modules/artesca-compliance-bucket) | Bucket + object lock + default retention (GOVERNANCE / COMPLIANCE) |
+| [`artesca-tiered-bucket`](modules/artesca-tiered-bucket) | Bucket whose objects move to a Scality S3 (warm) or Versity tape (cold) location |
+| [`artesca-storage-location`](modules/artesca-storage-location) | Scality S3 or Versity tape location + optional endpoint |
+| [`artesca-edge-replication`](modules/artesca-edge-replication) | Account + users + bucket replicated to Scality S3, through a location or CRR over STS (pair with `scality-ring-s3-target`; see [`examples/artesca-edge-to-ring-s3`](examples/artesca-edge-to-ring-s3)) |
 
-### Hybrid (both providers)
+## Examples
 
-| Module | Status | Purpose |
-|---|---|---|
-| [`artesca-ring-backed-bucket`](examples/artesca-ring-backed-bucket) (example) | Available | ARTESCA bucket whose data is stored in a RING bucket |
+Runnable configurations, one per directory under `examples/`.
+
+### Scality S3
+
+| Example | Shows |
+|---|---|
+| [`access-logging`](examples/access-logging) | Server access logs from a bucket delivered to a log bucket |
+| [`delegated-admin-bootstrap`](examples/delegated-admin-bootstrap) / [`delegated-admin-managed`](examples/delegated-admin-managed) | A management account managing sub-accounts through an assumed role, in two stages |
+| [`group-access`](examples/group-access) | Application users, plus a group with read-only access to a shared bucket |
+| [`operator-test`](examples/operator-test) | The operator pattern end to end on one cluster |
+| [`s3-crr-one-direction`](examples/s3-crr-one-direction) / [`s3-crr-bidirectional`](examples/s3-crr-bidirectional) | Cross-region replication between two clusters |
+
+### ARTESCA
+
+| Example | Shows |
+|---|---|
+| [`artesca-account`](examples/artesca-account) | An account and its S3 keys |
+| [`artesca-application-bucket`](examples/artesca-application-bucket) | A versioned, encrypted bucket with expiration and cleanup rules |
+| [`artesca-application-identity`](examples/artesca-application-identity) | A user with read-write access to one bucket |
+| [`artesca-compliance-bucket`](examples/artesca-compliance-bucket) | A bucket with object lock and a default retention |
+| [`artesca-group-access`](examples/artesca-group-access) | Application users, plus a group with read-only access to a shared bucket |
+| [`artesca-terraform-state-bootstrap`](examples/artesca-terraform-state-bootstrap) | A dedicated account, state bucket and state user |
+
+### ARTESCA + Scality S3 (both providers)
+
+| Example | Shows |
+|---|---|
+| [`artesca-edge-to-ring-s3`](examples/artesca-edge-to-ring-s3) | An ARTESCA bucket replicated to a Scality S3 bucket, through a location or CRR over STS |
+| [`artesca-ring-s3-backed-bucket`](examples/artesca-ring-s3-backed-bucket) | An ARTESCA bucket whose data is stored in a Scality S3 bucket |
+| [`artesca-storage-location`](examples/artesca-storage-location) | An ARTESCA location backed by a Scality S3 bucket |
+| [`artesca-tiered-bucket`](examples/artesca-tiered-bucket) | An ARTESCA bucket whose objects move to a Scality S3 bucket after a number of days |
 
 ## Repository layout
 
 ```
 modules/
-├── scality-<name>/   # S3C / RING modules
+├── scality-<name>/   # Scality S3 modules
 └── artesca-<name>/   # ARTESCA modules
 
 examples/<name>/      # Runnable examples; hybrid ones use both providers

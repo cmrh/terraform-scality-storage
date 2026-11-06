@@ -1,4 +1,4 @@
-# ARTESCA application identity example
+# artesca-application-identity example
 
 Creates an account, a bucket, and an `app` user with read-write access to
 that bucket only.

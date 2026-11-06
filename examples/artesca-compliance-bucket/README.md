@@ -1,4 +1,4 @@
-# ARTESCA compliance bucket example
+# artesca-compliance-bucket example
 
 Creates an account, a bucket with object lock and a 1-day `GOVERNANCE`
 default retention, and an `app` user with read-write access to it. Objects

@@ -1,4 +1,4 @@
-# ARTESCA Terraform state bootstrap example
+# artesca-terraform-state-bootstrap example
 
 Creates a dedicated account, a versioned and encrypted state bucket, and a
 state user. Point a project's `s3` backend at the bucket with the state user's

@@ -109,3 +109,14 @@ resource "scality_user_policy" "policies" {
   policy_name        = each.key
   policy_document    = each.value
 }
+
+# Managed policies, attached by ARN. Reference the policy (for example
+# scality_iam_policy.x.arn) so destroy detaches it before deleting the policy.
+resource "scality_iam_user_policy_attachment" "this" {
+  for_each = var.policy_arns
+
+  account_access_key = var.account_access_key
+  account_secret_key = var.account_secret_key
+  username           = scality_user.this.username
+  policy_arn         = each.value
+}

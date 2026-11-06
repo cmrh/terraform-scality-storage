@@ -1,4 +1,4 @@
-# scality / compliance-bucket
+# scality-compliance-bucket
 
 Provisions a Scality S3 bucket with **Object Lock** enabled and a default
 retention, so object versions written to it are locked for the retention

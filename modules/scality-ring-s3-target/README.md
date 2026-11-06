@@ -1,9 +1,9 @@
-# scality-ring-replication-target
+# scality-ring-s3-target
 
-A versioned RING bucket that an ARTESCA RING location writes into, plus a user
+A versioned Scality S3 bucket that an ARTESCA RING S3 location writes into, plus a user
 whose key the location uses. The key can only do what its `purpose` needs:
 replication (`artesca-edge-replication`: `replication` for its `ring-s3`
-mode, `crr` for its `crr` mode), or tiering and RING-backed buckets.
+mode, `crr` for its `crr` mode), or tiering and buckets stored on Scality S3.
 
 > Compatible with both Terraform and OpenTofu. Examples below use
 > `terraform`; substitute `tofu` if you use OpenTofu.
@@ -17,10 +17,10 @@ mode, `crr` for its `crr` mode), or tiering and RING-backed buckets.
     `s3:PutObject`
   - `tiering`: the same, plus `s3:GetObject`, `s3:GetObjectVersion`,
     `s3:DeleteObject`, `s3:DeleteObjectVersion`. Use it when the data lives
-    only on RING: a tiered bucket (`artesca-tiered-bucket`) or a bucket stored
-    on the location (`examples/artesca-ring-backed-bucket`). Reads through
+    only on Scality S3: a tiered bucket (`artesca-tiered-bucket`) or a bucket stored
+    on the location (`examples/artesca-ring-s3-backed-bucket`). Reads through
     ARTESCA fail without the read actions. With the delete actions, a
-    permanent delete through ARTESCA removes the object from RING; without
+    permanent delete through ARTESCA removes the object from Scality S3; without
     them, the data stays there.
   - `crr`: only `sts:AssumeRole` on a destination role, for
     `artesca-edge-replication` with `mode = "crr"`
@@ -35,8 +35,8 @@ mode, `crr` for its `crr` mode), or tiering and RING-backed buckets.
 ## Usage
 
 ```hcl
-module "ring_target" {
-  source  = "cmrh/storage/scality//modules/scality-ring-replication-target"
+module "ring_s3_target" {
+  source  = "cmrh/storage/scality//modules/scality-ring-s3-target"
   version = "~> 1.4"
 
   account_access_key = module.operator.access_key
@@ -53,7 +53,7 @@ Use one target bucket per ARTESCA source bucket.
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `account_access_key` | string (sensitive) | (required) | Key of a principal in the RING account, typically the operator from `account-operator`. |
+| `account_access_key` | string (sensitive) | (required) | Key of a principal in the Scality S3 account, typically the operator from `account-operator`. |
 | `account_secret_key` | string (sensitive) | (required) | Paired with `account_access_key`. |
 | `bucket_name` | string | (required) | Target bucket name. Forces replacement. |
 | `purpose` | string | `"replication"` | `replication`, `tiering` or `crr`; sets the key's permissions. |
@@ -76,4 +76,4 @@ Use one target bucket per ARTESCA source bucket.
 
 - **Destroy needs an empty bucket.** The bucket is versioned, so delete every
   object version and delete marker before `terraform destroy`. See the
-  [example](../../examples/artesca-edge-to-ring) for a command.
+  [example](../../examples/artesca-edge-to-ring-s3) for a command.

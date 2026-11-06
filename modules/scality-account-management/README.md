@@ -1,4 +1,4 @@
-# scality / scality-account-management
+# scality-account-management
 
 Provisions a Scality account with a stable S3 access key suitable for use
 by downstream wrapper modules in this repository (or any direct provider

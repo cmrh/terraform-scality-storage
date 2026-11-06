@@ -1,4 +1,4 @@
-# ARTESCA application bucket example
+# artesca-application-bucket example
 
 Creates an account, a versioned and encrypted bucket with a tag, a 30-day
 expiration rule and the module's default cleanup rule (noncurrent versions

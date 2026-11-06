@@ -1,4 +1,4 @@
-# scality / account-operator
+# scality-account-operator
 
 Creates an **operator user** inside a Scality account — a user with
 `s3:* + iam:*` permissions intended to manage all other users and

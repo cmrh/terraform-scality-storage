@@ -1,6 +1,6 @@
-# ARTESCA storage location example: a RING bucket as an ARTESCA location.
+# ARTESCA storage location example: a Scality S3 bucket as an ARTESCA location.
 #
-# RING:    account -> operator -> versioned bucket + key (ring-replication-target)
+# Scality S3:    account -> operator -> versioned bucket + key (scality-ring-s3-target)
 # ARTESCA: RING S3 location using that bucket and key
 
 terraform {
@@ -28,7 +28,7 @@ provider "artesca" {}
 variable "name" {
   type        = string
   default     = "ring-location-01"
-  description = "Base name for the RING account, bucket and location. Override (TF_VAR_name) to avoid collisions."
+  description = "Base name for the Scality S3 account, bucket and location. Override (TF_VAR_name) to avoid collisions."
 }
 
 variable "endpoint_hostname" {
@@ -37,12 +37,12 @@ variable "endpoint_hostname" {
   description = "Optional hostname for an ARTESCA S3 endpoint serving the location."
 }
 
-variable "ring_endpoint" {
+variable "ring_s3_endpoint" {
   type        = string
-  description = "RING S3 endpoint, as ARTESCA reaches it."
+  description = "Scality S3 endpoint, as ARTESCA reaches it."
 }
 
-module "ring_account" {
+module "ring_s3_account" {
   source = "../../modules/scality-account-management"
 
   account_name  = "${var.name}-ring"
@@ -50,18 +50,18 @@ module "ring_account" {
   console_login = false
 }
 
-module "ring_operator" {
+module "ring_s3_operator" {
   source = "../../modules/scality-account-operator"
 
-  account_access_key = module.ring_account.access_key
-  account_secret_key = module.ring_account.secret_key
+  account_access_key = module.ring_s3_account.access_key
+  account_secret_key = module.ring_s3_account.secret_key
 }
 
-module "ring_bucket" {
-  source = "../../modules/scality-ring-replication-target"
+module "ring_s3_bucket" {
+  source = "../../modules/scality-ring-s3-target"
 
-  account_access_key = module.ring_operator.access_key
-  account_secret_key = module.ring_operator.secret_key
+  account_access_key = module.ring_s3_operator.access_key
+  account_secret_key = module.ring_s3_operator.secret_key
   bucket_name        = "${var.name}-target"
 }
 
@@ -70,10 +70,10 @@ module "location" {
 
   name        = var.name
   type        = "ring-s3"
-  endpoint    = var.ring_endpoint
-  bucket_name = module.ring_bucket.bucket_name
-  access_key  = module.ring_bucket.access_key
-  secret_key  = module.ring_bucket.secret_key
+  endpoint    = var.ring_s3_endpoint
+  bucket_name = module.ring_s3_bucket.bucket_name
+  access_key  = module.ring_s3_bucket.access_key
+  secret_key  = module.ring_s3_bucket.secret_key
 
   endpoint_hostname = var.endpoint_hostname
 }

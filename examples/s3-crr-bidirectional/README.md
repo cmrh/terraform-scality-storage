@@ -1,4 +1,4 @@
-# Example: bidirectional (active-active) CRR
+# s3-crr-bidirectional example
 
 Creates active-active cross-region replication between two Scality clusters.
 Same composition as [`s3-crr-one-direction`](../s3-crr-one-direction/) but

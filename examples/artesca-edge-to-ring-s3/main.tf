@@ -1,7 +1,7 @@
-# ARTESCA edge replicating to RING.
+# ARTESCA edge replicating to Scality S3.
 #
-# RING:    account -> operator -> versioned target bucket + replication user
-# ARTESCA: account + users -> versioned bucket -> RING location -> replication
+# Scality S3:    account -> operator -> versioned target bucket + replication user
+# ARTESCA: account + users -> versioned bucket -> RING S3 location -> replication
 
 terraform {
   required_version = ">= 1.5.0"
@@ -37,10 +37,10 @@ variable "mode" {
   description = "\"ring-s3\" (RING S3 location with a write-only key) or \"crr\" (CRR location over STS with a destination role)."
 }
 
-variable "ring_sts_endpoint" {
+variable "ring_s3_sts_endpoint" {
   type        = string
   default     = null
-  description = "RING STS endpoint, as ARTESCA reaches it. Required for mode = \"crr\"."
+  description = "Scality S3 STS endpoint, as ARTESCA reaches it. Required for mode = \"crr\"."
 }
 
 variable "force_destroy" {
@@ -49,12 +49,12 @@ variable "force_destroy" {
   description = "Set true and apply before destroying, so the ARTESCA bucket and users can be deleted."
 }
 
-variable "ring_endpoint" {
+variable "ring_s3_endpoint" {
   type        = string
-  description = "RING S3 endpoint that ARTESCA replicates to."
+  description = "Scality S3 endpoint that ARTESCA replicates to."
 }
 
-module "ring_account" {
+module "ring_s3_account" {
   source = "../../modules/scality-account-management"
 
   account_name  = "${var.name}-ring"
@@ -62,18 +62,18 @@ module "ring_account" {
   console_login = false
 }
 
-module "ring_operator" {
+module "ring_s3_operator" {
   source = "../../modules/scality-account-operator"
 
-  account_access_key = module.ring_account.access_key
-  account_secret_key = module.ring_account.secret_key
+  account_access_key = module.ring_s3_account.access_key
+  account_secret_key = module.ring_s3_account.secret_key
 }
 
-module "ring_target" {
-  source = "../../modules/scality-ring-replication-target"
+module "ring_s3_target" {
+  source = "../../modules/scality-ring-s3-target"
 
-  account_access_key = module.ring_operator.access_key
-  account_secret_key = module.ring_operator.secret_key
+  account_access_key = module.ring_s3_operator.access_key
+  account_secret_key = module.ring_s3_operator.secret_key
   bucket_name        = "${var.name}-replica"
   purpose            = var.mode == "crr" ? "crr" : "replication"
 }
@@ -86,24 +86,24 @@ module "edge" {
   bucket_name   = "${var.name}-data"
   users         = ["${var.name}-app"]
 
-  mode              = var.mode
-  ring_sts_endpoint = var.ring_sts_endpoint
-  ring_role_arn     = module.ring_target.role_arn
+  mode                 = var.mode
+  ring_s3_sts_endpoint = var.ring_s3_sts_endpoint
+  ring_s3_role_arn     = module.ring_s3_target.role_arn
 
-  location_name    = "${var.name}-ring"
-  ring_endpoint    = var.ring_endpoint
-  ring_bucket_name = module.ring_target.bucket_name
-  force_destroy    = var.force_destroy
-  ring_access_key  = module.ring_target.access_key
-  ring_secret_key  = module.ring_target.secret_key
+  location_name       = "${var.name}-ring"
+  ring_s3_endpoint    = var.ring_s3_endpoint
+  ring_s3_bucket_name = module.ring_s3_target.bucket_name
+  force_destroy       = var.force_destroy
+  ring_s3_access_key  = module.ring_s3_target.access_key
+  ring_s3_secret_key  = module.ring_s3_target.secret_key
 }
 
 output "edge_bucket" {
   value = module.edge.bucket_name
 }
 
-output "ring_bucket" {
-  value = module.ring_target.bucket_name
+output "ring_s3_bucket" {
+  value = module.ring_s3_target.bucket_name
 }
 
 output "app_keys" {
@@ -111,12 +111,12 @@ output "app_keys" {
   sensitive = true
 }
 
-output "ring_operator_access_key" {
-  value     = module.ring_operator.access_key
+output "ring_s3_operator_access_key" {
+  value     = module.ring_s3_operator.access_key
   sensitive = true
 }
 
-output "ring_operator_secret_key" {
-  value     = module.ring_operator.secret_key
+output "ring_s3_operator_secret_key" {
+  value     = module.ring_s3_operator.secret_key
   sensitive = true
 }

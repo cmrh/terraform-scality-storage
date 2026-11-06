@@ -1,7 +1,7 @@
-# ARTESCA tiered bucket example: objects move to a RING bucket after N days.
+# ARTESCA tiered bucket example: objects move to a Scality S3 bucket after N days.
 #
-# RING:    account -> operator -> versioned bucket + tiering key (ring-replication-target)
-# ARTESCA: RING location -> account -> tiered bucket -> app user
+# Scality S3:    account -> operator -> versioned bucket + tiering key (scality-ring-s3-target)
+# ARTESCA: RING S3 location -> account -> tiered bucket -> app user
 
 terraform {
   required_version = ">= 1.5.0"
@@ -31,15 +31,15 @@ variable "name" {
   description = "Base name for the accounts, buckets and location. Override (TF_VAR_name) to avoid collisions."
 }
 
-variable "ring_endpoint" {
+variable "ring_s3_endpoint" {
   type        = string
-  description = "RING S3 endpoint, as ARTESCA reaches it."
+  description = "Scality S3 endpoint, as ARTESCA reaches it."
 }
 
 variable "transition_days" {
   type        = number
   default     = 30
-  description = "Days after creation when objects move to RING."
+  description = "Days after creation when objects move to Scality S3."
 }
 
 variable "force_destroy" {
@@ -48,7 +48,7 @@ variable "force_destroy" {
   description = "Set true and apply before destroying, so the ARTESCA bucket's objects are deleted with it."
 }
 
-module "ring_account" {
+module "ring_s3_account" {
   source = "../../modules/scality-account-management"
 
   account_name  = "${var.name}-ring"
@@ -56,18 +56,18 @@ module "ring_account" {
   console_login = false
 }
 
-module "ring_operator" {
+module "ring_s3_operator" {
   source = "../../modules/scality-account-operator"
 
-  account_access_key = module.ring_account.access_key
-  account_secret_key = module.ring_account.secret_key
+  account_access_key = module.ring_s3_account.access_key
+  account_secret_key = module.ring_s3_account.secret_key
 }
 
-module "ring_bucket" {
-  source = "../../modules/scality-ring-replication-target"
+module "ring_s3_bucket" {
+  source = "../../modules/scality-ring-s3-target"
 
-  account_access_key = module.ring_operator.access_key
-  account_secret_key = module.ring_operator.secret_key
+  account_access_key = module.ring_s3_operator.access_key
+  account_secret_key = module.ring_s3_operator.secret_key
   bucket_name        = "${var.name}-cold"
   purpose            = "tiering"
 }
@@ -76,10 +76,10 @@ module "location" {
   source = "../../modules/artesca-storage-location"
 
   name        = "${var.name}-cold"
-  endpoint    = var.ring_endpoint
-  bucket_name = module.ring_bucket.bucket_name
-  access_key  = module.ring_bucket.access_key
-  secret_key  = module.ring_bucket.secret_key
+  endpoint    = var.ring_s3_endpoint
+  bucket_name = module.ring_s3_bucket.bucket_name
+  access_key  = module.ring_s3_bucket.access_key
+  secret_key  = module.ring_s3_bucket.secret_key
 }
 
 module "account" {
@@ -111,8 +111,8 @@ output "bucket" {
   value = module.bucket.bucket_name
 }
 
-output "ring_bucket" {
-  value = module.ring_bucket.bucket_name
+output "ring_s3_bucket" {
+  value = module.ring_s3_bucket.bucket_name
 }
 
 output "app_access_key" {
@@ -125,12 +125,12 @@ output "app_secret_key" {
   sensitive = true
 }
 
-output "ring_operator_access_key" {
-  value     = module.ring_operator.access_key
+output "ring_s3_operator_access_key" {
+  value     = module.ring_s3_operator.access_key
   sensitive = true
 }
 
-output "ring_operator_secret_key" {
-  value     = module.ring_operator.secret_key
+output "ring_s3_operator_secret_key" {
+  value     = module.ring_s3_operator.secret_key
   sensitive = true
 }

@@ -1,11 +1,11 @@
 # artesca-edge-replication
 
 An ARTESCA account with a versioned bucket on ARTESCA's default storage,
-replicated to a RING bucket, in one of two modes:
+replicated to a Scality S3 bucket, in one of two modes:
 
 - `ring-s3` (default): a RING S3 location writes the replicas with a key
   limited to the bucket.
-- `crr`: a CRR location assumes a destination role on RING over STS, and the
+- `crr`: a CRR location assumes a destination role on Scality S3 over STS, and the
   role writes the replicas. The location's key can only assume that role.
 
 Optionally creates IAM users with keys that can read and write the bucket.
@@ -24,15 +24,15 @@ Optionally creates IAM users with keys that can read and write the bucket.
 - `artesca_bucket_workflow_replication`: replicates the bucket to the
   location. For `crr` it also sets the destination bucket and role.
 
-Objects keep their keys at the root of the RING bucket in both modes.
+Objects keep their keys at the root of the Scality S3 bucket in both modes.
 
 ## Prerequisites
 
 - cmrh/artesca provider 1.2 or later.
-- ARTESCA can reach the RING S3 endpoint. Prefer `https://`: the location's
+- ARTESCA can reach the Scality S3 endpoint. Prefer `https://`: the location's
   key and every replicated object pass through it.
-- A RING bucket and key that the location can use, from
-  [`scality-ring-replication-target`](../scality-ring-replication-target):
+- A Scality S3 bucket and key that the location can use, from
+  [`scality-ring-s3-target`](../scality-ring-s3-target):
   `purpose = "replication"` for `ring-s3`,
   `purpose = "crr"` for `crr` (which also gives `role_arn`).
 
@@ -49,10 +49,10 @@ module "edge" {
   users         = ["edge-01-app"]
 
   location_name    = "edge-01-ring"
-  ring_endpoint    = "https://s3.ring.example.com"
-  ring_bucket_name = module.ring_target.bucket_name
-  ring_access_key  = module.ring_target.access_key
-  ring_secret_key  = module.ring_target.secret_key
+  ring_s3_endpoint    = "https://s3.ring.example.com"
+  ring_s3_bucket_name = module.ring_s3_target.bucket_name
+  ring_s3_access_key  = module.ring_s3_target.access_key
+  ring_s3_secret_key  = module.ring_s3_target.secret_key
 }
 ```
 
@@ -68,14 +68,14 @@ module "edge" {
   bucket_name   = "edge-01-data"
 
   mode              = "crr"
-  ring_sts_endpoint = "https://sts.ring.example.com"
-  ring_role_arn     = module.ring_target.role_arn
+  ring_s3_sts_endpoint = "https://sts.ring.example.com"
+  ring_s3_role_arn     = module.ring_s3_target.role_arn
 
   location_name    = "edge-01-ring"
-  ring_endpoint    = "https://s3.ring.example.com"
-  ring_bucket_name = module.ring_target.bucket_name
-  ring_access_key  = module.ring_target.access_key
-  ring_secret_key  = module.ring_target.secret_key
+  ring_s3_endpoint    = "https://s3.ring.example.com"
+  ring_s3_bucket_name = module.ring_s3_target.bucket_name
+  ring_s3_access_key  = module.ring_s3_target.access_key
+  ring_s3_secret_key  = module.ring_s3_target.secret_key
 }
 ```
 
@@ -88,13 +88,13 @@ module "edge" {
 | `bucket_name` | string | (required) | Source bucket. Forces replacement. |
 | `users` | set(string) | `[]` | IAM users to create, each with a key and read-write access to the bucket. |
 | `mode` | string | `"ring-s3"` | `ring-s3` or `crr`. Changing it replaces the location. |
-| `ring_sts_endpoint` | string | `null` | RING STS endpoint, as ARTESCA reaches it. Required for `crr`. |
-| `ring_role_arn` | string | `null` | Destination role on RING. Required for `crr`. |
-| `location_name` | string | (required) | RING location name. Instance-wide. |
-| `ring_endpoint` | string | (required) | RING S3 endpoint URL. |
-| `ring_bucket_name` | string | (required) | RING target bucket (versioned). |
-| `ring_access_key` | string (sensitive) | (required) | RING key the location uses. |
-| `ring_secret_key` | string (sensitive) | (required) | Paired with `ring_access_key`. |
+| `ring_s3_sts_endpoint` | string | `null` | Scality S3 STS endpoint, as ARTESCA reaches it. Required for `crr`. |
+| `ring_s3_role_arn` | string | `null` | Destination role on Scality S3. Required for `crr`. |
+| `location_name` | string | (required) | RING S3 location name. Instance-wide. |
+| `ring_s3_endpoint` | string | (required) | Scality S3 endpoint URL. |
+| `ring_s3_bucket_name` | string | (required) | Scality S3 target bucket (versioned). |
+| `ring_s3_access_key` | string (sensitive) | (required) | Scality S3 key the location uses. |
+| `ring_s3_secret_key` | string (sensitive) | (required) | Paired with `ring_s3_access_key`. |
 | `replication_enabled` | bool | `true` | Whether the replication rule is active. |
 | `force_destroy` | bool | `false` | Delete every object version and the users' policies on destroy. Apply before destroying. |
 
@@ -105,12 +105,12 @@ module "edge" {
 | `account_name` | ARTESCA account name. |
 | `account_id` | ARTESCA account ID. |
 | `bucket_name` | Source bucket name. |
-| `location_name` | RING location name. |
+| `location_name` | RING S3 location name. |
 | `replication_rule_id` | Replication rule ID (the workflow ID in the ARTESCA UI). |
 | `user_access_keys` | Access key and secret key per user (sensitive). |
 
 ## Caveats
 
-- **Changing the RING key updates the location in place.**
-- **The RING bucket is managed separately** and must be emptied before it
+- **Changing the Scality S3 key updates the location in place.**
+- **The Scality S3 bucket is managed separately** and must be emptied before it
   can be deleted.

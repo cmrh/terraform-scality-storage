@@ -1,4 +1,4 @@
-# Example: one-direction CRR
+# s3-crr-one-direction example
 
 Creates one-direction cross-region replication between two Scality clusters:
 

@@ -1,4 +1,4 @@
-# Group access example
+# group-access example
 
 Creates an account, an operator user, two application users (`ingest` and
 `reporting`) with read-write access to their own buckets, and an archive

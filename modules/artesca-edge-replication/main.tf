@@ -61,20 +61,20 @@ resource "artesca_location" "ring" {
   location_type = var.mode == "crr" ? "location-scality-crr-v1" : "location-scality-ring-s3-v1"
 
   details {
-    endpoint = var.ring_endpoint
+    endpoint = var.ring_s3_endpoint
     # ring-s3: the location writes to its bucket. crr: the bucket is set on
     # the replication rule instead.
-    bucket_name  = var.mode == "crr" ? null : var.ring_bucket_name
+    bucket_name  = var.mode == "crr" ? null : var.ring_s3_bucket_name
     bucket_match = var.mode == "crr" ? null : true
-    sts_endpoint = var.mode == "crr" ? var.ring_sts_endpoint : null
-    access_key   = var.ring_access_key
-    secret_key   = var.ring_secret_key
+    sts_endpoint = var.mode == "crr" ? var.ring_s3_sts_endpoint : null
+    access_key   = var.ring_s3_access_key
+    secret_key   = var.ring_s3_secret_key
   }
 
   lifecycle {
     precondition {
-      condition     = var.mode != "crr" || (var.ring_sts_endpoint != null && var.ring_role_arn != null)
-      error_message = "mode = \"crr\" needs ring_sts_endpoint and ring_role_arn."
+      condition     = var.mode != "crr" || (var.ring_s3_sts_endpoint != null && var.ring_s3_role_arn != null)
+      error_message = "mode = \"crr\" needs ring_s3_sts_endpoint and ring_s3_role_arn."
     }
   }
 }
@@ -85,6 +85,6 @@ resource "artesca_bucket_workflow_replication" "this" {
   destination_location = artesca_location.ring.name
   enabled              = var.replication_enabled
 
-  destination_bucket_name = var.mode == "crr" ? var.ring_bucket_name : null
-  destination_role        = var.mode == "crr" ? var.ring_role_arn : null
+  destination_bucket_name = var.mode == "crr" ? var.ring_s3_bucket_name : null
+  destination_role        = var.mode == "crr" ? var.ring_s3_role_arn : null
 }

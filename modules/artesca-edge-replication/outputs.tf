@@ -15,7 +15,7 @@ output "bucket_name" {
 
 output "location_name" {
   value       = artesca_location.ring.name
-  description = "RING location name."
+  description = "RING S3 location name."
 }
 
 output "replication_rule_id" {

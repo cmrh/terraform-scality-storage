@@ -49,21 +49,39 @@ def rewrite(page, text, pages):
     return LINK.sub(fix, text)
 
 
+PROVIDER = re.compile(r'source\s*=\s*"cmrh/(artesca|scality)"')
+
+
+def providers(example):
+    """The cmrh providers an example's configuration declares."""
+    found = set()
+    for tf in (ROOT / example.parent).glob("*.tf"):
+        found |= set(PROVIDER.findall(tf.read_text()))
+    return found
+
+
 def nav(pages):
-    docs = [p.as_posix() for p in pages if p.parts[0] == "docs"]
-    pointers = [p for p in docs if p.startswith("docs/pointers/")]
-    other = [p for p in docs if p not in pointers]
-    modules = [p.as_posix() for p in pages if p.parts[0] == "modules"]
-    examples = [p.as_posix() for p in pages if p.parts[0] == "examples"]
+    docs = [p for p in pages if p.parts[0] == "docs"]
+    pointers = [p.as_posix() for p in docs if p.parts[1] == "pointers"]
+    guides = [p.as_posix() for p in docs if p.parts[1] != "pointers"]
+    modules = [p for p in pages if p.parts[0] == "modules"]
+    examples = [p for p in pages if p.parts[0] == "examples"]
+    by_provider = {"Scality S3": [], "ARTESCA": [], "ARTESCA + Scality S3": []}
+    for p in examples:
+        found = providers(p)
+        key = "ARTESCA + Scality S3" if len(found) > 1 else "ARTESCA" if found == {"artesca"} else "Scality S3"
+        by_provider[key].append(p)
     return [
         {"Home": "README.md"},
         {"Modules": [
-            {"Scality": [p for p in modules if "/scality-" in p]},
-            {"ARTESCA": [p for p in modules if "/artesca-" in p]},
+            {"Scality S3": [p.as_posix() for p in modules if p.parent.name.startswith("scality-")]},
+            {"ARTESCA": [p.as_posix() for p in modules if p.parent.name.startswith("artesca-")]},
         ]},
-        {"Examples": examples},
+        # Pages take their README titles: a module's is its directory name, an
+        # example's "<name> example".
+        {"Examples": [{k: [p.as_posix() for p in v]} for k, v in by_provider.items() if v]},
+        {"Guides": guides},
         {"Pointers": pointers},
-        *other,
         {"Changelog": "CHANGELOG.md"},
     ]
 

@@ -1,4 +1,4 @@
-# artesca / group-access
+# artesca-group-access
 
 Creates an ARTESCA IAM group with managed policies attached and, optionally,
 its members. Grants access per group rather than per user: users get the
