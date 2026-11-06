@@ -133,7 +133,7 @@ read back, so set it as registered; ARTESCA stores it lowercased.
 ```hcl
 module "acme" {
   source  = "cmrh/storage/scality//modules/artesca-account-management"
-  version = "~> 1.5"
+  version = "~> 2.0"
 
   account_name  = "acme"
   account_email = "platform@acme.example.com"   # as registered

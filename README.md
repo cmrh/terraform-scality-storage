@@ -99,7 +99,7 @@ addressed with the `//modules/<product>-<name>` path. Pin a version:
 ```hcl
 module "tofu_state" {
   source  = "cmrh/storage/scality//modules/scality-terraform-state-bootstrap"
-  version = "~> 1.4"
+  version = "~> 2.0"
 
   account_email = "platform@example.com"
   bucket_name   = "platform-tofu-state"
@@ -111,7 +111,7 @@ module "tofu_state" {
 commit or branch, or without the registry, a Git source works too:
 
 ```hcl
-source = "git::https://github.com/cmrh/terraform-scality-storage.git//modules/scality-terraform-state-bootstrap?ref=v1.4.0"
+source = "git::https://github.com/cmrh/terraform-scality-storage.git//modules/scality-terraform-state-bootstrap?ref=v2.0.0"
 ```
 
 **Air-gapped or restricted networks** (no registry or GitHub access) need both

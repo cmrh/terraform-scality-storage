@@ -26,7 +26,7 @@ group's permissions in addition to their own.
 ```hcl
 module "archive_readers" {
   source  = "cmrh/storage/scality//modules/artesca-group-access"
-  version = "~> 1.5"
+  version = "~> 2.0"
 
   account_name = module.account.account_name
   group_name   = "archive-readers"

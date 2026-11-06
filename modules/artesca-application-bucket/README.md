@@ -26,7 +26,7 @@ optional tags and an optional expiration rule.
 ```hcl
 module "bucket" {
   source  = "cmrh/storage/scality//modules/artesca-application-bucket"
-  version = "~> 1.4"
+  version = "~> 2.0"
 
   account_name    = module.account.account_name
   bucket_name     = "app-data"

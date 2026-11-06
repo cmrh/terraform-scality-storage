@@ -6,6 +6,12 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-06
+
+A major release: module paths, example paths and inputs that said "ring"
+now say "ring-s3" (see **Changed**). Update `source` addresses and those
+inputs when upgrading; the plan then shows no changes.
+
 ### Added
 - `scripts/scality-adopt.sh` adopts groups into `scality-group-access`, with
   their members and managed policies. A group owns the account policies
@@ -44,6 +50,9 @@ and the project follows [Semantic Versioning](https://semver.org/).
   `expire_delete_markers` and `bucket_policy`, passed to its bucket. (#82)
 
 ### Changed
+- Usage snippets, `git::` examples and the module pin both
+  `scripts/scality-adopt.sh` and `scripts/artesca-adopt.sh` write use
+  `~> 2.0`. (#75, #104)
 - Every scality module and example requires cmrh/scality 1.3, which adds
   the user policy attachment that `scality-application-identity` uses for
   `policy_arns`. (#81)
@@ -62,7 +71,9 @@ and the project follows [Semantic Versioning](https://semver.org/).
   - `artesca-edge-replication` inputs `ring_endpoint`, `ring_bucket_name`,
     `ring_access_key`, `ring_secret_key`, `ring_sts_endpoint` and
     `ring_role_arn` → `ring_s3_*`
-  - The examples' `ring_*` variables and outputs → `ring_s3_*`
+  - The examples' `ring_*` variables, outputs and module calls →
+    `ring_s3_*`. The examples carry `moved` blocks, so a deployed example
+    keeps its resources.
   - Docs say Scality S3 for the S3 service, and RING S3 location for the
     ARTESCA location type.
 - Docs site: examples are grouped by provider (Scality S3, ARTESCA, and
@@ -70,8 +81,6 @@ and the project follows [Semantic Versioning](https://semver.org/).
   each section has a tab. Module and example pages are titled by directory
   name, and the theme uses an indigo palette. The README lists the examples
   the same way. (#99)
-- Usage snippets and the module pin `scripts/scality-adopt.sh` writes use
-  `~> 1.4`, the first release on cmrh/scality 1.2. (#75)
 - `scality-application-bucket`, `scality-compliance-bucket`,
   `scality-access-log-bucket` and `scality-terraform-state-bootstrap` leave
   the lifecycle rule prefix unset instead of `""`, so an imported lifecycle

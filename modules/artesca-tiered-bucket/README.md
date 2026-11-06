@@ -31,7 +31,7 @@ days: a Scality S3 bucket (warm) or a Versity tape archive (cold).
 ```hcl
 module "bucket" {
   source  = "cmrh/storage/scality//modules/artesca-tiered-bucket"
-  version = "~> 1.4"
+  version = "~> 2.0"
 
   account_name        = module.account.account_name
   bucket_name         = "app-data"

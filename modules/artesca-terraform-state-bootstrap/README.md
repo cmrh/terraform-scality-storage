@@ -21,7 +21,7 @@ or OpenTofu state, and a user whose key can read and write that bucket only.
 ```hcl
 module "state" {
   source  = "cmrh/storage/scality//modules/artesca-terraform-state-bootstrap"
-  version = "~> 1.4"
+  version = "~> 2.0"
 
   account_email = "platform@example.com"
   bucket_name   = "platform-tfstate"
