@@ -28,7 +28,7 @@ Objects keep their keys at the root of the Scality S3 bucket in both modes.
 
 ## Prerequisites
 
-- cmrh/artesca provider 1.2 or later.
+- cmrh/artesca provider 1.2.1 or later.
 - ARTESCA can reach the Scality S3 endpoint. Prefer `https://`: the location's
   key and every replicated object pass through it.
 - A Scality S3 bucket and key that the location can use, from

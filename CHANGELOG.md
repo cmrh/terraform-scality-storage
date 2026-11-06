@@ -44,6 +44,11 @@ and the project follows [Semantic Versioning](https://semver.org/).
   `expire_delete_markers` and `bucket_policy`, passed to its bucket. (#82)
 
 ### Changed
+- `artesca-edge-replication` and `examples/artesca-edge-to-ring-s3` require
+  cmrh/artesca 1.2.1, which fixes in-place updates of CRR locations: with
+  `mode = "crr"`, changing the Scality S3 key or endpoint, or the first apply
+  after importing the location, used to fail with "Cannot change location
+  replication type". (#91)
 - **Breaking: names that said "ring" now say "ring-s3",** as ARTESCA's
   RING S3 location type does. RING is the store under Scality S3. Update
   `source` addresses and inputs (#100):
