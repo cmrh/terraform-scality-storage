@@ -60,8 +60,8 @@ and the project follows [Semantic Versioning](https://semver.org/).
 - Docs site: examples are grouped by provider (Scality S3, ARTESCA, and
   ARTESCA + Scality S3), guides and pointers have their own sections, and
   each section has a tab. Module and example pages are titled by directory
-  name, and the theme uses a blue grey palette. The README lists the
-  examples the same way. (#99)
+  name, and the theme uses an indigo palette. The README lists the examples
+  the same way. (#99)
 - Usage snippets and the module pin `scripts/scality-adopt.sh` writes use
   `~> 1.4`, the first release on cmrh/scality 1.2. (#75)
 - `scality-application-bucket`, `scality-compliance-bucket`,
