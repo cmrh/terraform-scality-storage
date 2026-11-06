@@ -44,6 +44,7 @@ and the project follows [Semantic Versioning](https://semver.org/).
   `expire_delete_markers` and `bucket_policy`, passed to its bucket. (#82)
 
 ### Changed
+<<<<<<< HEAD
 - `artesca-edge-replication` and `examples/artesca-edge-to-ring-s3` require
   cmrh/artesca 1.2.1, which fixes in-place updates of CRR locations: with
   `mode = "crr"`, changing the Scality S3 key or endpoint, or the first apply
@@ -67,6 +68,11 @@ and the project follows [Semantic Versioning](https://semver.org/).
   each section has a tab. Module and example pages are titled by directory
   name, and the theme uses an indigo palette. The README lists the examples
   the same way. (#99)
+=======
+- Every scality module and example requires cmrh/scality 1.3, which adds
+  the user policy attachment that `scality-application-identity` uses for
+  `policy_arns`. (#81)
+>>>>>>> a85eac5 (chore: require cmrh/scality 1.3 (#81))
 - Usage snippets and the module pin `scripts/scality-adopt.sh` writes use
   `~> 1.4`, the first release on cmrh/scality 1.2. (#75)
 - `scality-application-bucket`, `scality-compliance-bucket`,
