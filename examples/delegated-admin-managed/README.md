@@ -1,4 +1,4 @@
-# Delegated admin example: managed stage
+# delegated-admin-managed example
 
 Second stage of the delegated-admin example. The `delegator` user from the
 bootstrap stage assumes each sub-account's role and creates a bucket and an

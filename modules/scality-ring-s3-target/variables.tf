@@ -1,7 +1,7 @@
 variable "account_access_key" {
   type        = string
   sensitive   = true
-  description = "Access key of a principal in the RING account that owns the target bucket, typically the operator from account-operator."
+  description = "Access key of a principal in the Scality S3 account that owns the target bucket, typically the operator from account-operator."
 }
 
 variable "account_secret_key" {

@@ -11,7 +11,7 @@ variable "name" {
 variable "type" {
   type        = string
   default     = "ring-s3"
-  description = "Backend type: \"ring-s3\" (Scality RING S3) or \"versity-tape\" (Versity tape archive, a cold location; the endpoint must be https://). Forces replacement."
+  description = "Backend type: \"ring-s3\" (Scality S3) or \"versity-tape\" (Versity tape archive, a cold location; the endpoint must be https://). Forces replacement."
 
   validation {
     condition     = contains(["ring-s3", "versity-tape"], var.type)

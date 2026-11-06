@@ -1,4 +1,4 @@
-# scality / access-log-bucket
+# scality-access-log-bucket
 
 A bucket that receives server access logs, plus the logging configuration on
 the source buckets that write to it.

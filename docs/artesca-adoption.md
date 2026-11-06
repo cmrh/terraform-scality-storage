@@ -3,7 +3,7 @@
 Bring ARTESCA buckets, users and groups created by hand under the artesca
 modules without recreating them. `scripts/artesca-adopt.sh` reads an account
 and writes module calls plus `import {}` blocks; you review, plan, and apply.
-For Scality RING / S3C, see [adoption](adoption.md).
+For Scality S3, see [adoption](adoption.md).
 
 ## What it covers
 

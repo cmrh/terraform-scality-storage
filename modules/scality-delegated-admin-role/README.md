@@ -1,4 +1,4 @@
-# scality / delegated-admin-role
+# scality-delegated-admin-role
 
 Creates an IAM role inside a **sub-account** that one specific IAM user in a
 **management account** can assume. The management account then manages the

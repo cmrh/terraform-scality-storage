@@ -1,4 +1,4 @@
-# scality / group-access
+# scality-group-access
 
 Creates a Scality IAM group with managed policies attached and, optionally,
 its members. Grants access per group rather than per user: users get the

@@ -1,4 +1,4 @@
-# Operator pattern — lifecycle example
+# operator-test example
 
 Demonstrates and regression-tests the operator pattern end-to-end on a
 single cluster:

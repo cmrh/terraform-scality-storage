@@ -1,10 +1,10 @@
 locals {
   bucket_arn = "arn:aws:s3:::${var.bucket_name}"
 
-  # What ARTESCA's RING location needs, by purpose:
+  # What ARTESCA's RING S3 location needs, by purpose:
   # - replication: checks the bucket's versioning and location when the
   #   location is created, and writes replicas with PutObject.
-  # - tiering: the data lives only on RING, so ARTESCA also reads it back
+  # - tiering: the data lives only on Scality S3, so ARTESCA also reads it back
   #   and deletes it there.
   # - crr: the key only assumes the destination role; the role writes the
   #   replicas.

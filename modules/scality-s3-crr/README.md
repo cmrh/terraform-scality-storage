@@ -1,4 +1,4 @@
-# scality / s3-crr
+# scality-s3-crr
 
 Wires up the cross-region replication (CRR) feature on Scality: IAM
 roles and policies on each cluster, plus the `scality_bucket_replication`

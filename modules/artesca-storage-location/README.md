@@ -1,6 +1,6 @@
 # artesca-storage-location
 
-An ARTESCA storage location backed by a Scality RING bucket or a Versity tape
+An ARTESCA storage location backed by a Scality S3 bucket or a Versity tape
 archive, with an optional S3 endpoint that serves it.
 
 > Compatible with both Terraform and OpenTofu.
@@ -17,8 +17,8 @@ as a replication destination.
 ## Prerequisites
 
 - cmrh/artesca provider 1.1 or later.
-- A bucket on the backend and a key for it. For a RING bucket,
-  `scality-ring-replication-target` creates both; use `purpose = "tiering"`
+- A bucket on the backend and a key for it. For a Scality S3 bucket,
+  `scality-ring-s3-target` creates both; use `purpose = "tiering"`
   when ARTESCA moves objects to the location, since it then reads and
   deletes them there.
 - ARTESCA can reach the endpoint. It checks the bucket when it creates the
@@ -36,9 +36,9 @@ module "location" {
 
   name        = "ring-archive"
   endpoint    = "https://s3.ring.example.com"
-  bucket_name = module.ring_bucket.bucket_name
-  access_key  = module.ring_bucket.access_key
-  secret_key  = module.ring_bucket.secret_key
+  bucket_name = module.ring_s3_bucket.bucket_name
+  access_key  = module.ring_s3_bucket.access_key
+  secret_key  = module.ring_s3_bucket.secret_key
 }
 ```
 

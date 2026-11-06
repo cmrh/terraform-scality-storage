@@ -1,4 +1,4 @@
-# scality / application-identity
+# scality-application-identity
 
 Creates a Scality IAM user with a stable access key and an inline policy
 — the standard primitive for **per-application workload identity**. One

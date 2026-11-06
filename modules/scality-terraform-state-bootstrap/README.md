@@ -1,4 +1,4 @@
-# scality / terraform-state-bootstrap
+# scality-terraform-state-bootstrap
 
 Provisions a dedicated Scality account and S3 bucket suitable for storing
 Terraform/OpenTofu state files.

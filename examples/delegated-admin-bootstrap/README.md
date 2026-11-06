@@ -1,4 +1,4 @@
-# Delegated administration example
+# delegated-admin-bootstrap example
 
 A management account manages the buckets and IAM of several sub-accounts
 through [`delegated-admin-role`](../../modules/scality-delegated-admin-role).

@@ -1,4 +1,4 @@
-# Access logging example
+# access-logging example
 
 Creates an account, an operator user, an application bucket and a log
 bucket. The application bucket's access logs are delivered to the log bucket

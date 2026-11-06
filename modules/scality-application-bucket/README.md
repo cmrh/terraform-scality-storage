@@ -1,4 +1,4 @@
-# scality / application-bucket
+# scality-application-bucket
 
 Provisions a Scality S3 bucket with secure-by-default settings:
 versioning on, SSE-S3 encryption, and lifecycle hygiene rules that clean

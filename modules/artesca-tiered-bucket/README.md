@@ -1,7 +1,7 @@
 # artesca-tiered-bucket
 
 An ARTESCA bucket whose objects move to another location after a number of
-days: a RING bucket (warm) or a Versity tape archive (cold).
+days: a Scality S3 bucket (warm) or a Versity tape archive (cold).
 
 > Compatible with both Terraform and OpenTofu.
 
@@ -18,10 +18,10 @@ days: a RING bucket (warm) or a Versity tape archive (cold).
 
 - cmrh/artesca provider 1.2 or later.
 - The target location, e.g. from `artesca-storage-location`.
-- **RING target:** after the move the data lives only on RING. The location's
+- **Scality S3 target:** after the move the data lives only on Scality S3. The location's
   key needs `s3:GetObject` and `s3:GetObjectVersion`, or reads through ARTESCA
   fail. Without delete rights, a permanent delete through ARTESCA leaves the
-  data on RING. `scality-ring-replication-target` with `purpose = "tiering"`
+  data on Scality S3. `scality-ring-s3-target` with `purpose = "tiering"`
   creates a key with both read and delete rights.
 - **Cold target (`versity-tape`):** see the `artesca-storage-location`
   prerequisites.

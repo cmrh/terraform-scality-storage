@@ -44,9 +44,26 @@ and the project follows [Semantic Versioning](https://semver.org/).
   `expire_delete_markers` and `bucket_policy`, passed to its bucket. (#82)
 
 ### Changed
+- **Breaking: names that said "ring" now say "ring-s3",** as ARTESCA's
+  RING S3 location type does. RING is the store under Scality S3. Update
+  `source` addresses and inputs (#100):
+  - `modules/scality-ring-replication-target` → `modules/scality-ring-s3-target`
+  - `examples/artesca-edge-to-ring` → `examples/artesca-edge-to-ring-s3`, and
+    `examples/artesca-ring-backed-bucket` →
+    `examples/artesca-ring-s3-backed-bucket`
+  - `artesca-edge-replication` inputs `ring_endpoint`, `ring_bucket_name`,
+    `ring_access_key`, `ring_secret_key`, `ring_sts_endpoint` and
+    `ring_role_arn` → `ring_s3_*`
+  - The examples' `ring_*` variables and outputs → `ring_s3_*`
+  - Docs say Scality S3 for the S3 service, and RING S3 location for the
+    ARTESCA location type.
+- Docs site: examples are grouped by provider (Scality S3, ARTESCA, and
+  ARTESCA + Scality S3), guides and pointers have their own sections, and
+  each section has a tab. Module and example pages are titled by directory
+  name, and the theme uses a blue grey palette. The README lists the
+  examples the same way. (#99)
 - Usage snippets and the module pin `scripts/scality-adopt.sh` writes use
   `~> 1.4`, the first release on cmrh/scality 1.2. (#75)
-
 - `scality-application-bucket`, `scality-compliance-bucket`,
   `scality-access-log-bucket` and `scality-terraform-state-bootstrap` leave
   the lifecycle rule prefix unset instead of `""`, so an imported lifecycle
