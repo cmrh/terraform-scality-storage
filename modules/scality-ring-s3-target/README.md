@@ -30,7 +30,7 @@ mode, `crr` for its `crr` mode), or tiering and buckets stored on Scality S3.
 
 ## Prerequisites
 
-- cmrh/scality provider 1.2 or later.
+- cmrh/scality provider 1.3 or later.
 
 ## Usage
 

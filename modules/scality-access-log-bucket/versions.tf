@@ -3,9 +3,8 @@ terraform {
 
   required_providers {
     scality = {
-      source = "cmrh/scality"
-      # Earlier 1.1.x have bugs this module hits.
-      version = "~> 1.2"
+      source  = "cmrh/scality"
+      version = "~> 1.3"
     }
   }
 }

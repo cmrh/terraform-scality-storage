@@ -46,7 +46,7 @@ terraform {
   required_providers {
     scality = {
       source  = "cmrh/scality"
-      version = "~> 1.2"
+      version = "~> 1.3"
     }
   }
 }

@@ -18,7 +18,7 @@ the source buckets that write to it.
 ## Prerequisites
 
 - Server access logging enabled on the cluster.
-- cmrh/scality provider 1.2 or later.
+- cmrh/scality provider 1.3 or later.
 
 ## Usage
 
