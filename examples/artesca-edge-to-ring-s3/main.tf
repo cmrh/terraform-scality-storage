@@ -12,8 +12,9 @@ terraform {
       version = "~> 1.2"
     }
     artesca = {
-      source  = "cmrh/artesca"
-      version = "~> 1.2"
+      source = "cmrh/artesca"
+      # 1.2.1 fixes in-place updates of CRR locations.
+      version = ">= 1.2.1, < 2.0.0"
     }
   }
 }
