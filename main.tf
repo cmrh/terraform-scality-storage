@@ -7,7 +7,7 @@
 #
 #   module "app_bucket" {
 #     source  = "cmrh/storage/scality//modules/scality-application-bucket"
-#     version = "~> 1.2"
+#     version = "~> 2.0"
 #     # ...module inputs...
 #   }
 #

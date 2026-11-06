@@ -84,7 +84,7 @@ provider "scality" {
 
 module "crr" {
   source  = "cmrh/storage/scality//modules/scality-s3-crr"
-  version = "~> 1.4"
+  version = "~> 2.0"
 
   providers = {
     scality.source = scality.src
@@ -111,7 +111,7 @@ for break-glass.
 
 module "source_account" {
   source    = "cmrh/storage/scality//modules/scality-account-management"
-  version   = "~> 1.4"
+  version   = "~> 2.0"
   providers = { scality = scality.src }
 
   account_name  = "crr-source"
@@ -120,7 +120,7 @@ module "source_account" {
 
 module "source_operator" {
   source    = "cmrh/storage/scality//modules/scality-account-operator"
-  version   = "~> 1.4"
+  version   = "~> 2.0"
   providers = { scality = scality.src }
 
   account_access_key = module.source_account.access_key
@@ -129,7 +129,7 @@ module "source_operator" {
 
 module "source_bucket" {
   source    = "cmrh/storage/scality//modules/scality-application-bucket"
-  version   = "~> 1.4"
+  version   = "~> 2.0"
   providers = { scality = scality.src }
 
   account_access_key = module.source_operator.access_key
@@ -141,7 +141,7 @@ module "source_bucket" {
 
 module "dest_account" {
   source    = "cmrh/storage/scality//modules/scality-account-management"
-  version   = "~> 1.4"
+  version   = "~> 2.0"
   providers = { scality = scality.dst }
 
   account_name  = "crr-dest"
@@ -150,7 +150,7 @@ module "dest_account" {
 
 module "dest_operator" {
   source    = "cmrh/storage/scality//modules/scality-account-operator"
-  version   = "~> 1.4"
+  version   = "~> 2.0"
   providers = { scality = scality.dst }
 
   account_access_key = module.dest_account.access_key
@@ -159,7 +159,7 @@ module "dest_operator" {
 
 module "dest_bucket" {
   source    = "cmrh/storage/scality//modules/scality-application-bucket"
-  version   = "~> 1.4"
+  version   = "~> 2.0"
   providers = { scality = scality.dst }
 
   account_access_key = module.dest_operator.access_key
@@ -171,7 +171,7 @@ module "dest_bucket" {
 
 module "crr" {
   source  = "cmrh/storage/scality//modules/scality-s3-crr"
-  version = "~> 1.4"
+  version = "~> 2.0"
 
   providers = {
     scality.source = scality.src
@@ -195,7 +195,7 @@ Add a single line:
 ```hcl
 module "crr" {
   source  = "cmrh/storage/scality//modules/scality-s3-crr"
-  version = "~> 1.4"
+  version = "~> 2.0"
   providers = { scality.source = scality.src, scality.dest = scality.dst }
 
   # ...all other inputs as above...
@@ -214,7 +214,7 @@ replication after `terraform apply`:
 # Source-side writer — for the application or for uploading test objects
 module "source_writer" {
   source    = "cmrh/storage/scality//modules/scality-application-identity"
-  version   = "~> 1.4"
+  version   = "~> 2.0"
   providers = { scality = scality.src }
 
   account_access_key = module.source_operator.access_key
@@ -228,7 +228,7 @@ module "source_writer" {
 # Destination-side reader — for confirming that replicated objects landed
 module "dest_reader" {
   source    = "cmrh/storage/scality//modules/scality-application-identity"
-  version   = "~> 1.4"
+  version   = "~> 2.0"
   providers = { scality = scality.dst }
 
   account_access_key = module.dest_operator.access_key

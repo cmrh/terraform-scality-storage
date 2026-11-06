@@ -39,7 +39,7 @@ endpoint=${SCALITY_ENDPOINT:-}
 iam_endpoint=
 out=adopt.tf
 module_source=cmrh/storage/scality//modules
-module_version="~> 1.4"
+module_version="~> 2.0"
 account_module=
 
 usage() { sed -n '/^# Usage:/,/^set /p' "$0" | sed '$d; s/^# \{0,1\}//' >&2; exit "${1:-2}"; }

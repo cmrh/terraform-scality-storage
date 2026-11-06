@@ -45,7 +45,7 @@ created and used in the same apply.
 ```hcl
 module "mgmt_account" {
   source  = "cmrh/storage/scality//modules/scality-account-management"
-  version = "~> 1.4"
+  version = "~> 2.0"
 
   account_name  = "mgmt"
   account_email = "mgmt@example.com"
@@ -53,7 +53,7 @@ module "mgmt_account" {
 
 module "sub_a_account" {
   source  = "cmrh/storage/scality//modules/scality-account-management"
-  version = "~> 1.4"
+  version = "~> 2.0"
 
   account_name  = "customer-a"
   account_email = "customer-a@example.com"
@@ -63,7 +63,7 @@ module "sub_a_account" {
 # allows sts:AssumeRole on the sub-accounts' roles only.
 module "delegator" {
   source  = "cmrh/storage/scality//modules/scality-application-identity"
-  version = "~> 1.4"
+  version = "~> 2.0"
 
   account_access_key = module.mgmt_account.access_key
   account_secret_key = module.mgmt_account.secret_key
@@ -82,7 +82,7 @@ module "delegator" {
 
 module "sub_a_admin" {
   source  = "cmrh/storage/scality//modules/scality-delegated-admin-role"
-  version = "~> 1.4"
+  version = "~> 2.0"
 
   account_access_key = module.sub_a_account.access_key
   account_secret_key = module.sub_a_account.secret_key

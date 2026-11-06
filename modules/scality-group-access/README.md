@@ -22,7 +22,7 @@ group's permissions in addition to their own.
 ```hcl
 module "archive_readers" {
   source  = "cmrh/storage/scality//modules/scality-group-access"
-  version = "~> 1.4"
+  version = "~> 2.0"
 
   account_access_key = module.acme_operator.access_key
   account_secret_key = module.acme_operator.secret_key

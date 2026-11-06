@@ -41,7 +41,7 @@ Objects keep their keys at the root of the Scality S3 bucket in both modes.
 ```hcl
 module "edge" {
   source  = "cmrh/storage/scality//modules/artesca-edge-replication"
-  version = "~> 1.4"
+  version = "~> 2.0"
 
   account_name  = "edge-01"
   account_email = "edge-01@example.com"
@@ -61,7 +61,7 @@ CRR over STS:
 ```hcl
 module "edge" {
   source  = "cmrh/storage/scality//modules/artesca-edge-replication"
-  version = "~> 1.4"
+  version = "~> 2.0"
 
   account_name  = "edge-01"
   account_email = "edge-01@example.com"

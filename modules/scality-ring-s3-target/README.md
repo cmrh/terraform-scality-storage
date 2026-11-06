@@ -37,7 +37,7 @@ mode, `crr` for its `crr` mode), or tiering and buckets stored on Scality S3.
 ```hcl
 module "ring_s3_target" {
   source  = "cmrh/storage/scality//modules/scality-ring-s3-target"
-  version = "~> 1.4"
+  version = "~> 2.0"
 
   account_access_key = module.operator.access_key
   account_secret_key = module.operator.secret_key
